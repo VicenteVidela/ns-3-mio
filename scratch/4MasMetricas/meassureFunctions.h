@@ -23,11 +23,13 @@ extern bool print;      // Flag for printing information
 extern bool animation;  // Flag for including animation in the simulation
 
 // Simulation parameters
+extern float stopSendingTime;           // Time to stop sending packets
 extern float stopTime;                  // Simulation stop time
 extern StringValue p2pDelay;            // Delay for point-to-point links
 extern StringValue p2pDataRate;         // Data rate for point-to-point links
 extern DataRate onoffDataRate;          // Data rate for OnOff applications
 extern UintegerValue onoffPacketSize;   // Packet size for OnOff applications
+extern StringValue CCAlgorithm;         // Congestion control algorithm
 // Error rate for package loss
 extern Ptr<RateErrorModel> em;          // Error model for point-to-point links
 extern DoubleValue errorRate;           // Error rate for package loss

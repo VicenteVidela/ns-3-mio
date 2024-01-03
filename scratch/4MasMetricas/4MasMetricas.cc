@@ -7,11 +7,13 @@ bool print = false;               // Flag for printing information
 bool animation = false;           // Flag for including animation in the simulation
 
 // Simulation parameters
-float stopTime = 60;                                  // Simulation stop time
-StringValue p2pDelay = StringValue("2ms");            // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("5Mbps");       // Data rate for point-to-point links
-DataRate onoffDataRate = DataRate("15kbps");          // Data rate for OnOff applications
-UintegerValue onoffPacketSize = UintegerValue(1200);  // Packet size for OnOff applications
+float stopSendingTime = 30;                               // Time to stop sending packets
+float stopTime = 60;                                      // Simulation stop time
+StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
+StringValue p2pDataRate = StringValue("5Mbps");           // Data rate for point-to-point links
+DataRate onoffDataRate = DataRate("15kbps");              // Data rate for OnOff applications
+UintegerValue onoffPacketSize = UintegerValue(1200);      // Packet size for OnOff applications
+StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.00001);             // Error rate for package loss
@@ -147,12 +149,14 @@ int main(int argc, char* argv[])
   // -- Send around packets
   // ------------------------------------------------------------
 
-  // Set up raw sockets for packet transmission
-  Config::SetDefault("ns3::Ipv4RawSocketImpl::Protocol", StringValue("2"));
-  InetSocketAddress dst(ipv4AddrServer);
+  // Use Congestion Control
+  Config::SetDefault("ns3::TcpL4Protocol::SocketType", CCAlgorithm);
 
-  // Set up OnOff applications for packet transmission
-  OnOffHelper onoff = OnOffHelper("ns3::Ipv4RawSocketFactory", dst);
+  // Set up TCP sockets for packet transmission
+  Config::SetDefault("ns3::TcpSocket::SegmentSize", onoffPacketSize);
+
+  // Set up OnOff applications for packet transmission using TCP
+  OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
   onoff.SetConstantRate(onoffDataRate);
   onoff.SetAttribute("PacketSize", onoffPacketSize);
 
@@ -170,7 +174,7 @@ int main(int argc, char* argv[])
   // Install OnOff applications on client nodes
   ApplicationContainer apps = onoff.Install(clientNodes);
   apps.Start(Seconds(1.0));
-  apps.Stop(Seconds(stopTime));
+  apps.Stop(Seconds(stopSendingTime));
 
   // Connect OnOffTx to the OnOffApplication::Tx trace source for each OnOffApplication
   for (uint32_t i = 0; i < apps.GetN(); i++) {
@@ -178,8 +182,12 @@ int main(int argc, char* argv[])
     onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&OnOffTx));
   }
 
+  // ------------------------------------------------------------
+  // -- Receive packets at sink
+  // ------------------------------------------------------------
+
   // Set up packet sink for receiving packets at the random server node
-  PacketSinkHelper sink = PacketSinkHelper("ns3::Ipv4RawSocketFactory", dst);
+  PacketSinkHelper sink("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
   apps = sink.Install(randomServerNode);
 
   // Connect PacketSinkRx to the PacketSink::Rx trace source
