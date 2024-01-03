@@ -25,22 +25,16 @@ uint64_t totalReceivedPackets = 0;     // Total received packets
 // Directory for topology files
 char topologyDirectory[] = "scratch/topologies/";
 
+// Default values for command line parameters
+std::string format("Inet");
+std::string input("topology1.txt");
+
 // Main function
 int main(int argc, char* argv[])
 {
   // Randomize the seed based on current time
   uint32_t seed = static_cast<uint32_t>(time(NULL)); // Replace with your desired seed value 12345
   SeedManager::SetSeed(seed);
-
-  // Default values for command line parameters
-  std::string format("Inet");
-  std::string input("topology1.txt");
-
-  // Set up command line parameters used to control the experiment.
-  CommandLine cmd(__FILE__);
-  cmd.AddValue("format", "Format to use for data input [Orbis|Inet|Rocketfuel].", format);
-  cmd.AddValue("input", "Name of the input file.", input);
-  cmd.Parse(argc, argv);
 
   // ------------------------------------------------------------
   // -- Read topology data.
@@ -66,6 +60,8 @@ int main(int argc, char* argv[])
     std::cout << "Problems reading the topology file. Failing." << std::endl;
     return -1;
   }
+
+  std::cout << "Number of nodes: " << nodes.GetN() << std::endl;
 
   // ------------------------------------------------------------
   // -- Create nodes and network stacks
@@ -195,15 +191,15 @@ int main(int argc, char* argv[])
   sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
   apps.Start(Seconds(0.0));
-  apps.Stop(Seconds(stopTime+1.0));
+  apps.Stop(Seconds(stopTime));
 
   // ------------------------------------------------------------
   // -- Run the simulation
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(stopTime+1), &PrintMeassures); // Schedule throughput printing
-  Simulator::Stop(Seconds(stopTime+1));                        // Stop simulation at 3 seconds
+  Simulator::Schedule(Seconds(stopTime), &PrintMeassures); // Schedule throughput printing
+  Simulator::Stop(Seconds(stopTime));                        // Stop simulation at 3 seconds
   Simulator::Run();
   Simulator::Destroy();
 
