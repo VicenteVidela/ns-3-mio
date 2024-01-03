@@ -1,14 +1,4 @@
-#include "ns3/applications-module.h"
-#include "ns3/core-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/network-module.h"
-#include "ns3/nix-vector-helper.h"
-#include "ns3/point-to-point-module.h"
-#include "ns3/topology-read-module.h"
-#include "ns3/netanim-module.h"
-#include "ns3/mobility-module.h"
-#include "ns3/error-model.h"
-#include "ns3/random-variable-stream.h"
+#include "meassureFunctions.h"
 
 #include <iostream>
 
@@ -35,36 +25,6 @@ uint64_t totalReceivedPackets = 0;     // Total received packets
 
 // Directory for topology files
 char topologyDirectory[] = "scratch/topologies/";
-
-// Callback function to process received packets and update statistics
-static void SinkRx(Ptr<const Packet> p, const Address& ad)
-{
-  Ipv4Header ipv4;
-  p->PeekHeader(ipv4);
-  // Update total received bytes and packets
-  totalReceivedBytes += p->GetSize();
-  totalReceivedPackets++;
-}
-
-void OnOffTx(Ptr<const Packet> packet) {
-  totalTransmittedPackets++;
-}
-
-// Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures()
-{
-  // Print throughput
-  std::cout << "Total received bytes: " << totalReceivedBytes << std::endl;
-  double throughput = static_cast<double>(totalReceivedBytes) / (Simulator::Now().GetSeconds());
-  std::cout << "Throughput: " << throughput << " bytes/second" << std::endl;
-
-  // Print packet statistics
-  std::cout << "Total transmitted packets: " << totalTransmittedPackets << std::endl;
-  std::cout << "Total received packets: " << totalReceivedPackets << std::endl;
-  // Calculate and print packet loss percentage
-  double packetLossPercentage = ((totalTransmittedPackets - totalReceivedPackets) / static_cast<double>(totalTransmittedPackets)) * 100.0;
-  std::cout << "Packet Loss Percentage: " << packetLossPercentage << "%" << std::endl;
-}
 
 // Main function
 int main(int argc, char* argv[])
