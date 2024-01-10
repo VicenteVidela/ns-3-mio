@@ -37,24 +37,24 @@ void OnOffTx(Ptr<const Packet> packet) {
 }
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures(bool detailedPrinting) {
-  std::cout << std::endl;
-  std::cout << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
+void PrintMeassures(bool detailedPrinting, std::ostream& output) {
+  output << std::endl;
+  output << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
   // Print throughput
-  if (detailedPrinting) std::cout << "Total received bytes: " << totalReceivedBytes << std::endl;
+  if (detailedPrinting) output << "Total received bytes: " << totalReceivedBytes << std::endl;
   double throughput = static_cast<double>(totalReceivedBytes) / (Simulator::Now().GetSeconds());
-  std::cout << "Throughput: " << throughput << " bytes/second" << std::endl;
-  if (detailedPrinting) std::cout << std::endl;
+  output << "Throughput: " << throughput << " bytes/second" << std::endl;
+  if (detailedPrinting) output << std::endl;
 
   // Print packet statistics
   if (detailedPrinting) {
-    std::cout << "Total transmitted packets: " << totalTransmittedPackets << std::endl;
-    std::cout << "Total received packets: " << totalReceivedPackets << std::endl;
+    output << "Total transmitted packets: " << totalTransmittedPackets << std::endl;
+    output << "Total received packets: " << totalReceivedPackets << std::endl;
   }
   // Calculate and print packet loss percentage
   double packetLossPercentage = ((totalTransmittedPackets - totalReceivedPackets) / static_cast<double>(totalTransmittedPackets)) * 100.0;
-  std::cout << "Packet Loss Percentage: " << packetLossPercentage << "%" << std::endl;
-  if (detailedPrinting) std::cout << std::endl;
+  output << "Packet Loss Percentage: " << packetLossPercentage << "%" << std::endl;
+  if (detailedPrinting) output << std::endl;
 
   // Print latency statistics
   double latency_sum = std::accumulate(latencies.begin(), latencies.end(), 0.0);
@@ -63,12 +63,12 @@ void PrintMeassures(bool detailedPrinting) {
   double latency_std_dev = std::sqrt(latency_sq_sum / latencies.size() - latency_mean * latency_mean);
   double max_latency = *std::max_element(latencies.begin(), latencies.end());
   double min_latency = *std::min_element(latencies.begin(), latencies.end());
-  std::cout << "Mean latency: " << latency_mean << " seconds" << std::endl;
+  output << "Mean latency: " << latency_mean << " seconds" << std::endl;
   if (detailedPrinting) {
-    std::cout << "Standard deviation of latency: " << latency_std_dev << " seconds" << std::endl;
-    std::cout << "Maximum latency: " << max_latency << " seconds" << std::endl;
-    std::cout << "Minimum latency: " << min_latency << " seconds" << std::endl;
-    std::cout << std::endl;
+    output << "Standard deviation of latency: " << latency_std_dev << " seconds" << std::endl;
+    output << "Maximum latency: " << max_latency << " seconds" << std::endl;
+    output << "Minimum latency: " << min_latency << " seconds" << std::endl;
+    output << std::endl;
   }
 
   // Print jitter statistics
@@ -79,12 +79,12 @@ void PrintMeassures(bool detailedPrinting) {
   double max_jitter = *std::max_element(jitters.begin(), jitters.end());
   double min_jitter = *std::min_element(jitters.begin(), jitters.end());
 
-  std::cout << "Mean jitter: " << jitter_mean << " seconds" << std::endl;
+  output << "Mean jitter: " << jitter_mean << " seconds" << std::endl;
   if (detailedPrinting) {
-    std::cout << "Standard deviation of jitter: " << jitter_std_dev << " seconds" << std::endl;
-    std::cout << "Maximum jitter: " << max_jitter << " seconds" << std::endl;
-    std::cout << "Minimum jitter: " << min_jitter << " seconds" << std::endl;
-    std::cout << std::endl;
+    output << "Standard deviation of jitter: " << jitter_std_dev << " seconds" << std::endl;
+    output << "Maximum jitter: " << max_jitter << " seconds" << std::endl;
+    output << "Minimum jitter: " << min_jitter << " seconds" << std::endl;
+    output << std::endl;
   }
 }
 

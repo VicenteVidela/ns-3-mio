@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <numeric>
+#include <fstream>
 
 using namespace ns3;
 
@@ -39,9 +40,6 @@ extern uint64_t totalReceivedBytes;       // Total received bytes
 extern uint64_t totalTransmittedPackets;  // Total transmitted packets
 extern uint64_t totalReceivedPackets;     // Total received packets
 
-// Directory for topology files
-extern char topologyDirectory[];
-
 // Callback function to process received packets and update statistics
 void SinkRx(Ptr<const ns3::Packet> p, const ns3::Address& ad);
 
@@ -49,7 +47,7 @@ void SinkRx(Ptr<const ns3::Packet> p, const ns3::Address& ad);
 void OnOffTx(Ptr<const ns3::Packet> packet);
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures(bool detailedPrinting);
+void PrintMeassures(bool detailedPrinting, std::ostream& output);
 
 // Function to reset meassures
 void ResetMeassures();

@@ -23,8 +23,14 @@ DoubleValue errorRate = DoubleValue(0.000005);             // Error rate for pac
 uint64_t totalReceivedBytes = 0;       // Total received bytes
 uint64_t totalTransmittedPackets = 0;  // Total transmitted packets
 uint64_t totalReceivedPackets = 0;     // Total received packets
+
 // Directory for topology files
-char topologyDirectory[] = "scratch/topologies/";
+std::string topologyDirectory = "scratch/topologies/";
+
+// Directory for data files
+std::string dataDirectory = "data/";
+std::string dataFile = "5Desconexiones.dat";
+std::ofstream outputFile;
 
 // Default values for command line parameters
 std::string format("Inet");
@@ -200,14 +206,20 @@ int main(int argc, char* argv[])
 
   std::cout << "Run Simulation." << std::endl;
   Simulator::Schedule(Seconds(2), &ResetMeassures);                       // Schedule meassures reset
+
+  outputFile.open(dataDirectory + dataFile);                              // Open data file
   for (i=6; i<=stopTime; i+=4) {
     Simulator::Schedule(Seconds(i), &DisconnectRandomNode, nodes);        // Schedule node disconnection
-    Simulator::Schedule(Seconds(i), &PrintMeassures, detailedPrinting);   // Schedule meassures printing
+    Simulator::Schedule(Seconds(i), &PrintMeassures, detailedPrinting,
+                        std::ref(outputFile.is_open()? outputFile : std::cout));    // Schedule meassures printing
     Simulator::Schedule(Seconds(i), &ResetMeassures);                     // Schedule meassures reset
   }
+
   Simulator::Stop(Seconds(stopTime));                                     // Stop simulation at 3 seconds
   Simulator::Run();
   Simulator::Destroy();
+
+  outputFile.close();                                                     // Close data file
 
   // Clean up dynamically allocated arrays
   delete[] ipic;

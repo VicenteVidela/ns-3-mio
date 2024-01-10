@@ -1,6 +1,15 @@
+import sys
 import matplotlib.pyplot as plt
 
-with open('data.dat', 'r') as f:
+# Check if the correct number of command-line arguments is provided
+if len(sys.argv) != 2:
+  print("Usage: python script_name.py <input_file>")
+  sys.exit(1)
+
+# Get the input file name from the command-line argument
+file_name = sys.argv[1]
+
+with open(file_name, 'r') as f:
   data = f.read()
 
 # Split the data into individual entries
