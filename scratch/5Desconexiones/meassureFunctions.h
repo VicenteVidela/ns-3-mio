@@ -8,7 +8,6 @@
 #include "ns3/nix-vector-helper.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/topology-read-module.h"
-#include "ns3/netanim-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/error-model.h"
 #include "ns3/random-variable-stream.h"
@@ -28,7 +27,7 @@ extern float stopSendingTime;           // Time to stop sending packets
 extern float stopTime;                  // Simulation stop time
 extern StringValue p2pDelay;            // Delay for point-to-point links
 extern StringValue p2pDataRate;         // Data rate for point-to-point links
-extern DataRate onoffDataRate;          // Data rate for OnOff applications
+extern StringValue onoffDataRate;          // Data rate for OnOff applications
 extern UintegerValue onoffPacketSize;   // Packet size for OnOff applications
 extern StringValue CCAlgorithm;         // Congestion control algorithm
 // Error rate for package loss

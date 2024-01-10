@@ -4,20 +4,19 @@
 using namespace ns3;
 
 // Control flags
-bool animation = false;           // Flag for including animation in the simulation
 bool detailedPrinting = false;    // Flag for detailed printing
 
 // Simulation parameters
-float stopSendingTime = 30;                               // Time to stop sending packets
-float stopTime = 30;                                      // Simulation stop time
-StringValue p2pDelay = StringValue("100ns");               // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("100Mbps");           // Data rate for point-to-point links
-DataRate onoffDataRate = DataRate("10Kbps");              // Data rate for OnOff applications
+float stopSendingTime = 60;                               // Time to stop sending packets
+float stopTime = 60;                                      // Simulation stop time
+StringValue p2pDelay = StringValue("100ns");              // Delay for point-to-point links
+StringValue p2pDataRate = StringValue("10Gbps");          // Data rate for point-to-point links
+StringValue onoffDataRate = StringValue("10Kbps");              // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1200);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.000005);             // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.000005);            // Error rate for package loss
 
 // Variables for statistics
 uint64_t totalReceivedBytes = 0;       // Total received bytes
@@ -129,26 +128,6 @@ int main(int argc, char* argv[])
   Ipv4Address ipv4AddrServer = iaddrServer.GetLocal();
 
   // ------------------------------------------------------------
-  // -- Setup animator and store animation
-  // ------------------------------------------------------------
-
-  if (animation)
-  {
-    MobilityHelper mobility;
-    mobility.SetPositionAllocator("ns3::GridPositionAllocator",
-                                  "MinX", DoubleValue(0.0),
-                                  "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(5.0),
-                                  "DeltaY", DoubleValue(5.0),
-                                  "GridWidth", UintegerValue(4),
-                                  "LayoutType", StringValue("RowFirst"));
-    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    mobility.Install(nodes);
-
-    AnimationInterface anim("animations/1ThroughputMeassure.xml");
-  }
-
-  // ------------------------------------------------------------
   // -- Send around packets
   // ------------------------------------------------------------
 
@@ -160,8 +139,18 @@ int main(int argc, char* argv[])
 
   // Set up OnOff applications for packet transmission using TCP
   OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
-  onoff.SetConstantRate(onoffDataRate);
+  onoff.SetAttribute("DataRate", onoffDataRate);
   onoff.SetAttribute("PacketSize", onoffPacketSize);
+
+  // Set the 'On' time to a random variable with an exponential distribution
+  Ptr<ExponentialRandomVariable> onTime = CreateObject<ExponentialRandomVariable>();
+  onTime->SetAttribute("Mean", DoubleValue(1.0)); // Mean 'On' time is 1 second
+  onoff.SetAttribute("OnTime", PointerValue(onTime));
+
+  // Set the 'Off' time to a random variable with an exponential distribution
+  Ptr<ExponentialRandomVariable> offTime = CreateObject<ExponentialRandomVariable>();
+  offTime->SetAttribute("Mean", DoubleValue(0.5)); // Mean 'Off' time is 2 seconds
+  onoff.SetAttribute("OffTime", PointerValue(offTime));
 
   NodeContainer clientNodes;
   for (unsigned int i = 0; i < nodes.GetN(); i++)

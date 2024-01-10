@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Check if the correct number of command-line arguments is provided
 if len(sys.argv) != 2:
-  print("Usage: python script_name.py <input_file>")
+  print("Usage: plot.py <input_file>")
   sys.exit(1)
 
 # Get the input file name from the command-line argument
