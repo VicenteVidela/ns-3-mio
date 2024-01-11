@@ -18,45 +18,49 @@ entries = data.strip().split('\n\n')
 # Initialize lists to store values
 seconds = []
 throughput = []
+packet_delivery_ratio = []
 packet_loss = []
-mean_latency = []
+mean_delay = []
 mean_jitter = []
 
 # Parse each entry and extract values
 for entry in entries:
-    lines = entry.split('\n')
-    seconds.append(int(lines[0].split(": ")[1]))
-    throughput.append(float(lines[1].split(": ")[1].split()[0]))
-    packet_loss.append(float(lines[2].split(": ")[1][:-1]))
-    mean_latency.append(float(lines[3].split(": ")[1].split()[0]))
-    mean_jitter.append(float(lines[4].split(": ")[1].split()[0]))
+  lines = entry.split('\n')
+  seconds.append(float(lines[0].split(": ")[1]))
+  throughput.append(float(lines[1].split(": ")[1].split()[0]))
+  packet_delivery_ratio.append(float(lines[2].split(": ")[1][:-1]))
+  packet_loss.append(float(lines[3].split(": ")[1][:-1]))
+  mean_delay.append(float(lines[4].split(": ")[1].split()[0]))
+  mean_jitter.append(float(lines[5].split(": ")[1].split()[0]))
 
 # Plotting
-fig, axs = plt.subplots(4, 1, figsize=(10, 12))
+fig, axs = plt.subplots(2, 2, figsize=(16, 12))
 
 # Plot Throughput
-axs[0].plot(seconds, throughput, marker='o', linestyle='-', color='b')
-axs[0].set_title('Throughput (bytes/second)')
-axs[0].set_xlabel('Seconds')
-axs[0].set_ylabel('Throughput')
+axs[0, 0].plot(seconds, throughput, marker='o', linestyle='-', color='b')
+axs[0, 0].set_title('Throughput')
+axs[0, 0].set_xlabel('Seconds')
+axs[0, 0].set_ylabel('Throughput (bps)')
+
+# Plot Delivery Ratio
+axs[0, 1].plot(seconds, packet_delivery_ratio, marker='o', linestyle='-', color='r')
+axs[0, 1].set_title('Packet Delivery Ratio')
+axs[0, 1].set_xlabel('Seconds')
+axs[0, 1].set_ylabel('PDR (%)')
 
 # Plot Packet Loss Percentage
-axs[1].plot(seconds, packet_loss, marker='o', linestyle='-', color='g')
-axs[1].set_title('Packet Loss Percentage (%)')
-axs[1].set_xlabel('Seconds')
-axs[1].set_ylabel('Packet Loss Percentage')
+axs[1, 0].plot(seconds, packet_loss, marker='o', linestyle='-', color='g')
+axs[1, 0].set_title('Packet Loss Percentage')
+axs[1, 0].set_xlabel('Seconds')
+axs[1, 0].set_ylabel('Packet Loss (%)')
 
-# Plot Mean Latency
-axs[2].plot(seconds, mean_latency, marker='o', linestyle='-', color='r')
-axs[2].set_title('Mean Latency (seconds)')
-axs[2].set_xlabel('Seconds')
-axs[2].set_ylabel('Mean Latency')
-
-# Plot Mean Jitter
-axs[3].plot(seconds, mean_jitter, marker='o', linestyle='-', color='purple')
-axs[3].set_title('Mean Jitter (seconds)')
-axs[3].set_xlabel('Seconds')
-axs[3].set_ylabel('Mean Jitter')
+# Combine Mean Delay and Mean Jitter
+axs[1, 1].plot(seconds, mean_delay, marker='o', linestyle='-', color='y', label='Mean Delay')
+axs[1, 1].plot(seconds, mean_jitter, marker='o', linestyle='-', color='m', label='Mean Jitter')
+axs[1, 1].set_title('Mean Delay and Mean Jitter')
+axs[1, 1].set_xlabel('Seconds')
+axs[1, 1].set_ylabel('Time (ms)')
+axs[1, 1].legend()
 
 # Adjust layout
 plt.tight_layout()

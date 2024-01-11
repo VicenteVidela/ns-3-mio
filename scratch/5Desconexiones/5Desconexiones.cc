@@ -36,8 +36,7 @@ std::string format("Inet");
 std::string input("19nodes.txt");
 
 // Main function
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   // Randomize the seed based on current time
   uint32_t seed = static_cast<uint32_t>(time(NULL)); // Replace with your desired seed value 12345
   SeedManager::SetSeed(seed);
@@ -173,6 +172,9 @@ int main(int argc, char* argv[])
     Ptr<OnOffApplication> onoffApp = DynamicCast<OnOffApplication>(apps.Get(i));
     onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&OnOffTx));
   }
+
+  // Install flow monitor on all nodes
+  monitor = flowmon.InstallAll();
 
   // ------------------------------------------------------------
   // -- Receive packets at sink

@@ -11,6 +11,8 @@
 #include "ns3/mobility-module.h"
 #include "ns3/error-model.h"
 #include "ns3/random-variable-stream.h"
+#include "ns3/flow-monitor-helper.h"
+#include "ns3/ipv4-flow-classifier.h"
 
 #include <iostream>
 #include <numeric>
@@ -38,6 +40,10 @@ extern DoubleValue errorRate;           // Error rate for package loss
 extern uint64_t totalReceivedBytes;       // Total received bytes
 extern uint64_t totalTransmittedPackets;  // Total transmitted packets
 extern uint64_t totalReceivedPackets;     // Total received packets
+
+// Flow monitor
+extern FlowMonitorHelper flowmon;
+extern Ptr<FlowMonitor> monitor;
 
 // Callback function to process received packets and update statistics
 void SinkRx(Ptr<const ns3::Packet> p, const ns3::Address& ad);

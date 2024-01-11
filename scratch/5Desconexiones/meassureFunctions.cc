@@ -7,6 +7,10 @@ std::vector<double> latencies;         // Vector to store latencies for each pac
 Time lastArrivalTime;                  // Time of last packet arrival
 std::vector<double> jitters;           // Vector to store jitters for each packet
 
+// Flow monitor
+FlowMonitorHelper flowmon;
+Ptr<FlowMonitor> monitor;
+
 // Callback function to process received packets and update statistics
 void SinkRx(Ptr<const Packet> p, const Address& ad)
 {
@@ -38,54 +42,61 @@ void OnOffTx(Ptr<const Packet> packet) {
 
 // Function to print throughput and packet statistics at the end of the simulation
 void PrintMeassures(bool detailedPrinting, std::ostream& output) {
-  output << std::endl;
+  // Print the current simulation time
   output << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
-  // Print throughput
-  if (detailedPrinting) output << "Total received bytes: " << totalReceivedBytes << std::endl;
-  double throughput = static_cast<double>(totalReceivedBytes) / (Simulator::Now().GetSeconds());
-  output << "Throughput: " << throughput << " bytes/second" << std::endl;
-  if (detailedPrinting) output << std::endl;
+  // Variable Declarations
+  double totalDelay = 0;                  // Accumulator for total delay of all flows
+  uint64_t totalPackets = 0;              // Total received packets across all flows
+  uint64_t totalLostPackets = 0;          // Total lost packets across all flows
+  uint64_t totalTransmittedPackets = 0;   // Total transmitted packets across all flows
+  double totalReceivedBytes = 0;          // Total received bytes across all flows
+  double totalDuration = 0;                // Accumulator for total duration of all flows
+  double totalJitter = 0;                  // Accumulator for total jitter of all flows
 
-  // Print packet statistics
-  if (detailedPrinting) {
-    output << "Total transmitted packets: " << totalTransmittedPackets << std::endl;
-    output << "Total received packets: " << totalReceivedPackets << std::endl;
-  }
-  // Calculate and print packet loss percentage
-  double packetLossPercentage = ((totalTransmittedPackets - totalReceivedPackets) / static_cast<double>(totalTransmittedPackets)) * 100.0;
-  output << "Packet Loss Percentage: " << packetLossPercentage << "%" << std::endl;
-  if (detailedPrinting) output << std::endl;
+  // Check for lost packets and get flow statistics
+  monitor->CheckForLostPackets();
+  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
+  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
 
-  // Print latency statistics
-  double latency_sum = std::accumulate(latencies.begin(), latencies.end(), 0.0);
-  double latency_mean = latency_sum / latencies.size();
-  double latency_sq_sum = std::inner_product(latencies.begin(), latencies.end(), latencies.begin(), 0.0);
-  double latency_std_dev = std::sqrt(latency_sq_sum / latencies.size() - latency_mean * latency_mean);
-  double max_latency = *std::max_element(latencies.begin(), latencies.end());
-  double min_latency = *std::min_element(latencies.begin(), latencies.end());
-  output << "Mean latency: " << latency_mean << " seconds" << std::endl;
-  if (detailedPrinting) {
-    output << "Standard deviation of latency: " << latency_std_dev << " seconds" << std::endl;
-    output << "Maximum latency: " << max_latency << " seconds" << std::endl;
-    output << "Minimum latency: " << min_latency << " seconds" << std::endl;
-    output << std::endl;
+  // Iterate through flow statistics and accumulate values
+  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin(); i != stats.end(); ++i) {
+    totalReceivedBytes += i->second.rxBytes;
+    totalDuration += i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds();
+    totalDelay += i->second.delaySum.GetSeconds();
+    totalPackets += i->second.rxPackets;
+    totalLostPackets += i->second.lostPackets;
+    totalTransmittedPackets += i->second.txPackets;
+    totalJitter += i->second.jitterSum.GetSeconds();
   }
 
-  // Print jitter statistics
-  double jitter_sum = std::accumulate(jitters.begin(), jitters.end(), 0.0);
-  double jitter_mean = jitter_sum / jitters.size();
-  double jitter_sq_sum = std::inner_product(jitters.begin(), jitters.end(), jitters.begin(), 0.0);
-  double jitter_std_dev = std::sqrt(jitter_sq_sum / jitters.size() - jitter_mean * jitter_mean);
-  double max_jitter = *std::max_element(jitters.begin(), jitters.end());
-  double min_jitter = *std::min_element(jitters.begin(), jitters.end());
+  // Calculate and print average throughput
+  double averageThroughput = totalReceivedBytes * 8.0 / totalDuration;
+  output << "Average Throughput: " << averageThroughput << " bps" << std::endl;
 
-  output << "Mean jitter: " << jitter_mean << " seconds" << std::endl;
-  if (detailedPrinting) {
-    output << "Standard deviation of jitter: " << jitter_std_dev << " seconds" << std::endl;
-    output << "Maximum jitter: " << max_jitter << " seconds" << std::endl;
-    output << "Minimum jitter: " << min_jitter << " seconds" << std::endl;
-    output << std::endl;
+  // Calculate and print average packet delivery ratio and percentage
+  double averagePacketDeliveryRatio = static_cast<double>(totalPackets) / static_cast<double>(totalTransmittedPackets);
+  double averagePacketDeliveryPercentage = averagePacketDeliveryRatio * 100;
+  output << "Average Packet Delivery Ratio: " << averagePacketDeliveryPercentage << "%" << std::endl;
+
+  // Calculate and print average packet loss rate and percentage
+  double averagePacketLossRate = static_cast<double>(totalLostPackets) / static_cast<double>(totalTransmittedPackets);
+  double averagePacketLossPercentage = averagePacketLossRate * 100;
+  output << "Average Packet Loss Rate: " << averagePacketLossPercentage << "%" << std::endl;
+
+  // Check if there are received packets and print average delay if applicable
+  if (totalPackets > 0) {
+    double averageDelayMs = (totalDelay / totalPackets) * 1000;
+    output << "Average delay: " << averageDelayMs << " ms" << std::endl;
+  } else {
+    output << "No packets received" << std::endl;
   }
+
+  // Calculate and print average jitter
+  double averageJitterMs = (totalJitter / stats.size()) * 1000;
+  output << "Average Jitter: " << averageJitterMs << " ms" << std::endl;
+
+  // Print an empty line for better readability
+  output << std::endl;
 }
 
 // Function to reset meassures
