@@ -18,11 +18,6 @@ StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control 
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.000005);            // Error rate for package loss
 
-// Variables for statistics
-uint64_t totalReceivedBytes = 0;       // Total received bytes
-uint64_t totalTransmittedPackets = 0;  // Total transmitted packets
-uint64_t totalReceivedPackets = 0;     // Total received packets
-
 // Directory for topology files
 std::string topologyDirectory = "scratch/topologies/";
 
@@ -170,7 +165,7 @@ int main(int argc, char* argv[]) {
   // Connect OnOffTx to the OnOffApplication::Tx trace source for each OnOffApplication
   for (uint32_t i = 0; i < apps.GetN(); i++) {
     Ptr<OnOffApplication> onoffApp = DynamicCast<OnOffApplication>(apps.Get(i));
-    onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&OnOffTx));
+    // onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&OnOffTx));
   }
 
   // Install flow monitor on all nodes
@@ -186,7 +181,7 @@ int main(int argc, char* argv[]) {
 
   // Connect PacketSinkRx to the PacketSink::Rx trace source
   Ptr<PacketSink> sink1 = DynamicCast<PacketSink>(apps.Get(0));
-  sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
+  // sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
   apps.Start(Seconds(0.0));
   apps.Stop(Seconds(stopTime));
@@ -196,14 +191,14 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(2), &ResetMeasures);                       // Schedule measures reset
+  // Simulator::Schedule(Seconds(2), &ResetMeasures);                       // Schedule measures reset
 
   outputFile.open(dataDirectory + dataFile);                              // Open data file
   for (i=6; i<=stopTime; i+=4) {
     Simulator::Schedule(Seconds(i), &DisconnectRandomNode, nodes);        // Schedule node disconnection
     Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
                         std::ref(outputFile.is_open()? outputFile : std::cout));    // Schedule measures printing
-    Simulator::Schedule(Seconds(i), &ResetMeasures);                     // Schedule measures reset
+    // Simulator::Schedule(Seconds(i), &ResetMeasures);                     // Schedule measures reset
   }
 
   Simulator::Stop(Seconds(stopTime));                                     // Stop simulation at 3 seconds

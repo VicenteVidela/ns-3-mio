@@ -45,16 +45,7 @@ extern uint64_t totalReceivedPackets;     // Total received packets
 extern FlowMonitorHelper flowmon;
 extern Ptr<FlowMonitor> monitor;
 
-// Callback function to process received packets and update statistics
-void SinkRx(Ptr<const ns3::Packet> p, const ns3::Address& ad);
-
-// Callback function when packets are transmitted
-void OnOffTx(Ptr<const ns3::Packet> packet);
-
 // Function to print throughput and packet statistics at the end of the simulation
 void PrintMeasures(bool detailedPrinting, std::ostream& output);
-
-// Function to reset measures
-void ResetMeasures();
 
 #endif

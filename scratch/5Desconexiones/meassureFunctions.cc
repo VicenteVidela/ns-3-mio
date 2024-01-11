@@ -11,35 +11,6 @@ std::vector<double> jitters;           // Vector to store jitters for each packe
 FlowMonitorHelper flowmon;
 Ptr<FlowMonitor> monitor;
 
-// Callback function to process received packets and update statistics
-void SinkRx(Ptr<const Packet> p, const Address& ad)
-{
-  Ipv4Header ipv4;
-  p->PeekHeader(ipv4);
-  // Update total received bytes and packets
-  totalReceivedBytes += p->GetSize();
-  totalReceivedPackets++;
-
-  // Calculate latency
-  Time txTime = transmissionTimes[p->GetUid()];
-  Time latency = Simulator::Now() - txTime;
-  latencies.push_back(latency.GetSeconds());
-
-  // Calculate jitter
-  if (lastArrivalTime != Time(0)) {
-    Time interArrivalTime = Simulator::Now() - lastArrivalTime;
-    double jitter = std::abs(interArrivalTime.GetSeconds() - latency.GetSeconds());
-    jitters.push_back(jitter);
-  }
-  lastArrivalTime = Simulator::Now();
-}
-
-// Callback function when packets are transmitted
-void OnOffTx(Ptr<const Packet> packet) {
-  totalTransmittedPackets++;    // Update total transmitted packets
-  transmissionTimes[packet->GetUid()] = Simulator::Now();   // Store transmission time for the packet
-}
-
 // Function to print throughput and packet statistics at the end of the simulation
 void PrintMeasures(bool detailedPrinting, std::ostream& output) {
   // Print the current simulation time
@@ -97,19 +68,6 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
 
   // Print an empty line for better readability
   output << std::endl;
-}
-
-// Function to reset measures
-void ResetMeasures() {
-  // Reset byte counters
-  totalReceivedBytes = 0;
-  totalTransmittedPackets = 0;
-  totalReceivedPackets = 0;
-
-  // Reset latency and jitter vectors
-  latencies.clear();
-  jitters.clear();
-
-  // Reset transmission times map
-  transmissionTimes.clear();
+  // Create a new FlowMonitor
+  monitor = flowmon.InstallAll();
 }
