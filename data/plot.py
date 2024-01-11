@@ -26,12 +26,15 @@ mean_jitter = []
 # Parse each entry and extract values
 for entry in entries:
   lines = entry.split('\n')
-  seconds.append(float(lines[0].split(": ")[1]))
-  throughput.append(float(lines[1].split(": ")[1].split()[0]))
-  packet_delivery_ratio.append(float(lines[2].split(": ")[1][:-1]))
-  packet_loss.append(float(lines[3].split(": ")[1][:-1]))
-  mean_delay.append(float(lines[4].split(": ")[1].split()[0]))
-  mean_jitter.append(float(lines[5].split(": ")[1].split()[0]))
+  try:
+    seconds.append(float(lines[0].split(": ")[1]))
+    throughput.append(float(lines[1].split(": ")[1].split()[0]))
+    packet_delivery_ratio.append(float(lines[2].split(": ")[1][:-1]))
+    packet_loss.append(float(lines[3].split(": ")[1][:-1]))
+    mean_delay.append(float(lines[4].split(": ")[1].split()[0]))
+    mean_jitter.append(float(lines[5].split(": ")[1].split()[0]))
+  except IndexError:
+    pass
 
 # Plotting
 fig, axs = plt.subplots(2, 2, figsize=(16, 12))

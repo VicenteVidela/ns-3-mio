@@ -8,7 +8,10 @@
 
 using namespace ns3;
 
+extern NodeContainer clientNodes;             // Container for client nodes
+extern std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
+
 // Function to disconnect a random node
-void DisconnectRandomNode(NodeContainer& nodes);
+void DisconnectRandomNode();
 
 #endif

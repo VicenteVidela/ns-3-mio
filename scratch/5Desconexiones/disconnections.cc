@@ -1,15 +1,33 @@
 #include "disconnections.h"
 
-// Function to disconnect a random node
-void DisconnectRandomNode(NodeContainer& nodes) {
-  // Select a random node
-  uint32_t totalNodes = nodes.GetN();
-  Ptr<UniformRandomVariable> unifRandom = CreateObject<UniformRandomVariable>();
-  unifRandom->SetAttribute("Min", DoubleValue(0));
-  unifRandom->SetAttribute("Max", DoubleValue(totalNodes - 1));
-  unsigned int randomNodeNumber = unifRandom->GetInteger(0, totalNodes - 1);
-  Ptr<Node> randomNode = nodes.Get(randomNodeNumber);
+NodeContainer clientNodes;             // Container for client nodes
+std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
 
-  // Disconnect the node
-  randomNode->GetObject<Ipv4>()->SetDown(1);
+// Function to disconnect a random node
+void DisconnectRandomNode() {
+  // Check if all nodes are already disconnected
+  uint32_t totalDisconnectedNodes = disconnectedNodes.size();
+  if (totalDisconnectedNodes == clientNodes.GetN()) {
+    return;
+  }
+  // Get a random node index
+  uint32_t randomIndex = rand() % clientNodes.GetN();
+
+  // Check if the node is already disconnected
+  while (disconnectedNodes.find(randomIndex) != disconnectedNodes.end()) {
+    // Generate a new random index
+    randomIndex = rand() % clientNodes.GetN();
+  }
+
+  // Add the node to the set of disconnected nodes
+  disconnectedNodes.insert(randomIndex);
+
+  // Get the random node
+  Ptr<Node> randomNode = clientNodes.Get(randomIndex);
+
+  // Disable all network interfaces on the node
+  Ptr<Ipv4> ipv4 = randomNode->GetObject<Ipv4>();
+  for (uint32_t i = 0; i < ipv4->GetNInterfaces(); ++i) {
+    ipv4->SetDown(i);
+  }
 }

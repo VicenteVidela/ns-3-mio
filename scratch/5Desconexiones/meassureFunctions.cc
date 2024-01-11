@@ -59,7 +59,7 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
     double averageDelayMs = (totalDelay / totalPackets) * 1000;
     output << "Average delay: " << averageDelayMs << " ms" << std::endl;
   } else {
-    output << "No packets received" << std::endl;
+    output << "Average delay: 0 ms" << std::endl;
   }
 
   // Calculate and print average jitter
@@ -68,6 +68,6 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
 
   // Print an empty line for better readability
   output << std::endl;
-  // Create a new FlowMonitor
-  monitor = flowmon.InstallAll();
+  // Reset flowmonitor
+  monitor->ResetAllStats();
 }

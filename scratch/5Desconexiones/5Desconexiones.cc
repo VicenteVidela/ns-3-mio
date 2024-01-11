@@ -7,11 +7,13 @@ using namespace ns3;
 bool detailedPrinting = false;    // Flag for detailed printing
 
 // Simulation parameters
-float stopSendingTime = 60;                               // Time to stop sending packets
-float stopTime = 60;                                      // Simulation stop time
+float stopSendingTime = 602;                              // Time to stop sending packets
+float stopTime = 602;                                     // Simulation stop time
+int timeInterval = 60;                                    // Time interval for printing statistics
+int timeIntervalInit = 2;                                 // Initial time for printing statistics
 StringValue p2pDelay = StringValue("100ns");              // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("10Gbps");          // Data rate for point-to-point links
-StringValue onoffDataRate = StringValue("10Kbps");              // Data rate for OnOff applications
+StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point-to-point links
+StringValue onoffDataRate = StringValue("10Kbps");        // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1200);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 // Error rate for package loss
@@ -49,14 +51,12 @@ int main(int argc, char* argv[]) {
   NodeContainer nodes;
 
   // Read the topology from the input file
-  if (inFile)
-  {
+  if (inFile) {
     nodes = inFile->Read();
   }
 
   // Check if the topology file is read successfully
-  if (inFile->LinksSize() == 0)
-  {
+  if (inFile->LinksSize() == 0) {
     std::cout << "Problems reading the topology file. Failing." << std::endl;
     return -1;
   }
@@ -81,8 +81,7 @@ int main(int argc, char* argv[]) {
   auto nc = new NodeContainer[totlinks];
   TopologyReader::ConstLinksIterator iter;
   int i = 0;
-  for (iter = inFile->LinksBegin(); iter != inFile->LinksEnd(); iter++, i++)
-  {
+  for (iter = inFile->LinksBegin(); iter != inFile->LinksEnd(); iter++, i++) {
     // Create a NodeContainer for each link
     nc[i] = NodeContainer(iter->GetFromNode(), iter->GetToNode());
   }
@@ -92,8 +91,7 @@ int main(int argc, char* argv[]) {
 
   auto ndc = new NetDeviceContainer[totlinks];
   PointToPointHelper p2p;
-  for (int i = 0; i < totlinks; i++)
-  {
+  for (int i = 0; i < totlinks; i++) {
     // Configure point-to-point communication attributes
     p2p.SetChannelAttribute("Delay", p2pDelay);
     p2p.SetDeviceAttribute("DataRate", p2pDataRate);
@@ -103,8 +101,7 @@ int main(int argc, char* argv[]) {
   }
 
   auto ipic = new Ipv4InterfaceContainer[totlinks];
-  for (int i = 0; i < totlinks; i++)
-  {
+  for (int i = 0; i < totlinks; i++) {
     // Assign IPv4 addresses to net devices
     ipic[i] = address.Assign(ndc[i]);
     address.NewNetwork();
@@ -146,11 +143,9 @@ int main(int argc, char* argv[]) {
   offTime->SetAttribute("Mean", DoubleValue(0.5)); // Mean 'Off' time is 2 seconds
   onoff.SetAttribute("OffTime", PointerValue(offTime));
 
-  NodeContainer clientNodes;
-  for (unsigned int i = 0; i < nodes.GetN(); i++)
-  {
-    if (i != randomServerNumber)
-    {
+  // Add client nodes to the container
+  for (unsigned int i = 0; i < nodes.GetN(); i++) {
+    if (i != randomServerNumber) {
       // Add client nodes to the container
       Ptr<Node> clientNode = nodes.Get(i);
       clientNodes.Add(clientNode);
@@ -191,21 +186,22 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  // Simulator::Schedule(Seconds(2), &ResetMeasures);                       // Schedule measures reset
+  Simulator::Schedule(Seconds(timeIntervalInit), &FlowMonitor::ResetAllStats, monitor);   // Schedule measures reset
 
-  outputFile.open(dataDirectory + dataFile);                              // Open data file
-  for (i=6; i<=stopTime; i+=4) {
-    Simulator::Schedule(Seconds(i), &DisconnectRandomNode, nodes);        // Schedule node disconnection
+  outputFile.open(dataDirectory + dataFile);                                              // Open data file
+  for (i=timeIntervalInit+timeInterval; i<=stopTime; i+=timeInterval) {
+    Simulator::Schedule(Seconds(i), &DisconnectRandomNode);                               // Schedule node disconnection
     Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
-                        std::ref(outputFile.is_open()? outputFile : std::cout));    // Schedule measures printing
-    // Simulator::Schedule(Seconds(i), &ResetMeasures);                     // Schedule measures reset
+                        std::ref(outputFile.is_open()? outputFile : std::cout));          // Schedule measures printing
   }
 
-  Simulator::Stop(Seconds(stopTime));                                     // Stop simulation at 3 seconds
+  // Stop simulation at 3 seconds
+  Simulator::Stop(Seconds(stopTime));
   Simulator::Run();
   Simulator::Destroy();
 
-  outputFile.close();                                                     // Close data file
+  // Close data file
+  outputFile.close();
 
   // Clean up dynamically allocated arrays
   delete[] ipic;
