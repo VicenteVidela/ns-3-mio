@@ -41,7 +41,7 @@ void OnOffTx(Ptr<const Packet> packet) {
 }
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures(bool detailedPrinting, std::ostream& output) {
+void PrintMeasures(bool detailedPrinting, std::ostream& output) {
   // Print the current simulation time
   output << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
   // Variable Declarations
@@ -99,8 +99,8 @@ void PrintMeassures(bool detailedPrinting, std::ostream& output) {
   output << std::endl;
 }
 
-// Function to reset meassures
-void ResetMeassures() {
+// Function to reset measures
+void ResetMeasures() {
   // Reset byte counters
   totalReceivedBytes = 0;
   totalTransmittedPackets = 0;

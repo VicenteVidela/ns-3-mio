@@ -42,6 +42,6 @@ void SinkRx(Ptr<const ns3::Packet> p, const ns3::Address& ad);
 void OnOffTx(Ptr<const ns3::Packet> packet);
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures();
+void PrintMeasures();
 
 #endif // MY_FUNCTIONS_H

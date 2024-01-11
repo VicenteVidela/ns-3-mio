@@ -196,14 +196,14 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(2), &ResetMeassures);                       // Schedule meassures reset
+  Simulator::Schedule(Seconds(2), &ResetMeasures);                       // Schedule measures reset
 
   outputFile.open(dataDirectory + dataFile);                              // Open data file
   for (i=6; i<=stopTime; i+=4) {
     Simulator::Schedule(Seconds(i), &DisconnectRandomNode, nodes);        // Schedule node disconnection
-    Simulator::Schedule(Seconds(i), &PrintMeassures, detailedPrinting,
-                        std::ref(outputFile.is_open()? outputFile : std::cout));    // Schedule meassures printing
-    Simulator::Schedule(Seconds(i), &ResetMeassures);                     // Schedule meassures reset
+    Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
+                        std::ref(outputFile.is_open()? outputFile : std::cout));    // Schedule measures printing
+    Simulator::Schedule(Seconds(i), &ResetMeasures);                     // Schedule measures reset
   }
 
   Simulator::Stop(Seconds(stopTime));                                     // Stop simulation at 3 seconds

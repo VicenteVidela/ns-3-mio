@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(stopTime), &PrintMeassures); // Schedule throughput printing
+  Simulator::Schedule(Seconds(stopTime), &PrintMeasures); // Schedule throughput printing
   Simulator::Stop(Seconds(stopTime));                        // Stop simulation at 3 seconds
   Simulator::Run();
   Simulator::Destroy();

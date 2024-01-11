@@ -19,7 +19,7 @@ void OnOffTx(Ptr<const ns3::Packet> packet)
 }
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures()
+void PrintMeasures()
 {
   // Print throughput
   std::cout << "Total received bytes: " << totalReceivedBytes << std::endl;

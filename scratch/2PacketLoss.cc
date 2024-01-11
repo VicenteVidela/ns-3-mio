@@ -51,7 +51,7 @@ void OnOffTx(Ptr<const Packet> packet) {
 }
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures()
+void PrintMeasures()
 {
   // Print throughput
   std::cout << "Total received bytes: " << totalReceivedBytes << std::endl;
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(stopTime+1), &PrintMeassures); // Schedule throughput printing
+  Simulator::Schedule(Seconds(stopTime+1), &PrintMeasures); // Schedule throughput printing
   Simulator::Stop(Seconds(stopTime+1));                        // Stop simulation at 3 seconds
   Simulator::Run();
   Simulator::Destroy();

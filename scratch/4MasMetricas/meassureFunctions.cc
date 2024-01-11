@@ -36,7 +36,7 @@ void OnOffTx(Ptr<const Packet> packet) {
 }
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeassures()
+void PrintMeasures()
 {
   std::cout << std::endl;
   // Print throughput
