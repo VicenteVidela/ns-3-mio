@@ -7,10 +7,10 @@ using namespace ns3;
 bool detailedPrinting = false;    // Flag for detailed printing
 
 // Simulation parameters
-float stopSendingTime = 602;                              // Time to stop sending packets
-float stopTime = 602;                                     // Simulation stop time
+float stopSendingTime = 1200;                             // Time to stop sending packets
+float stopTime = 1200;                                    // Simulation stop time
 int timeInterval = 60;                                    // Time interval for printing statistics
-int timeIntervalInit = 2;                                 // Initial time for printing statistics
+int timeIntervalInit = 60;                                // Initial time for printing statistics
 StringValue p2pDelay = StringValue("100ns");              // Delay for point-to-point links
 StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point-to-point links
 StringValue onoffDataRate = StringValue("10Kbps");        // Data rate for OnOff applications
@@ -186,10 +186,9 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   std::cout << "Run Simulation." << std::endl;
-  Simulator::Schedule(Seconds(timeIntervalInit), &FlowMonitor::ResetAllStats, monitor);   // Schedule measures reset
 
   outputFile.open(dataDirectory + dataFile);                                              // Open data file
-  for (i=timeIntervalInit+timeInterval; i<=stopTime; i+=timeInterval) {
+  for (i=timeIntervalInit; i<=stopTime; i+=timeInterval) {
     Simulator::Schedule(Seconds(i), &DisconnectRandomNode);                               // Schedule node disconnection
     Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
                         std::ref(outputFile.is_open()? outputFile : std::cout));          // Schedule measures printing

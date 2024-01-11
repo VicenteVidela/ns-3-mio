@@ -45,9 +45,13 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
   output << "Average Throughput: " << averageThroughput << " bps" << std::endl;
 
   // Calculate and print average packet delivery ratio and percentage
-  double averagePacketDeliveryRatio = static_cast<double>(totalPackets) / static_cast<double>(totalTransmittedPackets);
-  double averagePacketDeliveryPercentage = averagePacketDeliveryRatio * 100;
-  output << "Average Packet Delivery Ratio: " << averagePacketDeliveryPercentage << "%" << std::endl;
+  if (totalTransmittedPackets) {
+    double averagePacketDeliveryRatio = std::min(1.0, static_cast<double>(totalPackets) / static_cast<double>(totalTransmittedPackets));
+    double averagePacketDeliveryPercentage = averagePacketDeliveryRatio * 100;
+    output << "Average Packet Delivery Ratio: " << averagePacketDeliveryPercentage << "%" << std::endl;
+  } else {
+    output << "Average Packet Delivery Ratio: -nan%" << std::endl;
+  }
 
   // Calculate and print average packet loss rate and percentage
   double averagePacketLossRate = static_cast<double>(totalLostPackets) / static_cast<double>(totalTransmittedPackets);
