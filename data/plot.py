@@ -67,6 +67,7 @@ for i in range(len(seconds)):
 
 # Plotting
 fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+fig.suptitle('Average Performance Metrics for 10 runs')
 
 # Plot Throughput
 axs[0, 0].plot(seconds, throughput, marker='o', linestyle='-', color='b')
