@@ -7,25 +7,25 @@ using namespace ns3;
 bool detailedPrinting = false;    // Flag for detailed printing
 
 // Simulation parameters
-float stopSendingTime = 1200;                             // Time to stop sending packets
-float stopTime = 1200;                                    // Simulation stop time
+float stopSendingTime = 602;                             // Time to stop sending packets
+float stopTime = 602;                                    // Simulation stop time
 int timeInterval = 60;                                    // Time interval for printing statistics
-int timeIntervalInit = 60;                                // Initial time for printing statistics
+int timeIntervalInit = 2;                                // Initial time for printing statistics
 StringValue p2pDelay = StringValue("100ns");              // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point-to-point links
-StringValue onoffDataRate = StringValue("10Kbps");        // Data rate for OnOff applications
+StringValue p2pDataRate = StringValue("100Kbps");           // Data rate for point-to-point links
+StringValue onoffDataRate = StringValue("10Kbps");       // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1200);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.000005);            // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.00005);            // Error rate for package loss
 
 // Directory for topology files
 std::string topologyDirectory = "scratch/topologies/";
 
 // Directory for data files
 std::string dataDirectory = "data/";
-std::string dataFile = "5Desconexiones.dat";
+std::string dataFile = "5Desconexiones0.dat";
 std::ofstream outputFile;
 
 // Default values for command line parameters
@@ -156,12 +156,6 @@ int main(int argc, char* argv[]) {
   ApplicationContainer apps = onoff.Install(clientNodes);
   apps.Start(Seconds(1.0));
   apps.Stop(Seconds(stopSendingTime));
-
-  // Connect OnOffTx to the OnOffApplication::Tx trace source for each OnOffApplication
-  for (uint32_t i = 0; i < apps.GetN(); i++) {
-    Ptr<OnOffApplication> onoffApp = DynamicCast<OnOffApplication>(apps.Get(i));
-    // onoffApp->TraceConnectWithoutContext("Tx", MakeCallback(&OnOffTx));
-  }
 
   // Install flow monitor on all nodes
   monitor = flowmon.InstallAll();
