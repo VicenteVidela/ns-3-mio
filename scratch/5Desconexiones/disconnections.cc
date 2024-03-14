@@ -4,10 +4,10 @@ NodeContainer clientNodes;             // Container for client nodes
 std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
 
 // Function to disconnect a random node
-void DisconnectRandomNode() {
+void DisconnectRandomNode(PacketSinkDisconnectedHelper &sinkDisconnected) {
   // Check if all nodes are already disconnected
   uint32_t totalDisconnectedNodes = disconnectedNodes.size();
-  if (totalDisconnectedNodes == clientNodes.GetN()) {
+  if (totalDisconnectedNodes >= clientNodes.GetN()) {
     return;
   }
   // Get a random node index
@@ -21,13 +21,15 @@ void DisconnectRandomNode() {
 
   // Add the node to the set of disconnected nodes
   disconnectedNodes.insert(randomIndex);
+  sinkDisconnected.AddNodeToDisconnect(clientNodes.Get(randomIndex));
 
   // Get the random node
-  Ptr<Node> randomNode = clientNodes.Get(randomIndex);
+  // Ptr<Node> randomNode = clientNodes.Get(randomIndex);
 
   // Disable all network interfaces on the node
-  Ptr<Ipv4> ipv4 = randomNode->GetObject<Ipv4>();
-  for (uint32_t i = 0; i < ipv4->GetNInterfaces(); ++i) {
-    ipv4->SetDown(i);
-  }
+  // Ptr<Ipv4> ipv4 = randomNode->GetObject<Ipv4>();
+  // for (uint32_t i = 0; i < ipv4->GetNInterfaces(); ++i) {
+  //   ipv4->SetDown(i);
+  // }
+
 }

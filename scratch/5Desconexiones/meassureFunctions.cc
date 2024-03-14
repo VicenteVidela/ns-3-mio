@@ -12,16 +12,15 @@ FlowMonitorHelper flowmon;
 Ptr<FlowMonitor> monitor;
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(bool detailedPrinting, std::ostream& output) {
-  // Print the current simulation time
-  output << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
+void PrintMeasures(int nodesDisconnected, std::ostream& output) {
+  // Print the number of connected nodes
+  output << "Nodes disconnected: " << nodesDisconnected << std::endl;
   // Variable Declarations
   double totalDelay = 0;                  // Accumulator for total delay of all flows
   uint64_t totalPackets = 0;              // Total received packets across all flows
   uint64_t totalLostPackets = 0;          // Total lost packets across all flows
   uint64_t totalTransmittedPackets = 0;   // Total transmitted packets across all flows
   double totalReceivedBytes = 0;          // Total received bytes across all flows
-  double totalDuration = 0;                // Accumulator for total duration of all flows
   double totalJitter = 0;                  // Accumulator for total jitter of all flows
 
   // Check for lost packets and get flow statistics
@@ -29,10 +28,12 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
   Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
 
+  // Reset flowmonitor
+  // monitor->ResetAllStats();
+
   // Iterate through flow statistics and accumulate values
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin(); i != stats.end(); ++i) {
     totalReceivedBytes += i->second.rxBytes;
-    totalDuration += i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds();
     totalDelay += i->second.delaySum.GetSeconds();
     totalPackets += i->second.rxPackets;
     totalLostPackets += i->second.lostPackets;
@@ -41,8 +42,8 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
   }
 
   // Calculate and print average throughput
-  double averageThroughput = totalReceivedBytes * 8.0 / totalDuration;
-  output << "Average Throughput: " << averageThroughput << " bps" << std::endl;
+  double averageThroughput = totalReceivedBytes * 8.0;
+  output << "Throughput: " << averageThroughput << " bps" << std::endl;
 
   // Calculate and print average packet delivery ratio and percentage
   if (totalTransmittedPackets) {
@@ -72,6 +73,4 @@ void PrintMeasures(bool detailedPrinting, std::ostream& output) {
 
   // Print an empty line for better readability
   output << std::endl;
-  // Reset flowmonitor
-  monitor->ResetAllStats();
 }

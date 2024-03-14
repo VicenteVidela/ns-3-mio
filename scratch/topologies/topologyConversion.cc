@@ -31,20 +31,20 @@ int main() {
     std::string line;
     while (std::getline(inputFile, line)) {
         // Skip lines starting with '#'
-        if (!line.empty() && line[0] == '#') {
+        if (!line.empty() && (line[0] == '#' || line[0] == 'T' || line[0] == 'M')) {
             continue;
         }
 
         std::istringstream tokenStream(line);
         std::vector<std::string> tokens;
         std::string token;
-        while (std::getline(tokenStream, token, '|')) {
+        while (std::getline(tokenStream, token, '\t')) {
             tokens.push_back(token);
         }
 
         // Extract node IDs from the link information and add them to the set
-        int node1 = std::stoi(tokens[0]);
-        int node2 = std::stoi(tokens[1]);
+        int node1 = std::stoi(tokens[1]);
+        int node2 = std::stoi(tokens[2]);
         uniqueNodeIds.insert(node1);
         uniqueNodeIds.insert(node2);
     }
@@ -59,16 +59,18 @@ int main() {
     // Process each line in the input file
     while (std::getline(inputFile, line)) {
         // Skip lines starting with '#'
-        if (!line.empty() && line[0] == '#') {
+        if (!line.empty() && (line[0] == '#' || line[0] == 'T' || line[0] == 'M')) {
             continue;
         }
 
+        std::vector<std::string> tokens;
         std::string token;
         std::istringstream tokenStream(line);
-        while (std::getline(tokenStream, token, '|')) {
-            outputFile << token << " ";
+        while (std::getline(tokenStream, token, '\t')) {
+            tokens.push_back(token);
+            // outputFile << token << " ";
         }
-        outputFile << std::endl;
+        outputFile << tokens[1] << " " << tokens[2] << std::endl;
     }
 
     // Close the input and output files

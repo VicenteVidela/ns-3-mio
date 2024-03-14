@@ -1,5 +1,6 @@
 #include "meassureFunctions.h"
 #include "disconnections.h"
+#include "PacketSinkDisconnected.h"
 
 using namespace ns3;
 
@@ -7,25 +8,26 @@ using namespace ns3;
 bool detailedPrinting = false;    // Flag for detailed printing
 
 // Simulation parameters
-float stopSendingTime = 602;                             // Time to stop sending packets
-float stopTime = 602;                                    // Simulation stop time
-int timeInterval = 60;                                    // Time interval for printing statistics
-int timeIntervalInit = 2;                                // Initial time for printing statistics
-StringValue p2pDelay = StringValue("100ns");              // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("100Kbps");           // Data rate for point-to-point links
-StringValue onoffDataRate = StringValue("10Kbps");       // Data rate for OnOff applications
-UintegerValue onoffPacketSize = UintegerValue(1200);      // Packet size for OnOff applications
+float stopSendingTime = 60;                               // Time to stop sending packets
+float stopTime = 60;                                      // Simulation stop time
+int timeInterval = 30;                                    // Time interval for printing statistics
+int timeIntervalInit = 10;                                // Initial time for printing statistics
+StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
+StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point-to-point links
+StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
+UintegerValue onoffPacketSize = UintegerValue(1500);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
+int nodesToDisconnect = 10;                                // Number of nodes to disconnect
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.00005);            // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.00001);             // Error rate for package loss
 
 // Directory for topology files
 std::string topologyDirectory = "scratch/topologies/";
 
 // Directory for data files
 std::string dataDirectory = "data/";
-std::string dataFile = "5Desconexiones0.dat";
+std::string dataFile = "5Desconexiones.dat";
 std::ofstream outputFile;
 
 // Default values for command line parameters
@@ -100,6 +102,8 @@ int main(int argc, char* argv[]) {
     ndc[i] = p2p.Install(nc[i]);
   }
 
+  // p2p.EnablePcapAll("awa");
+
   auto ipic = new Ipv4InterfaceContainer[totlinks];
   for (int i = 0; i < totlinks; i++) {
     // Assign IPv4 addresses to net devices
@@ -154,8 +158,8 @@ int main(int argc, char* argv[]) {
 
   // Install OnOff applications on client nodes
   ApplicationContainer apps = onoff.Install(clientNodes);
-  apps.Start(Seconds(1.0));
-  apps.Stop(Seconds(stopSendingTime));
+  apps.Start(Seconds(0.0));
+  apps.Stop(Seconds(stopTime));
 
   // Install flow monitor on all nodes
   monitor = flowmon.InstallAll();
@@ -165,11 +169,15 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   // Set up packet sink for receiving packets at the random server node
-  PacketSinkHelper sink("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
-  apps = sink.Install(randomServerNode);
+  PacketSinkDisconnectedHelper sinkHelper("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
+  // Disconnect nodes
+  for (int i = 0; i < nodesToDisconnect; i++) {
+    DisconnectRandomNode(sinkHelper);
+  }
+  apps = sinkHelper.Install(randomServerNode);
 
   // Connect PacketSinkRx to the PacketSink::Rx trace source
-  Ptr<PacketSink> sink1 = DynamicCast<PacketSink>(apps.Get(0));
+  // PacketSinkDisconnected sink1 = DynamicCast<PacketSinkDisconnected>(apps.Get(0));
   // sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
   apps.Start(Seconds(0.0));
@@ -181,15 +189,22 @@ int main(int argc, char* argv[]) {
 
   std::cout << "Run Simulation." << std::endl;
 
-  outputFile.open(dataDirectory + dataFile);                                              // Open data file
-  for (i=timeIntervalInit; i<=stopTime; i+=timeInterval) {
-    Simulator::Schedule(Seconds(i), &DisconnectRandomNode);                               // Schedule node disconnection
-    Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
-                        std::ref(outputFile.is_open()? outputFile : std::cout));          // Schedule measures printing
-  }
+  // Schedule reset stats
+  // Simulator::Schedule(Seconds(timeIntervalInit), []() { monitor->ResetAllStats(); });
 
-  // Stop simulation at 3 seconds
-  Simulator::Stop(Seconds(stopTime));
+  // Open output file to print out measures
+  outputFile.open(dataDirectory + dataFile, std::ios::app);
+  Simulator::Schedule(Seconds(stopTime), &PrintMeasures, nodesToDisconnect,
+                      std::ref(outputFile.is_open()? outputFile : std::cout));
+  // for (i=timeIntervalInit+timeInterval; i<=stopTime; i+=timeInterval) {
+  //   Simulator::Schedule(Seconds(i), &DisconnectRandomNode);                               // Schedule node disconnection
+  //   Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
+  //                       std::ref(outputFile.is_open()? outputFile : std::cout));          // Schedule measures printing
+  // }
+
+
+  // Stop simulation at stop time
+  Simulator::Stop(Seconds(stopTime+1));
   Simulator::Run();
   Simulator::Destroy();
 

@@ -46,6 +46,6 @@ extern FlowMonitorHelper flowmon;
 extern Ptr<FlowMonitor> monitor;
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(bool detailedPrinting, std::ostream& output);
+void PrintMeasures(int nodesDisconnected, std::ostream& output);
 
 #endif

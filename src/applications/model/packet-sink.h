@@ -113,6 +113,12 @@ class PacketSink : public Application
 
   protected:
     void DoDispose() override;
+    void HandleRead(Ptr<Socket> socket);
+    /**
+     * \brief Handle an incoming connection
+     * \param socket the incoming connection socket
+     * \param from the address the connection is from
+     */
 
   private:
     // inherited from Application base class.
@@ -123,12 +129,7 @@ class PacketSink : public Application
      * \brief Handle a packet received by the application
      * \param socket the receiving socket
      */
-    void HandleRead(Ptr<Socket> socket);
-    /**
-     * \brief Handle an incoming connection
-     * \param socket the incoming connection socket
-     * \param from the address the connection is from
-     */
+
     void HandleAccept(Ptr<Socket> socket, const Address& from);
     /**
      * \brief Handle an connection close
