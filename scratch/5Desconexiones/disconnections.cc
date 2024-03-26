@@ -3,8 +3,15 @@
 NodeContainer clientNodes;             // Container for client nodes
 std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
 
+// Define a callback function for packet reception
+bool DropPacket(Ptr<const Packet> packet, const Address& from) {
+    // Simply discard the received packet
+    std::cout << "Packet dropped upon reception" << std::endl;
+    return false;
+}
+
 // Function to disconnect a random node
-void DisconnectRandomNode(PacketSinkDisconnectedHelper &sinkDisconnected) {
+void DisconnectRandomNode(Ptr<PacketSink> sinkDisconnected) {
   // Check if all nodes are already disconnected
   uint32_t totalDisconnectedNodes = disconnectedNodes.size();
   if (totalDisconnectedNodes >= clientNodes.GetN()) {
@@ -21,8 +28,8 @@ void DisconnectRandomNode(PacketSinkDisconnectedHelper &sinkDisconnected) {
 
   // Add the node to the set of disconnected nodes
   disconnectedNodes.insert(randomIndex);
-  sinkDisconnected.AddNodeToDisconnect(clientNodes.Get(randomIndex));
-
+  std::cout << "Disconnecting node " << randomIndex << std::endl;
+  // sinkDisconnected->AddNodeToDisconnect(clientNodes.Get(randomIndex));
   // Get the random node
   // Ptr<Node> randomNode = clientNodes.Get(randomIndex);
 

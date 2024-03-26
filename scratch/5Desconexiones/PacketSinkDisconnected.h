@@ -32,8 +32,7 @@ class PacketSinkDisconnectedHelper : public PacketSinkHelper
 public:
   PacketSinkDisconnectedHelper (std::string protocol, ns3::Address address);
 
-  void SetAttribute (std::string name, const AttributeValue &value);
-  ApplicationContainer Install (Ptr<Node> node) const;
+  // ApplicationContainer Install (Ptr<Node> node) const;
   void AddNodeToDisconnect (Ptr<Node> node);
 
 private:

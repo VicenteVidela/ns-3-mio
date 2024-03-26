@@ -39,34 +39,27 @@ PacketSinkDisconnectedHelper::PacketSinkDisconnectedHelper (std::string protocol
 {
 }
 
+// ApplicationContainer
+// PacketSinkDisconnectedHelper::Install(Ptr<Node> node) const
+// {
+//   // Create a new instance of PacketSinkDisconnected
+//   Ptr<Application> app = CreateObject<Application>();
+//   Ptr<PacketSinkDisconnected> sink = CreateObject<PacketSinkDisconnected>();
 
-void
-PacketSinkDisconnectedHelper::SetAttribute (std::string name, const AttributeValue &value)
-{
-  m_factory.Set (name, value);
-}
+//   // Install the PacketSinkDisconnected application
+//   node->AddApplication(app);
+//   // node->AddApplication(sink);
 
-ApplicationContainer
-PacketSinkDisconnectedHelper::Install(Ptr<Node> node) const
-{
-    ApplicationContainer apps;
+//   // Add nodes to disconnect
+//   // for (auto it = m_nodesToDisconnect.begin(); it != m_nodesToDisconnect.end(); ++it) {
+//   //     sink->AddNodeToDisconnect(*it);
+//   //     // std::cout << "Node " << (*it)->GetId() << " will be disconnected from the network" << std::endl;
+//   // }
 
-    // Create a new instance of PacketSinkDisconnected
-    Ptr<PacketSinkDisconnected> sink = CreateObject<PacketSinkDisconnected>();
+//   std::cout << "Installing PacketSinkDisconnected on node " << node->GetId() << std::endl;
 
-    // Add nodes to disconnect
-    for (auto it = m_nodesToDisconnect.begin(); it != m_nodesToDisconnect.end(); ++it) {
-        sink->AddNodeToDisconnect(*it);
-    }
-
-    // Install the PacketSinkDisconnected application
-    node->AddApplication(sink);
-
-    // Add the installed application to the ApplicationContainer
-    apps.Add(sink);
-
-    return apps;
-}
+//   return ApplicationContainer(app);
+// }
 
 void
 PacketSinkDisconnectedHelper::AddNodeToDisconnect (Ptr<Node> node)

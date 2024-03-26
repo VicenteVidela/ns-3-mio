@@ -17,7 +17,7 @@ StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point
 StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1500);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
-int nodesToDisconnect = 10;                                // Number of nodes to disconnect
+int nodesToDisconnect = 10;                               // Number of nodes to disconnect
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.00001);             // Error rate for package loss
@@ -169,19 +169,24 @@ int main(int argc, char* argv[]) {
   // ------------------------------------------------------------
 
   // Set up packet sink for receiving packets at the random server node
-  PacketSinkDisconnectedHelper sinkHelper("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
-  // Disconnect nodes
-  for (int i = 0; i < nodesToDisconnect; i++) {
-    DisconnectRandomNode(sinkHelper);
-  }
-  apps = sinkHelper.Install(randomServerNode);
+  // PacketSinkHelper sinkHelper("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
+  // ApplicationContainer sinkApps = sinkHelper.Install(randomServerNode);
+
+  // // Connect the custom callback function to the PacketSink's Rx trace
+  // Ptr<PacketSink> sink = DynamicCast<PacketSink>(sinkApps.Get(0));
+  // sink->TraceConnect("Rx", MakeCallback(&DropPacket));
 
   // Connect PacketSinkRx to the PacketSink::Rx trace source
-  // PacketSinkDisconnected sink1 = DynamicCast<PacketSinkDisconnected>(apps.Get(0));
+  // Ptr<PacketSink> sink1 = sinkApps.Get(0)->GetObject<PacketSink>();
+  // // sink1->AddNodeToDisconnect(clientNodes.Get(0));
+  // // Disconnect nodes
+  // for (int i = 0; i < nodesToDisconnect; i++) {
+  //   DisconnectRandomNode(sink1);
+  // }
   // sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
-  apps.Start(Seconds(0.0));
-  apps.Stop(Seconds(stopTime));
+  // sinkApps.Start(Seconds(0.0));
+  // sinkApps.Stop(Seconds(stopTime));
 
   // ------------------------------------------------------------
   // -- Run the simulation
