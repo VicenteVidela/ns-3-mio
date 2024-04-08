@@ -1,24 +1,26 @@
 #include "disconnections.h"
 
-NodeContainer clientNodes;             // Container for client nodes
-std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
+NodeContainer clientNodes;                            // Container for client nodes
+std::set<uint32_t> disconnectedNodes;                 // Set to store disconnected nodes
 
-// Define a callback function for packet reception
-bool DropPacket(Ptr<const Packet> packet, const Address& from) {
-    // Simply discard the received packet
-    std::cout << "Packet dropped upon reception" << std::endl;
-    return false;
+// Function to handle reception at each sink
+void SinkRx(Ptr<const Packet> packet, const Address &addr) {
+  // This function will be called whenever a packet is received at any sink
+  // if (disconnectedNodes.find(nodeId) != disconnectedNodes.end()){
+  //   std::cout << "Packet dropped at " << nodeId << std::endl;
+  // }
+  std::cout << "Packet received at sink with address " << addr << std::endl;
 }
 
 // Function to disconnect a random node
-void DisconnectRandomNode(Ptr<PacketSink> sinkDisconnected) {
+void DisconnectRandomNode() {
   // Check if all nodes are already disconnected
   uint32_t totalDisconnectedNodes = disconnectedNodes.size();
   if (totalDisconnectedNodes >= clientNodes.GetN()) {
     return;
   }
   // Get a random node index
-  uint32_t randomIndex = rand() % clientNodes.GetN();
+  uint32_t randomIndex = 17;
 
   // Check if the node is already disconnected
   while (disconnectedNodes.find(randomIndex) != disconnectedNodes.end()) {

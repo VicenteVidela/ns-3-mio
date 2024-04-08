@@ -13,8 +13,8 @@ extern NodeContainer clientNodes;             // Container for client nodes
 extern std::set<uint32_t> disconnectedNodes;  // Set to store disconnected nodes
 
 // Function to disconnect a random node
-void DisconnectRandomNode(Ptr<PacketSink> sinkDisconnected);
-// Define a callback function for packet reception
-bool DropPacket(Ptr<const Packet> packet, const Address& from);
+void DisconnectRandomNode();
+// Function to handle reception at each sink
+void SinkRx(Ptr<const Packet> packet, const Address &addr);
 
 #endif
