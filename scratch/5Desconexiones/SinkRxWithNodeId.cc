@@ -6,7 +6,7 @@ void SinkRxWithNodeId::operator()(ns3::Ptr<const ns3::Packet> packet, const ns3:
   if (disconnectedNodes.find(m_nodeId) != disconnectedNodes.end()){
     std::cout << "Packet dropped at " << m_nodeId << std::endl;
   }
-  else {
+  else if (m_nodeId != 17) {
     std::cout << "Packet received at " << m_nodeId << std::endl;
   }
 }

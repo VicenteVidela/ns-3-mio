@@ -1,7 +1,5 @@
 #include "meassureFunctions.h"
 #include "disconnections.h"
-#include "PacketSinkDisconnected.h"
-#include "SinkRxWithNodeId.h"
 
 using namespace ns3;
 
@@ -14,14 +12,14 @@ float stopTime = 60;                                      // Simulation stop tim
 int timeInterval = 30;                                    // Time interval for printing statistics
 int timeIntervalInit = 10;                                // Initial time for printing statistics
 StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("100Kbps");         // Data rate for point-to-point links
+StringValue p2pDataRate = StringValue("10Gbps");         // Data rate for point-to-point links
 StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1500);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 int nodesToDisconnect = 10;                               // Number of nodes to disconnect
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.00001);             // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.0000);             // Error rate for package loss
 
 // Directory for topology files
 std::string topologyDirectory = "scratch/topologies/";
@@ -51,7 +49,7 @@ int main(int argc, char* argv[]) {
   topoHelp.SetFileType(format);
   Ptr<TopologyReader> inFile = topoHelp.GetTopologyReader();
 
-  NodeContainer nodes;
+  // NodeContainer nodes;
 
   // Read the topology from the input file
   if (inFile) {
@@ -64,7 +62,9 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
-  std::cout << "Number of nodes: " << nodes.GetN() << std::endl;
+  uint32_t totalNodes = nodes.GetN();
+
+  std::cout << "Number of nodes: " << totalNodes << std::endl;
 
   // ------------------------------------------------------------
   // -- Create nodes and network stacks
@@ -92,6 +92,26 @@ int main(int argc, char* argv[]) {
   // Set error rate
   em->SetAttribute("ErrorRate", errorRate);
 
+  // Disconnect nodes
+  for (int i = 0; i < nodesToDisconnect; i++) {
+    DisconnectRandomNode();
+  }
+
+  // Create a set of disconnected links
+  // std::set<int> disconnectedLinks;
+  // for (uint32_t i=0; i<totalNodes; i++) {
+  //   if (disconnectedNodes.find(i) != disconnectedNodes.end()) {
+  //     Ptr<Node> node = nodes.Get(i);
+  //     for (int j=0; j<totlinks; j++) {
+  //       if (nc[j].Get(0) == node || nc[j].Get(1) == node) {
+  //         disconnectedLinks.insert(j);
+  //       }
+  //     }
+  //   }
+  // }
+
+
+  // Create point-to-point links between nodes
   auto ndc = new NetDeviceContainer[totlinks];
   PointToPointHelper p2p;
   for (int i = 0; i < totlinks; i++) {
@@ -99,6 +119,13 @@ int main(int argc, char* argv[]) {
     p2p.SetChannelAttribute("Delay", p2pDelay);
     p2p.SetDeviceAttribute("DataRate", p2pDataRate);
     p2p.SetDeviceAttribute("ReceiveErrorModel", PointerValue(em));
+
+    // Set the queue to 0 for disconnected nodes links
+    // if (disconnectedLinks.find(i) != disconnectedLinks.end()) {
+    //   std::cout << "Setting queue size to 0 for link " << i << std::endl;
+    //   p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("0p"));
+    // }
+
     // Install net devices for point-to-point communication
     ndc[i] = p2p.Install(nc[i]);
   }
@@ -111,7 +138,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Select a random server node
-  // uint32_t totalNodes = nodes.GetN();
+
   // Ptr<UniformRandomVariable> unifRandom = CreateObject<UniformRandomVariable>();
   // unifRandom->SetAttribute("Min", DoubleValue(0));
   // unifRandom->SetAttribute("Max", DoubleValue(totalNodes - 1));
@@ -135,11 +162,11 @@ int main(int argc, char* argv[]) {
   ApplicationContainer sinkApps;
   ApplicationContainer onOffApps;
 
+
+
   // Create a packet sink for each node to measure packet reception
-  for (unsigned int i = 0; i < nodes.GetN(); i++) {
+  for (unsigned int i = 0; i < totalNodes; i++) {
     Ptr<Node> clientNode = nodes.Get(i);
-    // Add client nodes to the container
-    clientNodes.Add(clientNode);
 
     // Get the IPv4 address of the client node
     Ptr<Ipv4> ipv4Client = clientNode->GetObject<Ipv4>();
@@ -154,7 +181,7 @@ int main(int argc, char* argv[]) {
     onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
 
     // Choose the next node as destination
-    uint32_t destNodeIndex = (i + 1) % nodes.GetN();
+    uint32_t destNodeIndex = (i + 1) % totalNodes;
     AddressValue remoteAddress(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9));
     onoff.SetAttribute("Remote", remoteAddress);
 
@@ -171,24 +198,44 @@ int main(int argc, char* argv[]) {
 
     // Connect the custom callback function to the PacketSink's Rx trace
     Ptr<PacketSink> sinkPtr = DynamicCast<PacketSink>(sinkApp.Get(0));
-    // Create a SinkRxWithNodeId object for this node
-    SinkRxWithNodeId sinkRxWithNodeId(clientNode->GetId());
+    // // Create a SinkRxWithNodeId object for this node
+    // SinkRxWithNodeId sinkRxWithNodeId(i);
     // Connect SinkRxWithNodeId object to the trace source
-    sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRxWithNodeId::operator(), &sinkRxWithNodeId));
+    // if (disconnectedNodes.find(i) != disconnectedNodes.end()) sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&disconnectedSinkRx));
+    // else sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
+
+    // sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRxWithNodeId::operator(), &sinkRxWithNodeId));
     // sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
+
+    if (disconnectedNodes.find(i) == disconnectedNodes.end()) {
+      // Iterate over net devices of the client node
+      for (uint32_t j = 0; j < clientNode->GetNDevices(); ++j) {
+        Ptr<NetDevice> dev = clientNode->GetDevice(j);
+        Ptr<PointToPointNetDevice> p2pDev = DynamicCast<PointToPointNetDevice>(dev);
+        if (p2pDev) {
+            // Connect trace only for point-to-point devices
+            Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
+                                          "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
+                                          "/$ns3::PointToPointNetDevice/PhyRxEnd",
+                                          MakeCallback(&nodeRxTrace));
+        }
+      }
+    }
 
     // Add the sink application to the container
     sinkApps.Add(sinkApp);
   }
 
+  // Connect trace to transmited packets
+  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
+  // Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyRxEnd", MakeCallback(&nodeRxTrace));
+
+  // Start the sink and OnOff applications
   sinkApps.Start(Seconds(0.0));
   sinkApps.Stop(Seconds(stopTime));
 
   onOffApps.Start(Seconds(0.0));
   onOffApps.Stop(Seconds(stopTime));
-
-  // Install flow monitor on all nodes
-  monitor = flowmon.InstallAll();
 
   // ------------------------------------------------------------
   // -- Receive packets at sink
@@ -205,10 +252,7 @@ int main(int argc, char* argv[]) {
   // Connect PacketSinkRx to the PacketSink::Rx trace source
   // Ptr<PacketSink> sink1 = sinkApps.Get(0)->GetObject<PacketSink>();
   // // sink1->AddNodeToDisconnect(clientNodes.Get(0));
-  // // Disconnect nodes
-  // for (int i = 0; i < nodesToDisconnect; i++) {
-  //   DisconnectRandomNode();
-  // }
+
   // sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
   // sinkApps.Start(Seconds(0.0));

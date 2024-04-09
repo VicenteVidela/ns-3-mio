@@ -13,12 +13,15 @@
 #include "ns3/random-variable-stream.h"
 #include "ns3/flow-monitor-helper.h"
 #include "ns3/ipv4-flow-classifier.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/queue.h"
 
 #include <iostream>
 #include <numeric>
 #include <fstream>
 
 using namespace ns3;
+
 
 // Control flags
 extern bool print;      // Flag for printing information
@@ -41,11 +44,22 @@ extern uint64_t totalReceivedBytes;       // Total received bytes
 extern uint64_t totalTransmittedPackets;  // Total transmitted packets
 extern uint64_t totalReceivedPackets;     // Total received packets
 
+extern uint32_t receivedPacketCount;    // Number of packets received
+extern uint32_t transmitedPacketCount;  // Number of packets transmitted
+
 // Flow monitor
 extern FlowMonitorHelper flowmon;
 extern Ptr<FlowMonitor> monitor;
 
 // Function to print throughput and packet statistics at the end of the simulation
 void PrintMeasures(int nodesDisconnected, std::ostream& output);
+
+// Function to handle TCP packet events
+void nodeTxTrace(Ptr<const Packet> packet);
+
+// Function to handle reception at each sink
+void nodeRxTrace(Ptr<const Packet> packet);
+// Function for dropping packets at disconnected sinks
+void disconnectednodeRxTrace(Ptr<const Packet> packet);
 
 #endif
