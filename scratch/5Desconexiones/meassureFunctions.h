@@ -11,7 +11,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <numeric>
 
 using namespace ns3;
 
@@ -26,7 +26,7 @@ extern uint32_t transmitedPacketCount;  // Number of packets transmitted
 
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(int nodesDisconnected, std::ostream& output);
+void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime);
 
 // Function to handle TCP packet events
 void nodeTxTrace(Ptr<const Packet> packet);

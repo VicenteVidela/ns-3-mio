@@ -8,14 +8,31 @@ std::vector<double> jitters;           // Vector to store jitters for each packe
 uint32_t receivedPacketCount = 0;
 uint32_t transmitedPacketCount = 0;
 
-
-// Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(int nodesDisconnected, std::ostream& output) {
-  // Print the number of connected nodes
+// Function to print statistics at the end of the simulation
+void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime) {
+  // Print the number of disconnected nodes
   output << "Nodes disconnected: " << nodesDisconnected << std::endl;
 
-  output << "Total packets transmitted: " << transmitedPacketCount << std::endl;
-  output << "Total packets received: " << receivedPacketCount << std::endl;
+  // output << "Total packets transmitted: " << transmitedPacketCount << std::endl;
+  // output << "Total packets received: " << receivedPacketCount << std::endl;
+
+  // Calculate and print average throughput
+  double averageThroughput = static_cast<double>(receivedPacketCount) / stopTime;
+  output << "Average throughput: " << averageThroughput << " packets/sec" << std::endl;
+
+  // Calculate and print packet loss percentage
+  double packetLossPercentage = 100.0 * (1.0 - static_cast<double>(receivedPacketCount) / transmitedPacketCount);
+  output << "Packet loss percentage: " << packetLossPercentage << "%" << std::endl;
+
+  // Calculate and print average delay
+  double totalDelay = std::accumulate(latencies.begin(), latencies.end(), 0.0);
+  double averageDelay = totalDelay * 1000/ latencies.size();
+  output << "Average delay: " << averageDelay << " ms" << std::endl;
+
+  // Calculate and print average jitter
+  double totalJitter = std::accumulate(jitters.begin(), jitters.end(), 0.0);
+  double averageJitter = totalJitter * 1000 / jitters.size();
+  output << "Average jitter: " << averageJitter << " ms" << std::endl;
 
   // Print an empty line for better readability
   output << std::endl;

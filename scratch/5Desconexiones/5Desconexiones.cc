@@ -6,14 +6,14 @@ float stopTime = 60;                                      // Simulation stop tim
 int timeInterval = 30;                                    // Time interval for printing statistics
 int timeIntervalInit = 10;                                // Initial time for printing statistics
 StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("10Gbps");         // Data rate for point-to-point links
+StringValue p2pDataRate = StringValue("10Mbps");          // Data rate for point-to-point links
 StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1500);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
 int nodesToDisconnect = 10;                               // Number of nodes to disconnect
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.0000);             // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.0001);              // Error rate for package loss
 
 // Directory for topology file
 std::string dataFile = "5Desconexiones.dat";
@@ -117,27 +117,31 @@ int main(int argc, char* argv[]) {
     Ipv4InterfaceAddress iaddrClient = ipv4Client->GetAddress(1, 0);
     Ipv4Address ipv4AddrClient = iaddrClient.GetLocal();
 
-    // Set up OnOff applications for packet transmission using TCP
-    OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
-    onoff.SetAttribute("DataRate", onoffDataRate);
-    onoff.SetAttribute("PacketSize", onoffPacketSize);
-    onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
-    onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
-
-    // Choose the next node as destination
-    uint32_t destNodeIndex = (i + 1) % totalNodes;
-    AddressValue remoteAddress(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9));
-    onoff.SetAttribute("Remote", remoteAddress);
-
-    // Install OnOff applications on client nodes
-    ApplicationContainer onOffApp = onoff.Install(clientNode);
-    onOffApps.Add(onOffApp);
-
     // Install sinks
     PacketSinkHelper sink("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
     ApplicationContainer sinkApp = sink.Install(clientNode);
+    // Add the sink application to the container
+    sinkApps.Add(sinkApp);
 
+    // Add packet send and connect callback only to connected nodes
     if (disconnectedNodes.find(i) == disconnectedNodes.end()) {
+      // Set up OnOff applications for packet transmission using TCP
+      OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
+      onoff.SetAttribute("DataRate", onoffDataRate);
+      onoff.SetAttribute("PacketSize", onoffPacketSize);
+      onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+      onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+
+      // Choose the next node as destination
+      uint32_t destNodeIndex = (i + 1) % totalNodes;
+      AddressValue remoteAddress(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9));
+      onoff.SetAttribute("Remote", remoteAddress);
+
+      // Install OnOff applications on client nodes
+      ApplicationContainer onOffApp = onoff.Install(clientNode);
+      onOffApps.Add(onOffApp);
+
+      // Connect trace to received packets
       // Iterate over net devices of the client node
       for (uint32_t j = 0; j < clientNode->GetNDevices(); ++j) {
         Ptr<NetDevice> dev = clientNode->GetDevice(j);
@@ -152,8 +156,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    // Add the sink application to the container
-    sinkApps.Add(sinkApp);
+
   }
 
   // Connect trace to transmited packets
@@ -172,7 +175,7 @@ int main(int argc, char* argv[]) {
   // Schedule reset stats
   outputFile.open(dataDirectory + dataFile, std::ios::app);
   Simulator::Schedule(Seconds(stopTime), &PrintMeasures, nodesToDisconnect,
-                      std::ref(outputFile.is_open()? outputFile : std::cout));
+                      std::ref(outputFile.is_open()? outputFile : std::cout), stopTime);
 
   // Stop simulation at stop time
   Simulator::Stop(Seconds(stopTime+1));
