@@ -1,10 +1,4 @@
-#include "meassureFunctions.h"
-#include "disconnections.h"
-
-using namespace ns3;
-
-// Control flags
-bool detailedPrinting = false;    // Flag for detailed printing
+#include "main.h"
 
 // Simulation parameters
 float stopSendingTime = 60;                               // Time to stop sending packets
@@ -21,13 +15,8 @@ int nodesToDisconnect = 10;                               // Number of nodes to 
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.0000);             // Error rate for package loss
 
-// Directory for topology files
-std::string topologyDirectory = "scratch/topologies/";
-
-// Directory for data files
-std::string dataDirectory = "data/";
+// Directory for topology file
 std::string dataFile = "5Desconexiones.dat";
-std::ofstream outputFile;
 
 // Default values for command line parameters
 std::string format("Inet");
@@ -39,17 +28,11 @@ int main(int argc, char* argv[]) {
   uint32_t seed = static_cast<uint32_t>(time(NULL)); // Replace with your desired seed value 12345
   SeedManager::SetSeed(seed);
 
-  // ------------------------------------------------------------
-  // -- Read topology data.
-  // ------------------------------------------------------------
-
-  // Pick a topology reader based on the requested format.
+  // Read topology data.
   TopologyReaderHelper topoHelp;
   topoHelp.SetFileName(topologyDirectory + input);
   topoHelp.SetFileType(format);
   Ptr<TopologyReader> inFile = topoHelp.GetTopologyReader();
-
-  // NodeContainer nodes;
 
   // Read the topology from the input file
   if (inFile) {
@@ -66,10 +49,7 @@ int main(int argc, char* argv[]) {
 
   std::cout << "Number of nodes: " << totalNodes << std::endl;
 
-  // ------------------------------------------------------------
-  // -- Create nodes and network stacks
-  // ------------------------------------------------------------
-
+  // Create nodes and network stacks
   InternetStackHelper stack;
 
   Ipv4NixVectorHelper nixRouting;
@@ -97,20 +77,6 @@ int main(int argc, char* argv[]) {
     DisconnectRandomNode();
   }
 
-  // Create a set of disconnected links
-  // std::set<int> disconnectedLinks;
-  // for (uint32_t i=0; i<totalNodes; i++) {
-  //   if (disconnectedNodes.find(i) != disconnectedNodes.end()) {
-  //     Ptr<Node> node = nodes.Get(i);
-  //     for (int j=0; j<totlinks; j++) {
-  //       if (nc[j].Get(0) == node || nc[j].Get(1) == node) {
-  //         disconnectedLinks.insert(j);
-  //       }
-  //     }
-  //   }
-  // }
-
-
   // Create point-to-point links between nodes
   auto ndc = new NetDeviceContainer[totlinks];
   PointToPointHelper p2p;
@@ -119,12 +85,6 @@ int main(int argc, char* argv[]) {
     p2p.SetChannelAttribute("Delay", p2pDelay);
     p2p.SetDeviceAttribute("DataRate", p2pDataRate);
     p2p.SetDeviceAttribute("ReceiveErrorModel", PointerValue(em));
-
-    // Set the queue to 0 for disconnected nodes links
-    // if (disconnectedLinks.find(i) != disconnectedLinks.end()) {
-    //   std::cout << "Setting queue size to 0 for link " << i << std::endl;
-    //   p2p.SetQueue("ns3::DropTailQueue", "MaxSize", StringValue("0p"));
-    // }
 
     // Install net devices for point-to-point communication
     ndc[i] = p2p.Install(nc[i]);
@@ -137,21 +97,7 @@ int main(int argc, char* argv[]) {
     address.NewNetwork();
   }
 
-  // Select a random server node
-
-  // Ptr<UniformRandomVariable> unifRandom = CreateObject<UniformRandomVariable>();
-  // unifRandom->SetAttribute("Min", DoubleValue(0));
-  // unifRandom->SetAttribute("Max", DoubleValue(totalNodes - 1));
-  // unsigned int randomServerNumber = unifRandom->GetInteger(0, totalNodes - 1);
-  // Ptr<Node> randomServerNode = nodes.Get(randomServerNumber);
-  // Ptr<Ipv4> ipv4Server = randomServerNode->GetObject<Ipv4>();
-  // Ipv4InterfaceAddress iaddrServer = ipv4Server->GetAddress(1, 0);
-  // Ipv4Address ipv4AddrServer = iaddrServer.GetLocal();
-
-  // ------------------------------------------------------------
-  // -- Send around packets
-  // ------------------------------------------------------------
-
+  // Send around packets
   // Use Congestion Control
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", CCAlgorithm);
 
@@ -161,8 +107,6 @@ int main(int argc, char* argv[]) {
   // Create a container to hold all sink applications
   ApplicationContainer sinkApps;
   ApplicationContainer onOffApps;
-
-
 
   // Create a packet sink for each node to measure packet reception
   for (unsigned int i = 0; i < totalNodes; i++) {
@@ -185,7 +129,6 @@ int main(int argc, char* argv[]) {
     AddressValue remoteAddress(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9));
     onoff.SetAttribute("Remote", remoteAddress);
 
-
     // Install OnOff applications on client nodes
     ApplicationContainer onOffApp = onoff.Install(clientNode);
     onOffApps.Add(onOffApp);
@@ -193,19 +136,6 @@ int main(int argc, char* argv[]) {
     // Install sinks
     PacketSinkHelper sink("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
     ApplicationContainer sinkApp = sink.Install(clientNode);
-    // sinkApp.Start(Seconds(0.0));
-    // sinkApp.Stop(Seconds(stopTime));
-
-    // Connect the custom callback function to the PacketSink's Rx trace
-    Ptr<PacketSink> sinkPtr = DynamicCast<PacketSink>(sinkApp.Get(0));
-    // // Create a SinkRxWithNodeId object for this node
-    // SinkRxWithNodeId sinkRxWithNodeId(i);
-    // Connect SinkRxWithNodeId object to the trace source
-    // if (disconnectedNodes.find(i) != disconnectedNodes.end()) sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&disconnectedSinkRx));
-    // else sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
-
-    // sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRxWithNodeId::operator(), &sinkRxWithNodeId));
-    // sinkPtr->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
 
     if (disconnectedNodes.find(i) == disconnectedNodes.end()) {
       // Iterate over net devices of the client node
@@ -228,7 +158,6 @@ int main(int argc, char* argv[]) {
 
   // Connect trace to transmited packets
   Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
-  // Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyRxEnd", MakeCallback(&nodeRxTrace));
 
   // Start the sink and OnOff applications
   sinkApps.Start(Seconds(0.0));
@@ -237,46 +166,13 @@ int main(int argc, char* argv[]) {
   onOffApps.Start(Seconds(0.0));
   onOffApps.Stop(Seconds(stopTime));
 
-  // ------------------------------------------------------------
-  // -- Receive packets at sink
-  // ------------------------------------------------------------
-
-  // Set up packet sink for receiving packets at the random server node
-  // PacketSinkHelper sinkHelper("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrServer, 9)));
-  // ApplicationContainer sinkApps = sinkHelper.Install(randomServerNode);
-
-  // // Connect the custom callback function to the PacketSink's Rx trace
-  // Ptr<PacketSink> sink = DynamicCast<PacketSink>(sinkApps.Get(0));
-  // sink->TraceConnect("Rx", MakeCallback(&DropPacket));
-
-  // Connect PacketSinkRx to the PacketSink::Rx trace source
-  // Ptr<PacketSink> sink1 = sinkApps.Get(0)->GetObject<PacketSink>();
-  // // sink1->AddNodeToDisconnect(clientNodes.Get(0));
-
-  // sink1->TraceConnectWithoutContext("Rx", MakeCallback(&SinkRx));
-
-  // sinkApps.Start(Seconds(0.0));
-  // sinkApps.Stop(Seconds(stopTime));
-
-  // ------------------------------------------------------------
-  // -- Run the simulation
-  // ------------------------------------------------------------
-
+  // Run the simulation
   std::cout << "Run Simulation." << std::endl;
 
   // Schedule reset stats
-  // Simulator::Schedule(Seconds(timeIntervalInit), []() { monitor->ResetAllStats(); });
-
-  // Open output file to print out measures
   outputFile.open(dataDirectory + dataFile, std::ios::app);
   Simulator::Schedule(Seconds(stopTime), &PrintMeasures, nodesToDisconnect,
                       std::ref(outputFile.is_open()? outputFile : std::cout));
-  // for (i=timeIntervalInit+timeInterval; i<=stopTime; i+=timeInterval) {
-  //   Simulator::Schedule(Seconds(i), &DisconnectRandomNode);                               // Schedule node disconnection
-  //   Simulator::Schedule(Seconds(i), &PrintMeasures, detailedPrinting,
-  //                       std::ref(outputFile.is_open()? outputFile : std::cout));          // Schedule measures printing
-  // }
-
 
   // Stop simulation at stop time
   Simulator::Stop(Seconds(stopTime+1));

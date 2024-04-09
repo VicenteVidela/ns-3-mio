@@ -1,7 +1,5 @@
 #include "meassureFunctions.h"
 
-using namespace ns3;
-
 std::map<uint32_t, Time> transmissionTimes; // Map to store transmission times for each packet
 std::vector<double> latencies;         // Vector to store latencies for each packet
 Time lastArrivalTime;                  // Time of last packet arrival
@@ -22,8 +20,6 @@ void PrintMeasures(int nodesDisconnected, std::ostream& output) {
   // Print an empty line for better readability
   output << std::endl;
 }
-
-
 
 // Function to handle transmited packets
 void nodeTxTrace(Ptr<const Packet> packet) {
