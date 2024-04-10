@@ -1168,9 +1168,9 @@ class PowerRateAdaptationTestSuite : public TestSuite
 };
 
 PowerRateAdaptationTestSuite::PowerRateAdaptationTestSuite()
-    : TestSuite("wifi-power-rate-adaptation", UNIT)
+    : TestSuite("wifi-power-rate-adaptation", Type::UNIT)
 {
-    AddTestCase(new PowerRateAdaptationTest, TestCase::QUICK);
+    AddTestCase(new PowerRateAdaptationTest, TestCase::Duration::QUICK);
 }
 
 static PowerRateAdaptationTestSuite g_powerRateAdaptationTestSuite; ///< the test suite

@@ -806,11 +806,12 @@ ChannelAccessManagerTest<TxopType>::DoAccessRequest(uint64_t txTime,
                                                     uint64_t expectedGrantTime,
                                                     Ptr<TxopTest<TxopType>> state)
 {
-    if (m_ChannelAccessManager->NeedBackoffUponAccess(state))
+    auto hadFramesToTransmit = state->HasFramesToTransmit(SINGLE_LINK_OP_ID);
+    state->QueueTx(txTime, expectedGrantTime);
+    if (m_ChannelAccessManager->NeedBackoffUponAccess(state, hadFramesToTransmit, true))
     {
         state->GenerateBackoff(0);
     }
-    state->QueueTx(txTime, expectedGrantTime);
     m_ChannelAccessManager->RequestAccess(state);
 }
 
@@ -1537,9 +1538,9 @@ class TxopTestSuite : public TestSuite
 };
 
 TxopTestSuite::TxopTestSuite()
-    : TestSuite("wifi-devices-dcf", UNIT)
+    : TestSuite("wifi-devices-dcf", Type::UNIT)
 {
-    AddTestCase(new ChannelAccessManagerTest<Txop>, TestCase::QUICK);
+    AddTestCase(new ChannelAccessManagerTest<Txop>, TestCase::Duration::QUICK);
 }
 
 static TxopTestSuite g_dcfTestSuite;
@@ -1557,9 +1558,9 @@ class QosTxopTestSuite : public TestSuite
 };
 
 QosTxopTestSuite::QosTxopTestSuite()
-    : TestSuite("wifi-devices-edca", UNIT)
+    : TestSuite("wifi-devices-edca", Type::UNIT)
 {
-    AddTestCase(new ChannelAccessManagerTest<QosTxop>, TestCase::QUICK);
+    AddTestCase(new ChannelAccessManagerTest<QosTxop>, TestCase::Duration::QUICK);
 }
 
 static QosTxopTestSuite g_edcaTestSuite;
@@ -1577,9 +1578,9 @@ class ChannelAccessManagerTestSuite : public TestSuite
 };
 
 ChannelAccessManagerTestSuite::ChannelAccessManagerTestSuite()
-    : TestSuite("wifi-channel-access-manager", UNIT)
+    : TestSuite("wifi-channel-access-manager", Type::UNIT)
 {
-    AddTestCase(new LargestIdlePrimaryChannelTest, TestCase::QUICK);
+    AddTestCase(new LargestIdlePrimaryChannelTest, TestCase::Duration::QUICK);
 }
 
 static ChannelAccessManagerTestSuite g_camTestSuite;

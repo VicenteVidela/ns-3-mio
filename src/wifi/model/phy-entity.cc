@@ -37,6 +37,9 @@
 
 #include <algorithm>
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(m_wifiPhy)
+
 namespace ns3
 {
 
@@ -709,31 +712,44 @@ PhyEntity::EndReceivePayload(Ptr<Event> event)
     NS_ASSERT(signalNoiseIt != m_signalNoiseMap.end());
     auto statusPerMpduIt = m_statusPerMpduMap.find({ppdu->GetUid(), staId});
     NS_ASSERT(statusPerMpduIt != m_statusPerMpduMap.end());
+    // store per-MPDU status, which is cleared by the call to DoEndReceivePayload below
+    auto statusPerMpdu = statusPerMpduIt->second;
 
-    if (std::count(statusPerMpduIt->second.begin(), statusPerMpduIt->second.end(), true))
+    RxSignalInfo rxSignalInfo;
+    bool success;
+
+    if (std::count(statusPerMpdu.cbegin(), statusPerMpdu.cend(), true))
     {
         // At least one MPDU has been successfully received
         m_wifiPhy->NotifyMonitorSniffRx(psdu,
                                         m_wifiPhy->GetFrequency(),
                                         txVector,
                                         signalNoiseIt->second,
-                                        statusPerMpduIt->second,
+                                        statusPerMpdu,
                                         staId);
-        RxSignalInfo rxSignalInfo;
         rxSignalInfo.snr = snr;
         rxSignalInfo.rssi = signalNoiseIt->second.signal; // same information for all MPDUs
-        RxPayloadSucceeded(psdu, rxSignalInfo, txVector, staId, statusPerMpduIt->second);
+        RxPayloadSucceeded(psdu, rxSignalInfo, txVector, staId, statusPerMpdu);
         m_wifiPhy->m_previouslyRxPpduUid =
             ppdu->GetUid(); // store UID only if reception is successful (because otherwise trigger
                             // won't be read by MAC layer)
+        success = true;
     }
     else
     {
         RxPayloadFailed(psdu, snr, txVector);
+        success = false;
     }
 
     DoEndReceivePayload(ppdu);
     m_wifiPhy->SwitchMaybeToCcaBusy(ppdu);
+
+    // notify the MAC through the PHY state helper as the last action. Indeed, the notification
+    // of the RX end may lead the MAC to request a PHY state change (e.g., channel switch, sleep).
+    // Hence, all actions the PHY has to perform when RX ends should be completed before
+    // notifying the MAC.
+    success ? m_state->NotifyRxPsduSucceeded(psdu, rxSignalInfo, txVector, staId, statusPerMpdu)
+            : m_state->NotifyRxPsduFailed(psdu, snr);
 }
 
 void
@@ -744,7 +760,6 @@ PhyEntity::RxPayloadSucceeded(Ptr<const WifiPsdu> psdu,
                               const std::vector<bool>& statusPerMpdu)
 {
     NS_LOG_FUNCTION(this << *psdu << txVector);
-    m_state->NotifyRxPsduSucceeded(psdu, rxSignalInfo, txVector, staId, statusPerMpdu);
     m_state->SwitchFromRxEndOk();
 }
 
@@ -752,7 +767,6 @@ void
 PhyEntity::RxPayloadFailed(Ptr<const WifiPsdu> psdu, double snr, const WifiTxVector& txVector)
 {
     NS_LOG_FUNCTION(this << *psdu << txVector << snr);
-    m_state->NotifyRxPsduFailed(psdu, snr);
     m_state->SwitchFromRxEndError();
 }
 
@@ -860,7 +874,11 @@ PhyEntity::CreateInterferenceEvent(Ptr<const WifiPpdu> ppdu,
                                    RxPowerWattPerChannelBand& rxPower,
                                    bool isStartHePortionRxing /* = false */)
 {
-    return m_wifiPhy->m_interference->Add(ppdu, duration, rxPower, isStartHePortionRxing);
+    return m_wifiPhy->m_interference->Add(ppdu,
+                                          duration,
+                                          rxPower,
+                                          m_wifiPhy->GetCurrentFrequencyRange(),
+                                          isStartHePortionRxing);
 }
 
 void
@@ -927,8 +945,9 @@ PhyEntity::StartPreambleDetectionPeriod(Ptr<Event> event)
 {
     NS_LOG_FUNCTION(this << *event);
     NS_LOG_DEBUG("Sync to signal (power=" << WToDbm(GetRxPowerWForPpdu(event)) << "dBm)");
-    m_wifiPhy->m_interference
-        ->NotifyRxStart(); // We need to notify it now so that it starts recording events
+    m_wifiPhy->m_interference->NotifyRxStart(
+        m_wifiPhy->GetCurrentFrequencyRange()); // We need to notify it now so that it starts
+                                                // recording events
     m_endPreambleDetectionEvents.push_back(
         Simulator::Schedule(m_wifiPhy->GetPreambleDetectionDuration(),
                             &PhyEntity::EndPreambleDetectionPeriod,
@@ -977,7 +996,7 @@ PhyEntity::EndPreambleDetectionPeriod(Ptr<Event> event)
         m_wifiPhy->m_interference->NotifyRxEnd(maxEvent->GetStartTime(),
                                                m_wifiPhy->GetCurrentFrequencyRange());
         // Make sure InterferenceHelper keeps recording events
-        m_wifiPhy->m_interference->NotifyRxStart();
+        m_wifiPhy->m_interference->NotifyRxStart(m_wifiPhy->GetCurrentFrequencyRange());
         return;
     }
 
@@ -1034,7 +1053,7 @@ PhyEntity::EndPreambleDetectionPeriod(Ptr<Event> event)
         }
 
         // Make sure InterferenceHelper keeps recording events
-        m_wifiPhy->m_interference->NotifyRxStart();
+        m_wifiPhy->m_interference->NotifyRxStart(m_wifiPhy->GetCurrentFrequencyRange());
 
         m_wifiPhy->NotifyRxBegin(GetAddressedPsduInPpdu(m_wifiPhy->m_currentEvent->GetPpdu()),
                                  m_wifiPhy->m_currentEvent->GetRxPowerWPerBand());

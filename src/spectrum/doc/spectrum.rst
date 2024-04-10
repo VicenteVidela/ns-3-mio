@@ -292,7 +292,11 @@ Here are some notes on how the spectrum module is expected to be used.
    type it can attempt to receive. If not, the signal is normally
    expected to be considered as interference.
 
-
+*  Many propagation loss and delay models can be added to these channels.
+   The base class ``SpectrumChannel`` provides an ``AssignStreams()`` method
+   to allow the deterministic configuration of random variable stream numbers
+   with a single API call.  See the ns-3 Manual chapter on random variables
+   for more information.
 
 
 Helpers
@@ -739,7 +743,7 @@ returns a 3D long term channel matrix whose dimensions are the number of the
 receive antenna ports, the number transmit antenna ports, and
 the number of clusters. When multiple ports are being configured note that
 the sub-array partition model is adopted for TXRU virtualization, as described
-in Section 5.2.2 of 3GPP TR 36.897[TR36897]_, and so equal beam weights are used for all the ports.
+in Section 5.2.2 of 3GPP TR 36.897 [TR36897]_, and so equal beam weights are used for all the ports.
 Support of the full-connection model for TXRU virtualization would need extensions.
 To reduce the computational load, the long term
 components associated to the different channels are stored in the m_longTermMap
@@ -764,7 +768,7 @@ The value of :math:`v_{scatt}` can be configured using the attribute "vScatt"
 (by default it is set to 0, so that the scattering effect is not considered).
 Function GenSpectrumChannelMatrix generates the received PSD for each pair of
 the transmit and receive antenna ports. It creates a frequency domain 3D spectrum
-channel matrix whose dimensions are the number of receive antena ports,
+channel matrix whose dimensions are the number of receive antenna ports,
 the number of transmit antenna ports, and the number of resource blocks.
 Finally, the frequency domain 3D spectrum channel matrix is used to obtain the
 received PSD. In case of multiple ports at the transmitter the PSD is calculated
@@ -809,8 +813,8 @@ presence of obstacles, such as trees, cars or humans, at the level
 of a single cluster. This differs from a complete blockage, which
 would result in an LOS to NLOS transition. Therefore, when this
 feature is enabled, an additional attenuation is added to certain
-clusters, depending on their angle of arrival. There are two possi-
-ble methods for the computation of the additional attenuation, i.e.,
+clusters, depending on their angle of arrival. There are two possible
+methods for the computation of the additional attenuation, i.e.,
 stochastic (Model A) and geometric (Model B). In this work, we
 used the implementation provided by [Zhang]_, which
 uses the stochastic method. In particular, the model is implemented by the

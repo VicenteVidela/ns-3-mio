@@ -47,6 +47,9 @@
 
 #include <algorithm>
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(Ptr(this))
+
 namespace ns3
 {
 
@@ -88,9 +91,15 @@ WifiPhy::GetTypeId()
                 "Note that the channel width can be left unspecified (0) if the channel "
                 "number uniquely identify a frequency channel for the given standard and band.",
                 StringValue("{0, 0, BAND_UNSPECIFIED, 0}"),
-                MakeTupleAccessor<UintegerValue, UintegerValue, EnumValue, UintegerValue>(
-                    (void(WifiPhy::*)(const ChannelTuple&)) & WifiPhy::SetOperatingChannel),
-                MakeTupleChecker<UintegerValue, UintegerValue, EnumValue, UintegerValue>(
+                MakeTupleAccessor<UintegerValue,
+                                  UintegerValue,
+                                  EnumValue<WifiPhyBand>,
+                                  UintegerValue>((void(WifiPhy::*)(const ChannelTuple&)) &
+                                                 WifiPhy::SetOperatingChannel),
+                MakeTupleChecker<UintegerValue,
+                                 UintegerValue,
+                                 EnumValue<WifiPhyBand>,
+                                 UintegerValue>(
                     MakeUintegerChecker<uint8_t>(0, 233),
                     MakeUintegerChecker<uint16_t>(0, 160),
                     MakeEnumChecker(WifiPhyBand::WIFI_PHY_BAND_2_4GHZ,
@@ -342,7 +351,8 @@ WifiPhy::GetTypeId()
 }
 
 WifiPhy::WifiPhy()
-    : m_txMpduReferenceNumber(0xffffffff),
+    : m_phyId(0),
+      m_txMpduReferenceNumber(0xffffffff),
       m_rxMpduReferenceNumber(0xffffffff),
       m_endPhyRxEvent(),
       m_endTxEvent(),
@@ -403,8 +413,6 @@ WifiPhy::DoDispose()
 {
     NS_LOG_FUNCTION(this);
 
-    Reset();
-
     m_device = nullptr;
     m_mobility = nullptr;
     m_frameCaptureModel = nullptr;
@@ -419,6 +427,9 @@ WifiPhy::DoDispose()
     m_random = nullptr;
     m_state = nullptr;
 
+    Reset();
+
+    // this should be done after calling the Reset function
     for (auto& phyEntity : m_phyEntities)
     {
         phyEntity.second = nullptr;
@@ -473,13 +484,13 @@ void
 WifiPhy::SetRxSensitivity(double threshold)
 {
     NS_LOG_FUNCTION(this << threshold);
-    m_rxSensitivityW = DbmToW(threshold);
+    m_rxSensitivityDbm = threshold;
 }
 
 double
 WifiPhy::GetRxSensitivity() const
 {
-    return WToDbm(m_rxSensitivityW);
+    return m_rxSensitivityDbm;
 }
 
 void
@@ -622,8 +633,22 @@ WifiPhy::GetMobility() const
 }
 
 void
+WifiPhy::SetPhyId(uint8_t phyId)
+{
+    NS_LOG_FUNCTION(this << phyId);
+    m_phyId = phyId;
+}
+
+uint8_t
+WifiPhy::GetPhyId() const
+{
+    return m_phyId;
+}
+
+void
 WifiPhy::SetInterferenceHelper(const Ptr<InterferenceHelper> helper)
 {
+    NS_LOG_FUNCTION(this << helper);
     m_interference = helper;
     m_interference->SetNoiseFigure(DbToRatio(m_noiseFigureDb));
     m_interference->SetNumberOfReceiveAntennas(m_numberOfAntennas);
@@ -632,6 +657,7 @@ WifiPhy::SetInterferenceHelper(const Ptr<InterferenceHelper> helper)
 void
 WifiPhy::SetErrorRateModel(const Ptr<ErrorRateModel> model)
 {
+    NS_LOG_FUNCTION(this << model);
     NS_ASSERT(m_interference);
     m_interference->SetErrorRateModel(model);
 }
@@ -745,8 +771,7 @@ WifiPhy::GetPhyEntityForPpdu(const Ptr<const WifiPpdu> ppdu) const
 void
 WifiPhy::AddStaticPhyEntity(WifiModulationClass modulation, Ptr<PhyEntity> phyEntity)
 {
-    NS_LOG_FUNCTION(modulation);
-    NS_ASSERT_MSG(GetStaticPhyEntities().find(modulation) == GetStaticPhyEntities().end(),
+    NS_ASSERT_MSG(!GetStaticPhyEntities().contains(modulation),
                   "The PHY entity has already been added. The setting should only be done once per "
                   "modulation class");
     GetStaticPhyEntities()[modulation] = phyEntity;
@@ -756,7 +781,7 @@ void
 WifiPhy::AddPhyEntity(WifiModulationClass modulation, Ptr<PhyEntity> phyEntity)
 {
     NS_LOG_FUNCTION(this << modulation);
-    NS_ABORT_MSG_IF(GetStaticPhyEntities().find(modulation) == GetStaticPhyEntities().end(),
+    NS_ABORT_MSG_IF(!GetStaticPhyEntities().contains(modulation),
                     "Cannot add an unimplemented PHY to supported list. Update the former first.");
     NS_ASSERT_MSG(m_phyEntities.find(modulation) == m_phyEntities.end(),
                   "The PHY entity has already been added. The setting should only be done once per "
@@ -1175,9 +1200,9 @@ WifiPhy::DoChannelSwitch()
     // Update unspecified parameters with default values
     {
         auto& [number, width, band, primary20] = m_channelSettings;
-        if (band == static_cast<int>(WIFI_PHY_BAND_UNSPECIFIED))
+        if (band == WIFI_PHY_BAND_UNSPECIFIED)
         {
-            band = static_cast<int>(GetDefaultPhyBand(m_standard));
+            band = GetDefaultPhyBand(m_standard);
         }
         if (width == 0 && number == 0)
         {
@@ -1353,7 +1378,16 @@ WifiPhy::SetSleepMode()
     case WifiPhyState::CCA_BUSY:
     case WifiPhyState::IDLE:
         NS_LOG_DEBUG("setting sleep mode");
-        m_state->SwitchToSleep();
+        // The PHY object may be in CCA_BUSY state because it is receiving a preamble. Cancel
+        // preamble events before switching to sleep state
+        Reset();
+        // It may happen that we request to switch to sleep at the same time the reception of
+        // a PPDU ends. In such a case, WifiPhyStateHelper::GetState() does not return RX
+        // (m_endRx equals now), we get here and set the state to SLEEP. However,
+        // WifiPhyStateHelper::DoSwitchFromRx() may be called after this function (at the same
+        // simulation time), thus hitting the assert that checks that the state is IDLE or
+        // CCA_BUSY.
+        Simulator::ScheduleNow(&WifiPhyStateHelper::SwitchToSleep, m_state);
         break;
     case WifiPhyState::SLEEP:
         NS_LOG_DEBUG("already in sleep mode");
@@ -1721,7 +1755,7 @@ WifiPhy::Send(WifiConstPsduMap psdus, const WifiTxVector& txVector)
     NS_ASSERT(!m_state->IsStateTx() && !m_state->IsStateSwitching());
     NS_ASSERT(m_endTxEvent.IsExpired());
 
-    if (!txVector.IsValid())
+    if (!txVector.IsValid(m_band))
     {
         NS_FATAL_ERROR("TX-VECTOR is invalid!");
     }
@@ -1809,17 +1843,23 @@ WifiPhy::Send(WifiConstPsduMap psdus, const WifiTxVector& txVector)
     }
 
     m_endTxEvent =
-        Simulator::Schedule(txDuration, &WifiPhy::NotifyTxEnd, this, psdus); // TODO: fix for MU
+        Simulator::Schedule(txDuration, &WifiPhy::TxDone, this, psdus); // TODO: fix for MU
 
     StartTx(ppdu);
     ppdu->ResetTxVector();
 
     m_channelAccessRequested = false;
     m_powerRestricted = false;
+}
 
-    Simulator::Schedule(txDuration, &WifiPhy::Reset, this);
-
-    Simulator::Schedule(txDuration, &WifiPhy::SwitchMaybeToCcaBusy, this, nullptr);
+void
+WifiPhy::TxDone(const WifiConstPsduMap& psdus)
+{
+    NS_LOG_FUNCTION(this << psdus);
+    NotifyTxEnd(psdus);
+    Reset();
+    // we might have received signals during TX
+    SwitchMaybeToCcaBusy();
 }
 
 uint64_t
@@ -1840,6 +1880,10 @@ WifiPhy::Reset()
 {
     NS_LOG_FUNCTION(this);
     m_currentPreambleEvents.clear();
+    if (m_currentEvent && m_interference)
+    {
+        m_interference->NotifyRxEnd(Simulator::Now(), GetCurrentFrequencyRange());
+    }
     m_currentEvent = nullptr;
     for (auto& phyEntity : m_phyEntities)
     {
@@ -1867,7 +1911,7 @@ WifiPhy::StartReceivePreamble(Ptr<const WifiPpdu> ppdu,
         // TODO find a fallback PHY for receiving the PPDU (e.g. 11a for 11ax due to preamble
         // structure)
         NS_LOG_DEBUG("Unsupported modulation received (" << modulation << "), consider as noise");
-        m_interference->Add(ppdu, rxDuration, rxPowersW);
+        m_interference->Add(ppdu, rxDuration, rxPowersW, GetCurrentFrequencyRange());
         SwitchMaybeToCcaBusy();
     }
 }

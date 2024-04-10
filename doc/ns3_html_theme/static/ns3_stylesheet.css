@@ -94,6 +94,11 @@ div.sphinxsidebar a {
     z-index: 10000;
 }
 
+#projectrow
+{
+	height: 56px;
+}
+
 #projectlogo {
     color: white;
     margin: 10px;
@@ -352,5 +357,17 @@ div.sphinxsidebar a {
     img {
         background-color: #ceccca;
         padding: 3px;
+    }
+
+    #ns3_home1 img {
+        background-color: transparent;
+    }
+
+    img.footer {
+        background-color: transparent;
+    }
+
+    #nav-sync img {
+        background-color: transparent;
     }
 }

@@ -587,10 +587,8 @@ WifiMac::NotifyChannelSwitching(uint8_t linkId)
     // the PHY dependent parameters. In any case, this makes no harm
     ConfigurePhyDependentParameters(linkId);
 
-    // SetupPhy not only resets the remote station manager, but also sets the
-    // default TX mode and MCS, which is required when switching to a channel
-    // in a different band
-    GetLink(linkId).stationManager->SetupPhy(GetLink(linkId).phy);
+    // Reset remote station manager
+    GetLink(linkId).stationManager->Reset();
 }
 
 void
@@ -630,7 +628,7 @@ WifiMac::SetupEdcaQueue(AcIndex ac)
 
     // Our caller shouldn't be attempting to setup a queue that is
     // already configured.
-    NS_ASSERT(m_edca.find(ac) == m_edca.end());
+    NS_ASSERT(!m_edca.contains(ac));
 
     Ptr<QosTxop> edca = CreateObject<QosTxop>(ac);
     edca->SetTxMiddle(m_txMiddle);
@@ -1013,7 +1011,7 @@ WifiMac::SwapLinks(std::map<uint8_t, uint8_t> links)
         }
 
         std::unique_ptr<LinkEntity> linkToMove;
-        NS_ASSERT(m_links.find(from) != m_links.cend());
+        NS_ASSERT(m_links.contains(from));
         linkToMove.swap(m_links.at(from)); // from is now out of m_links
         auto empty = from;                 // track empty cell in m_links
 
@@ -1447,6 +1445,9 @@ WifiMac::UnblockUnicastTxOnLinks(WifiQueueBlockedReason reason,
 
         for (const auto& [acIndex, ac] : wifiAcList)
         {
+            // save the status of the AC queues before unblocking the requested queues
+            auto hasFramesToTransmit = GetQosTxop(acIndex)->HasFramesToTransmit(linkId);
+
             // unblock queues storing QoS data frames and control frames that use MLD addresses
             m_scheduler->UnblockQueues(reason,
                                        acIndex,
@@ -1465,23 +1466,12 @@ WifiMac::UnblockUnicastTxOnLinks(WifiQueueBlockedReason reason,
                                        {linkId});
             // request channel access if needed (schedule now because multiple invocations
             // of this method may be done in a loop at the caller)
-            Simulator::ScheduleNow(&Txop::StartAccessIfNeeded, GetQosTxop(acIndex), linkId);
+            Simulator::ScheduleNow(&Txop::StartAccessAfterEvent,
+                                   GetQosTxop(acIndex),
+                                   linkId,
+                                   hasFramesToTransmit,
+                                   Txop::CHECK_MEDIUM_BUSY); // generate backoff if medium busy
         }
-    }
-}
-
-void
-WifiMac::StartAccessIfNeeded(uint8_t linkId)
-{
-    NS_LOG_FUNCTION(this << linkId);
-
-    if (m_txop)
-    {
-        m_txop->StartAccessIfNeeded(linkId);
-    }
-    for (const auto& [acIndex, edca] : m_edca)
-    {
-        edca->StartAccessIfNeeded(linkId);
     }
 }
 

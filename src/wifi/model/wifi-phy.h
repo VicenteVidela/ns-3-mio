@@ -30,6 +30,18 @@
 
 #include <limits>
 
+#define WIFI_PHY_NS_LOG_APPEND_CONTEXT(phy)                                                        \
+    {                                                                                              \
+        if (DynamicCast<const WifiPhy>(phy))                                                       \
+        {                                                                                          \
+            std::clog << "[index=" << +phy->GetPhyId() << "][channel="                             \
+                      << (phy->GetOperatingChannel().IsSet()                                       \
+                              ? std::to_string(+phy->GetOperatingChannel().GetNumber())            \
+                              : "UNKNOWN")                                                         \
+                      << "][band=" << phy->GetPhyBand() << "] ";                                   \
+        }                                                                                          \
+    }
+
 namespace ns3
 {
 
@@ -887,7 +899,7 @@ class WifiPhy : public Object
     using ChannelTuple =
         std::tuple<uint8_t /* channel number */,
                    uint16_t /* channel width */,
-                   int /* WifiPhyBand */,
+                   WifiPhyBand /* WifiPhyBand */,
                    uint8_t /* primary20 index*/>; //!< Tuple identifying an operating channel
 
     /**
@@ -985,6 +997,20 @@ class WifiPhy : public Object
      * \returns if short PHY preamble is supported or not
      */
     bool GetShortPhyPreambleSupported() const;
+
+    /**
+     * Set the index allocated to this PHY
+     *
+     * \param phyId the ID allocated to this PHY
+     */
+    void SetPhyId(uint8_t phyId);
+
+    /**
+     * Get the index allocated to this PHY
+     *
+     * \return the ID allocated to this PHY
+     */
+    uint8_t GetPhyId() const;
 
     /**
      * Sets the interference helper.
@@ -1256,6 +1282,8 @@ class WifiPhy : public Object
      */
     void AddPhyEntity(WifiModulationClass modulation, Ptr<PhyEntity> phyEntity);
 
+    uint8_t m_phyId; //!< the index of the PHY in the vector of PHYs held by the WifiNetDevice
+
     Ptr<InterferenceHelper>
         m_interference; //!< Pointer to a helper responsible for interference computations
 
@@ -1360,6 +1388,12 @@ class WifiPhy : public Object
      *
      */
     void AbortCurrentReception(WifiPhyRxfailureReason reason);
+
+    /**
+     * Callback function when a transmission is completed
+     * \param psdus the PSDUs that have been sent
+     */
+    void TxDone(const WifiConstPsduMap& psdus);
 
     /**
      * Get the PSDU addressed to that PHY in a PPDU (useful for MU PPDU).
@@ -1500,7 +1534,7 @@ class WifiPhy : public Object
     Time m_ackTxTime;      //!< estimated Ack TX time
     Time m_blockAckTxTime; //!< estimated BlockAck TX time
 
-    double m_rxSensitivityW;  //!< Receive sensitivity threshold in watts
+    double m_rxSensitivityDbm; //!< Receive sensitivity threshold in dBm
     double m_ccaEdThresholdW; //!< Clear channel assessment (CCA) energy detection (ED) threshold in
                               //!< watts
     double m_ccaSensitivityThresholdW; //!< Clear channel assessment (CCA) modulation and coding

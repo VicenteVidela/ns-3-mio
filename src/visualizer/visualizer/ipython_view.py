@@ -10,6 +10,7 @@ All rights reserved. This program and the accompanying materials are made
 available under the terms of the BSD which accompanies this distribution, and
 is available at U{http://www.opensource.org/licenses/bsd-license.php}
 """
+
 # this file is a modified version of source code from the Accerciser project
 # https://wiki.gnome.org/Apps/Accerciser
 
@@ -355,6 +356,19 @@ class ConsoleView(Gtk.TextView):
     #  color pattern
     ## @var line_start
     #  line start
+    ## @var onKeyPress
+    #  onKeyPress function
+    ## @var _write
+    #  _write function
+    ## @var _showPrompt
+    #  _showPrompt function
+    ## @var _changeLine
+    #  _changeLine function
+    ## @var _showReturned
+    #  _showReturned function
+    ## @var prompt
+    #  prompt function
+
     """
     Specialized text view for console-like workflow.
 

@@ -91,6 +91,12 @@ class EhtFrameExchangeManager : public HeFrameExchangeManager
      */
     void NotifySwitchingEmlsrLink(Ptr<WifiPhy> phy, uint8_t linkId, Time delay);
 
+    /**
+     * \return whether this is an EMLSR link that has been blocked because another EMLSR link
+     *         is being used
+     */
+    bool UsingOtherEmlsrLink() const;
+
   protected:
     void DoDispose() override;
     void RxStartIndication(WifiTxVector txVector, Time psduDuration) override;
@@ -107,6 +113,8 @@ class EhtFrameExchangeManager : public HeFrameExchangeManager
                      RxSignalInfo rxSignalInfo,
                      const WifiTxVector& txVector,
                      bool inAmpdu) override;
+    void NavResetTimeout() override;
+    void IntraBssNavResetTimeout() override;
 
     /**
      * This method is intended to be called when an AP MLD detects that an EMLSR client previously

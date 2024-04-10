@@ -1860,11 +1860,11 @@ class WifiPhyMuMimoTestSuite : public TestSuite
 };
 
 WifiPhyMuMimoTestSuite::WifiPhyMuMimoTestSuite()
-    : TestSuite("wifi-phy-mu-mimo", UNIT)
+    : TestSuite("wifi-phy-mu-mimo", Type::UNIT)
 {
-    AddTestCase(new TestDlMuTxVector, TestCase::QUICK);
-    AddTestCase(new TestDlMuMimoPhyTransmission, TestCase::QUICK);
-    AddTestCase(new TestUlMuMimoPhyTransmission, TestCase::QUICK);
+    AddTestCase(new TestDlMuTxVector, TestCase::Duration::QUICK);
+    AddTestCase(new TestDlMuMimoPhyTransmission, TestCase::Duration::QUICK);
+    AddTestCase(new TestUlMuMimoPhyTransmission, TestCase::Duration::QUICK);
 }
 
 static WifiPhyMuMimoTestSuite WifiPhyMuMimoTestSuite; ///< the test suite

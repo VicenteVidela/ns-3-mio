@@ -315,7 +315,7 @@ StaWifiMac::NotifyEmlsrModeChanged(const std::set<uint8_t>& linkIds)
     {
         auto& link = GetStaLink(lnk);
 
-        if (linkIds.count(linkId) > 0)
+        if (linkIds.contains(linkId))
         {
             // EMLSR mode enabled
             link.emlsrEnabled = true;
@@ -481,10 +481,10 @@ StaWifiMac::GetMultiLinkElement(bool isReassoc, uint8_t linkId) const
 
     auto ehtConfiguration = GetEhtConfiguration();
     NS_ASSERT(ehtConfiguration);
-    EnumValue negSupport;
+    EnumValue<WifiTidToLinkMappingNegSupport> negSupport;
     ehtConfiguration->GetAttributeFailSafe("TidToLinkMappingNegSupport", negSupport);
 
-    mldCapabilities->tidToLinkMappingSupport = negSupport.Get();
+    mldCapabilities->tidToLinkMappingSupport = static_cast<uint8_t>(negSupport.Get());
     mldCapabilities->freqSepForStrApMld = 0; // not supported yet
     mldCapabilities->aarSupport = 0;         // not supported yet
 
@@ -522,17 +522,17 @@ StaWifiMac::GetMultiLinkElement(bool isReassoc, uint8_t linkId) const
 }
 
 std::vector<TidToLinkMapping>
-StaWifiMac::GetTidToLinkMappingElements(uint8_t apNegSupport)
+StaWifiMac::GetTidToLinkMappingElements(WifiTidToLinkMappingNegSupport apNegSupport)
 {
     NS_LOG_FUNCTION(this << apNegSupport);
 
     auto ehtConfig = GetEhtConfiguration();
     NS_ASSERT(ehtConfig);
 
-    EnumValue negSupport;
+    EnumValue<WifiTidToLinkMappingNegSupport> negSupport;
     ehtConfig->GetAttributeFailSafe("TidToLinkMappingNegSupport", negSupport);
 
-    NS_ABORT_MSG_IF(negSupport.Get() == 0,
+    NS_ABORT_MSG_IF(negSupport.Get() == WifiTidToLinkMappingNegSupport::NOT_SUPPORTED,
                     "Cannot request TID-to-Link Mapping if negotiation is not supported");
 
     // store the mappings, so that we can enforce them when the AP MLD accepts them
@@ -542,10 +542,11 @@ StaWifiMac::GetTidToLinkMappingElements(uint8_t apNegSupport)
     bool mappingValidForNegType1 = TidToLinkMappingValidForNegType1(m_dlTidLinkMappingInAssocReq,
                                                                     m_ulTidLinkMappingInAssocReq);
     NS_ABORT_MSG_IF(
-        negSupport.Get() == 1 && !mappingValidForNegType1,
+        negSupport.Get() == WifiTidToLinkMappingNegSupport::SAME_LINK_SET &&
+            !mappingValidForNegType1,
         "Mapping TIDs to distinct link sets is incompatible with negotiation support of 1");
 
-    if (apNegSupport == 1 && !mappingValidForNegType1)
+    if (apNegSupport == WifiTidToLinkMappingNegSupport::SAME_LINK_SET && !mappingValidForNegType1)
     {
         // If the TID-to-link Mapping Negotiation Support subfield value received from a peer
         // MLD is equal to 1, the MLD that initiates a TID-to-link mapping negotiation with the
@@ -635,10 +636,12 @@ StaWifiMac::SendAssociationRequest(bool isReassoc)
         };
         std::visit(addMle, frame);
 
-        uint8_t negSupport;
+        WifiTidToLinkMappingNegSupport negSupport;
         if (const auto& mldCapabilities =
                 GetWifiRemoteStationManager(linkId)->GetStationMldCapabilities(*link.bssid);
-            mldCapabilities && (negSupport = mldCapabilities->get().tidToLinkMappingSupport) > 0)
+            mldCapabilities && (negSupport = static_cast<WifiTidToLinkMappingNegSupport>(
+                                    mldCapabilities->get().tidToLinkMappingSupport)) >
+                                   WifiTidToLinkMappingNegSupport::NOT_SUPPORTED)
         {
             auto addTlm = [&](auto&& frame) {
                 frame.template Get<TidToLinkMapping>() = GetTidToLinkMappingElements(negSupport);
@@ -1116,7 +1119,7 @@ StaWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         {
             apAddresses.insert(GetBssid(id));
         }
-        if (apAddresses.count(mpdu->GetHeader().GetAddr2()) == 0)
+        if (!apAddresses.contains(mpdu->GetHeader().GetAddr2()))
         {
             NS_LOG_LOGIC("Received data frame not from the BSS we are associated with: ignore");
             NotifyRxDrop(packet);
@@ -1132,7 +1135,7 @@ StaWifiMac::Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
         {
             if (hdr->IsQosAmsdu())
             {
-                NS_ASSERT(apAddresses.count(mpdu->GetHeader().GetAddr3()) != 0);
+                NS_ASSERT(apAddresses.contains(mpdu->GetHeader().GetAddr3()));
                 DeaggregateAmsduAndForward(mpdu);
                 packet = nullptr;
             }
@@ -1316,7 +1319,9 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
 
             if (const auto& mldCapabilities =
                     GetWifiRemoteStationManager(linkId)->GetStationMldCapabilities(hdr.GetAddr3());
-                mldCapabilities && mldCapabilities->get().tidToLinkMappingSupport > 0)
+                mldCapabilities && static_cast<WifiTidToLinkMappingNegSupport>(
+                                       mldCapabilities->get().tidToLinkMappingSupport) >
+                                       WifiTidToLinkMappingNegSupport::NOT_SUPPORTED)
             {
                 // the AP MLD supports TID-to-Link Mapping negotiation, hence we included
                 // TID-to-Link Mapping element(s) in the Association Request.
@@ -1450,7 +1455,21 @@ StaWifiMac::ReceiveAssocResp(Ptr<const WifiMpdu> mpdu, uint8_t linkId)
     {
         if (GetStaLink(link).bssid)
         {
-            StartAccessIfNeeded(id);
+            if (const auto txop = GetTxop())
+            {
+                txop->StartAccessAfterEvent(id,
+                                            Txop::DIDNT_HAVE_FRAMES_TO_TRANSMIT,
+                                            Txop::CHECK_MEDIUM_BUSY);
+            }
+            for (const auto& [acIndex, ac] : wifiAcList)
+            {
+                if (const auto edca = GetQosTxop(acIndex))
+                {
+                    edca->StartAccessAfterEvent(id,
+                                                Txop::DIDNT_HAVE_FRAMES_TO_TRANSMIT,
+                                                Txop::CHECK_MEDIUM_BUSY);
+                }
+            }
         }
     }
 
@@ -2014,34 +2033,52 @@ StaWifiMac::PhyCapabilitiesChanged()
  */
 
 void
-StaWifiMac::NotifySwitchingEmlsrLink(Ptr<WifiPhy> phy, uint8_t linkId)
+StaWifiMac::NotifySwitchingEmlsrLink(Ptr<WifiPhy> phy, uint8_t linkId, Time delay)
 {
-    NS_LOG_FUNCTION(this << phy << linkId);
+    NS_LOG_FUNCTION(this << phy << linkId << delay.As(Time::US));
 
-    // if any link points to the PHY that switched channel, reset the phy pointer
+    // If the PHY is switching channel to operate on another link, then it is no longer operating
+    // on the current link. If any link (other than the current link) points to the PHY that is
+    // switching channel, reset the phy pointer of the link
     for (auto& [id, link] : GetLinks())
     {
-        // auto& link = GetStaLink(lnk);
-        if (link->phy == phy)
+        if (link->phy == phy && id != linkId)
         {
             link->phy = nullptr;
         }
     }
 
-    auto& newLink = GetLink(linkId);
-    // The MAC stack associated with the new link uses the given PHY
-    newLink.phy = phy;
-    // Setup a PHY listener for the given PHY on the CAM associated with the new link
-    newLink.channelAccessManager->SetupPhyListener(phy);
-    NS_ASSERT(m_emlsrManager);
-    if (m_emlsrManager->GetCamStateReset())
+    // lambda to connect the PHY to the new link
+    auto connectPhy = [=, this]() mutable {
+        auto& newLink = GetLink(linkId);
+        // The MAC stack associated with the new link uses the given PHY
+        newLink.phy = phy;
+        // Setup a PHY listener for the given PHY on the CAM associated with the new link
+        newLink.channelAccessManager->SetupPhyListener(phy);
+        NS_ASSERT(m_emlsrManager);
+        if (m_emlsrManager->GetCamStateReset())
+        {
+            newLink.channelAccessManager->ResetState();
+        }
+        // Disconnect the FEM on the new link from the current PHY
+        newLink.feManager->ResetPhy();
+        // Connect the FEM on the new link to the given PHY
+        newLink.feManager->SetWifiPhy(phy);
+        // Connect the station manager on the new link to the given PHY
+        newLink.stationManager->SetupPhy(phy);
+    };
+
+    // if there is no PHY operating on the new link, connect the PHY to the new link now.
+    // Otherwise, wait until the channel switch is completed, so that the PHY operating on the new
+    // link can possibly continue receiving frames in the meantime.
+    if (!GetLink(linkId).phy)
     {
-        newLink.channelAccessManager->ResetState();
+        connectPhy();
     }
-    // Disconnect the FEM on the new link from the current PHY
-    newLink.feManager->ResetPhy();
-    // Connect the FEM on the new link to the given PHY
-    newLink.feManager->SetWifiPhy(phy);
+    else
+    {
+        Simulator::Schedule(delay, connectPhy);
+    }
 }
 
 void

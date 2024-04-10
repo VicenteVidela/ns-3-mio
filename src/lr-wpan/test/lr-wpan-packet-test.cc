@@ -120,9 +120,9 @@ class LrWpanPacketTestSuite : public TestSuite
 };
 
 LrWpanPacketTestSuite::LrWpanPacketTestSuite()
-    : TestSuite("lr-wpan-packet", UNIT)
+    : TestSuite("lr-wpan-packet", Type::UNIT)
 {
-    AddTestCase(new LrWpanPacketTestCase, TestCase::QUICK);
+    AddTestCase(new LrWpanPacketTestCase, TestCase::Duration::QUICK);
 }
 
 static LrWpanPacketTestSuite g_lrWpanPacketTestSuite; //!< Static variable for test initialization

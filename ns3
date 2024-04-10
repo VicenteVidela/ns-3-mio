@@ -1225,7 +1225,7 @@ def get_target_to_build(program_path, ns3_version, build_profile):
         print("Target to build does not exist: %s" % program_path)
         exit(1)
 
-    if "scratch" in program_path:
+    if "scratch" in os.path.relpath(program_path, ns3_path):
         # Get the path to the program and replace slashes with underlines
         # to get unique targets for CMake, preventing collisions with modules examples
         return program_name.replace(out_dir, "").replace("/", "_")[1:]
@@ -1412,6 +1412,9 @@ def run_step(args, target_to_run, target_args):
             debugging_software.extend(
                 [check_program_installed("valgrind"), "--leak-check=full", "--show-leak-kinds=all"]
             )
+            suppressions_file = os.path.join(ns3_path, ".ns3.supp")
+            if os.path.exists(suppressions_file):
+                debugging_software.append(f"--suppressions={suppressions_file}")
 
         # running gdb?
         if args.gdb:

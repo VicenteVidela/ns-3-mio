@@ -213,14 +213,16 @@ class TcpSackPermittedTestSuite : public TestSuite
   public:
     /** \brief Constructor */
     TcpSackPermittedTestSuite()
-        : TestSuite("tcp-sack-permitted", UNIT)
+        : TestSuite("tcp-sack-permitted", Type::UNIT)
     {
-        AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::DISABLED), TestCase::QUICK);
+        AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::DISABLED),
+                    TestCase::Duration::QUICK);
         AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::ENABLED_RECEIVER),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::ENABLED_SENDER),
-                    TestCase::QUICK);
-        AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::ENABLED), TestCase::QUICK);
+                    TestCase::Duration::QUICK);
+        AddTestCase(new SackPermittedTestCase(SackPermittedTestCase::ENABLED),
+                    TestCase::Duration::QUICK);
     }
 };
 

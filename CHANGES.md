@@ -13,31 +13,80 @@ Note that users who upgrade the simulator across versions, or who work directly 
 
 This file is a best-effort approach to solving this issue; we will do our best but can guarantee that there will be things that fall through the cracks, unfortunately. If you, as a user, can suggest improvements to this file based on your experience, please contribute a patch or drop us a note on ns-developers mailing list.
 
-Changes from ns-3.40 to ns-3-dev
+Changes from ns-3.41 to ns-3-dev
 --------------------------------
 
 ### New API
 
-* (spectrum) `SpectrumSignalParameters` is extended to include two new members called: `spectrumChannelMatrix` and `precodingMatrix` which are the key information needed to support MIMO simulations.
+* Objects now can be aggregated to multiple objects though the `Object::UnidirectionalAggregateObject` function. Objects aggregated in such a way can not use `GetObject` to access the objects they are aggregated to.
+* (network) Added `ApplicationHelper` helper class to create and install applications, removing
+redundant code in existing helpers and reducing the burden to add yet another helper when a new
+application model is added.
 
 ### Changes to existing API
 
+* `InetSocketAddress::SetTos()` and `InetSocketAddress::GetTos()` have been removed.
+Applications have a new Attribute to set the IPv4 ToS field.
+* (core) Deprecated enum `TestDuration` in `TestCase` class. It has been replaced by enum class `Duration`.
+* (core) In `TestSuite` class, deprecated `ALL`, `UNIT`, `SYSTEM`, `EXAMPLE` and `PERFORMANCE`. They have been replaced by `Type::ALL`, `Type::UNIT`, `Type::SYSTEM`, `Type::EXAMPLE` and `Type::PERFORMANCE`, respectively.
+* (wifi) Deprecated `WIFI_TID_TO_LINK_MAPPING_{NOT_SUPPORTED,SAME_LINK_SET,ANY_LINK_SET}`. They have been replaced by `WifiTidToLinkMappingNegSupport::{NOT_SUPPORTED,SAME_LINK_SET,ANY_LINK_SET}`, respectively.
+* (wifi) Deprecated `{IDLE, CCA_BUSY, TX, RX, SWITCHING, SLEEP, OFF}`. They have been replaced by `WifiPhyState::{IDLE, CCA_BUSY, TX, RX, SWITCHING, SLEEP, OFF}`, respectively.
+* `LrWpanMacPibAttributeIdentifier` attribute ids are now standard compliant.
+* Multiple new identifiers added to `LrWpanMacPibAttributeIdentifier`.
+
+### Changes to build system
+
+* Removed support of the `experimental/filesystem` library, in favor of the official `filesystem` library.
+
+### Changed behavior
+
+* Fixed the corner rebound direction in `RandomWalk2d[Outdoor]MobilityModel` and the initial direction in case of node starting from a border or corner.
+
+Changes from ns-3.40 to ns-3.41
+-------------------------------
+
+### New API
+
+* (core) Added `BernoulliRandomVariable` class implementing the bernoulli random variable, and `BinomialRandomVariable` class implementing the binomial random variable.
+* (core) Added wrapper around `UniformRandomVariable` to meet the C++11 requirements of UniformRandomBitGenerator.
+* (core) Added method to `GetStopEvent()` from `Simulator`
+* (internet) It is now possible to set the TOS field for IPv4 ICMP Echo Requests/Responses, via a new `Tos` attribute.
+* (spectrum) `SpectrumSignalParameters` is extended to include two new members called: `spectrumChannelMatrix` and `precodingMatrix` which are the key information needed to support MIMO simulations.
+* (spectrum) `SpectrumChannel::AssignStreams()` is added, to allow random variable stream assignment for all propagation loss and delay models added to the channel.
+* (wifi) Added new attribute `ChannelAccessManager:GenerateBackoffIfTxopWithoutTx` to invoke the backoff procedure when an AC gains the right to start a TXOP but it does not transmit any frame, provided that the queue is not actually empty. No transmission may occur,e.g., due to constraints associated with EMLSR operations. This possibility is specified by the current draft revision of the IEEE 802.11 standard.
+
+### Changes to existing API
+
+* (antenna) `UniformPlannarArray` has new attributes `NumVerticalPorts`, `NumHorizontalPorts`, and `IsDualPolarized`.
+* (antenna) `GetNumberOfElements` is renamed to `GetNumElems` for the sake of simplifying the long lines of code that use complex mathematical expressions.
+* (core) The EnumValue class now also supports enum class in addition to plain enums.  As a result of this change, attributes that wrap enums must update the syntax for the `MakeEnumAccessor` method call. Where you once were able to write, for example (from attribute-test-suite.cc):
+
+  ```cpp
+  MakeEnumAccessor(&AttributeObjectTest::m_enum),
+  ```
+
+  you must now write it with a template parameter such as:
+
+  ```cpp
+  MakeEnumAccessor<Test_e>(&AttributeObjectTest::m_enum),
+  ```
+
+* (internet) Deprecated `Ipv4::WeakEsModel` and `Ipv4::GetWeakEsModel()`, `Ipv4::SetWeakEsModel(bool)` methods. Moved `Ipv6L3Protocol::StrongEndSystemModel` to `Ipv6::StrongEndSystemModel` and added `Ipv4::StrongEndSystemModel` with corresponding `GetStrongEndSystemModel()` and `SetStrongEndSystemModel(bool)` methods to improve end system model configuration options.
+* (lr-wpan) Change the CapabilityField parameter in `LrWpanMac::MlmeAssociateRequest` and `LrWpanMac::MlmeAssociateIndication` to a standard bitmap.
+* (lr-wpan) Change the MAC SuperframeField usage to a standard bitmap, this change impact parameters in the `BeaconPayloadHeader`.
+* (lr-wpan) Create a new abstract class that defines the form of any Lr-wpan MAC layers (`LrWpanMacBase`).
+* (lr-wpan) Add the capability to see the enum values of the MAC transition states in log prints for easier debugging.
+* (lr-wpan) Group MAC status enumerations into a single `LrWpanMacStatus` enumeration in `lr-wpan-mac-base.h.`
 * The spelling of the following files, classes, functions, constants, defines and enumerated values was corrected; this will affect existing users who were using them with the misspelling.
   * (lte) Struct member `fdbetsFlowPerf_t::lastTtiBytesTrasmitted` in file `fdbet-ff-mac-scheduler.h` was renamed `fdbetsFlowPerf_t::lastTtiBytesTransmitted`.
   * (lte) Struct member `tdbetsFlowPerf_t::lastTtiBytesTrasmitted` in file `tdbet-ff-mac-scheduler.h` was renamed `fdbetsFlowPerf_t::lastTtiBytesTransmitted`.
   * (lte) Struct member `pfsFlowPerf_t::lastTtiBytesTrasmitted` in file `pf-ff-mac-scheduler.h` was renamed `fdbetsFlowPerf_t::lastTtiBytesTransmitted`.
-* (lr-wpan) Change the CapabilityField parameter in `LrWpanMac::MlmeAssociateRequest` and `LrWpanMac::MlmeAssociateIndication` to a standard bitmap.
-* (lr-wpan) Change the MAC SuperframeField usage to a standard bitmap, this change impact parameters in the `BeaconPayloadHeader`.
-* (lr-wpan) Create a new abstract class that defines the form of any Lr-wpan MAC layers (`LrWpanMacBase`).
+* (sixlowpan) Remove `ForceEtherType` and `EtherType` attributes, and use RFC 7973 EtherType for interfaces supporting an EtherType.
+* (spectrum) `PhasedArraySpectrumPropagationLossModel::CalcRxPowerSpectralDensity` return type is changed from `Ptr<SpectrumValue>` to `Ptr<SpectrumSignalParameters>` to support MIMO, because when multiple transmit and receive antenna ports are present, it is not enough to have a single PSD (represented by `Ptr<SpectrumValue>`) but also the 3D channel matrix is needed per receive and transmit antenna port. Notice that `CalcRxPowerSpectralDensity` is typically called from within `MultiModelSpectrumChannel`, but if some external ns-3 module is calling directly this function, it can still access to its original return value through `Ptr<SpectrumSignalParameters>` which contains `Ptr<SpectrumValue>`.
 * (wifi) The `HeConfiguration::MpduBufferSize` attribute is now obsolete. Use the `WifiMac::MpduBufferSize` attribute instead.
 * (wifi) The `LinkSetupCanceled` trace source of `StaWifiMac` has been obsoleted because disassociation does not occur at link level for non-AP MLDs.
-* (antenna) `UniformPlannarArray` has new attributes `NumVerticalPorts`, `NumHorizontalPorts`, and `IsDualPolarized`.
-* (antenna) `GetNumberOfElements` is renamed to `GetNumElems` for the sake of simplifying the long lines of code that use complex mathematical expressions.
-* (spectrum) `PhasedArraySpectrumPropagationLossModel::CalcRxPowerSpectralDensity` return type is changed from `Ptr<SpectrumValue>` to `Ptr<SpectrumSignalParameters>` to support MIMO, because when multiple transmit and receive antenna ports are present, it is not enough to have a single PSD (represented by `Ptr<SpectrumValue>`) but also the 3D channel matrix is needed per receive and transmit antenna port. Notice that `CalcRxPowerSpectralDensity` is typically called from within `MultiModelSpectrumChannel`, but if some external ns-3 module is calling directly this function, it can still access to its original return value through `Ptr<SpectrumSignalParameters>` which contains `Ptr<SpectrumValue>`.
 * (wifi) The default value for `WifiRemoteStationManager::RtsCtsThreshold` has been increased from 65535 to 4692480.
-* (lr-wpan) Add the capability to see the enum values of the MAC transition states in log prints for easier debugging.
-* (sixlowpan) Remove `ForceEtherType` and `EtherType` attributes, and use RFC 7973 EtherType for interfaces supporting an EtherType.
-* (lr-wpan) Group MAC status enumerations into a single `LrWpanMacStatus` enumeration in `lr-wpan-mac-base.h.`
+* (wifi) `SpectrumWifiHelper::SpectrumChannelSwitched()` is now static
 
 ### Changes to build system
 
@@ -49,6 +98,11 @@ Changes from ns-3.40 to ns-3-dev
 * Added guard rails for scratch targets missing or containing more than one `main` function.
 
 ### Changed behavior
+
+* (sixlowpan) Now uses RFC 7973 Ethertype by default
+* (spectrum) SpectrumChannel objects and the loss/delay models attached are now automatically initialized (Object::Initialize) at time zero
+* (tcp) TCP Cubic (the default congestion control in ns-3) now supports TCP-friendliness by default (see RFC 9438 Section 4.3), making the congestion window growth somewhat more aggressive.  This follows the default Linux behavior.
+* (wifi) Increase the duration of the timer started when waiting for an ADDBA_RESPONSE from 1ms to 5ms to better account for the time required by the recipient to access the medium and complete the frame exchange (which may involve protection with (MU-)RTS/CTS).
 
 Changes from ns-3.39 to ns-3.40
 -------------------------------
@@ -79,7 +133,6 @@ Changes from ns-3.39 to ns-3.40
 * (core) `EmpiricalRandomVariable` no longer requires that a CDF pair with a range value exactly equal to 1.0 be added (see issue #922).
 * (wifi) Upon ML setup, a non-AP MLD updates the IDs of the setup links to match the IDs used by the AP MLD.
 * (wifi) Attribute **TrackSignalsFromInactiveInterfaces** in SpectrumWifiPhy has been defaulted to be enabled.
-* (wifi) The default BlockAck buffer size is raised to the max value allowed by the supported standard
 
 Changes from ns-3.38 to ns-3.39
 -------------------------------

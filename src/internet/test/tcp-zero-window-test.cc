@@ -255,9 +255,9 @@ class TcpZeroWindowTestSuite : public TestSuite
 {
   public:
     TcpZeroWindowTestSuite()
-        : TestSuite("tcp-zero-window-test", UNIT)
+        : TestSuite("tcp-zero-window-test", Type::UNIT)
     {
-        AddTestCase(new TcpZeroWindowTest("zero window test"), TestCase::QUICK);
+        AddTestCase(new TcpZeroWindowTest("zero window test"), TestCase::Duration::QUICK);
     }
 };
 

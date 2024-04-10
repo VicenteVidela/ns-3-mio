@@ -997,10 +997,12 @@ class InterBssTestSuite : public TestSuite
 };
 
 InterBssTestSuite::InterBssTestSuite()
-    : TestSuite("wifi-inter-bss", UNIT)
+    : TestSuite("wifi-inter-bss", Type::UNIT)
 {
-    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211ax), TestCase::QUICK);
-    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211be), TestCase::QUICK);
+    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211ax),
+                TestCase::Duration::QUICK);
+    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211be),
+                TestCase::Duration::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite

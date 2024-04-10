@@ -137,7 +137,6 @@ set(source_files
     model/timer.cc
     model/watchdog.cc
     model/synchronizer.cc
-    model/make-event.cc
     model/environment-variable.cc
     model/log.cc
     model/breakpoint.cc
@@ -154,7 +153,6 @@ set(source_files
     model/boolean.cc
     model/integer.cc
     model/uinteger.cc
-    model/enum.cc
     model/double.cc
     model/int64x64.cc
     model/string.cc
@@ -229,7 +227,6 @@ set(header_files
     model/hash-murmur3.h
     model/hash.h
     model/heap-scheduler.h
-    model/int-to-type.h
     model/int64x64-double.h
     model/int64x64.h
     model/integer.h
@@ -283,7 +280,6 @@ set(header_files
     model/type-traits.h
     model/uinteger.h
     model/uniform-random-bit-generator.h
-    model/unused.h
     model/valgrind.h
     model/vector.h
     model/warnings.h
