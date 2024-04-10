@@ -26,8 +26,6 @@ using namespace ns3;
 // Simulation parameters
 extern float stopSendingTime;                               // Time to stop sending packets
 extern float stopTime;                                      // Simulation stop time
-extern int timeInterval;                                    // Time interval for printing statistics
-extern int timeIntervalInit;                                // Initial time for printing statistics
 extern ns3::StringValue p2pDelay;                           // Delay for point-to-point links
 extern ns3::StringValue p2pDataRate;                        // Data rate for point-to-point links
 extern ns3::StringValue onoffDataRate;                      // Data rate for OnOff applications

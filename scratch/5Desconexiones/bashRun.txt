@@ -1,0 +1,7 @@
+
+for i in {500..2500..500}
+do
+./ns3 run "5Desconexiones --nodesToDisconnect=$i
+∙ --input=3000nodes.txt
+∙ --output=5Desconexiones3000.dat"
+done

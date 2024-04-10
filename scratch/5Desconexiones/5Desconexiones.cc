@@ -1,10 +1,8 @@
 #include "main.h"
 
 // Simulation parameters
-float stopSendingTime = 60;                               // Time to stop sending packets
-float stopTime = 60;                                      // Simulation stop time
-int timeInterval = 30;                                    // Time interval for printing statistics
-int timeIntervalInit = 10;                                // Initial time for printing statistics
+float stopSendingTime = 10;                               // Time to stop sending packets
+float stopTime = 10;                                      // Simulation stop time
 StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
 StringValue p2pDataRate = StringValue("10Mbps");          // Data rate for point-to-point links
 StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
@@ -18,12 +16,19 @@ DoubleValue errorRate = DoubleValue(0.0001);              // Error rate for pack
 // Directory for topology file
 std::string dataFile = "5Desconexiones.dat";
 
-// Default values for command line parameters
+// Default values input paramaters
 std::string format("Inet");
 std::string input("19nodes.txt");
 
 // Main function
 int main(int argc, char* argv[]) {
+  // Command line parser
+  CommandLine cmd;
+  cmd.AddValue("nodesToDisconnect", "How many nodes to disconnect", nodesToDisconnect);
+  cmd.AddValue("input", "Topology input", input);
+  cmd.AddValue("output", "Where to store the data", dataFile);
+  cmd.Parse(argc, argv);
+
   // Randomize the seed based on current time
   uint32_t seed = static_cast<uint32_t>(time(NULL)); // Replace with your desired seed value 12345
   SeedManager::SetSeed(seed);
