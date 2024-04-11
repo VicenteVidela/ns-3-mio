@@ -41,11 +41,11 @@ void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime) 
 // Function to handle transmited packets
 void nodeTxTrace(Ptr<const Packet> packet) {
   // Get the packet transmission time
-  Time txTime = Simulator::Now();
-  // Get the packet ID
-  uint32_t packetId = packet->GetUid();
-  // Store the transmission time
-  transmissionTimes[packetId] = txTime;
+  // Time txTime = Simulator::Now();
+  // // Get the packet ID
+  // uint32_t packetId = packet->GetUid();
+  // // Store the transmission time
+  // transmissionTimes[packetId] = txTime;
   // Increment the number of transmitted packets
   transmitedPacketCount++;
 }
@@ -72,7 +72,23 @@ void nodeRxTrace(Ptr<const Packet> packet) {
   receivedPacketCount++;
 }
 
-// Function for dropping packets at disconnected sinkss
+// Function for dropping packets at disconnected sinks
 void disconnectednodeRxTrace(Ptr<const Packet> packet) {
   return;
+}
+
+// Function for tracing queue length
+void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue) {
+  // int32_t delta = newValue - oldValue;
+  // std::cout << "Queue " << context << " length changed from " << oldValue << " to " << newValue << std::endl;
+  return;
+}
+
+void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
+  // Get the packet transmission time
+  Time txTime = Simulator::Now();
+  // Get the packet ID
+  uint32_t packetId = packet->GetUid();
+  // Store the transmission time
+  transmissionTimes[packetId] = txTime;
 }

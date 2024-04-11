@@ -36,4 +36,9 @@ void nodeRxTrace(Ptr<const Packet> packet);
 // Function for dropping packets at disconnected sinks
 void disconnectednodeRxTrace(Ptr<const Packet> packet);
 
+// Function for tracing queue length
+void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue);
+
+void nodeQueueEnqueueTrace(Ptr<const Packet> packet);
+
 #endif

@@ -49,39 +49,38 @@ axs[0, 0].plot(nodes_disconnected, throughput, marker='o', linestyle='-', color=
 axs[0, 0].set_title('Throughput')
 axs[0, 0].set_xlabel('Nodes Disconnected')
 axs[0, 0].set_ylabel('Throughput (bps)')
-axs[0, 0].set_xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 1.0))
+axs[0, 0].set_xticks(nodes_disconnected)
 
 # Plot Packet Loss Percentage
 axs[0, 1].plot(nodes_disconnected, packet_loss, marker='o', linestyle='-', color='g')
 axs[0, 1].set_title('Packet Loss Percentage')
 axs[0, 1].set_xlabel('Nodes Disconnected')
 axs[0, 1].set_ylabel('Packet Loss (%)')
-axs[0, 1].set_xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 1.0))
+axs[0, 1].set_xticks(nodes_disconnected)
 
 # Combine Mean Delay and Mean Jitter
-axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y', label='Mean Delay')
-axs[1, 0].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m', label='Mean Jitter')
-axs[1, 0].set_title('Mean Delay and Mean Jitter')
-axs[1, 0].set_xlabel('Nodes Disconnected')
-axs[1, 0].set_ylabel('Time (ms)')
-axs[1, 0].set_xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 1.0))
-axs[1, 0].legend()
-
-# # Plot Mean Delay
-# axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y')
-# axs[1, 0].set_title('Mean Delay')
+# axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y', label='Mean Delay')
+# axs[1, 0].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m', label='Mean Jitter')
+# axs[1, 0].set_title('Mean Delay and Mean Jitter')
 # axs[1, 0].set_xlabel('Nodes Disconnected')
 # axs[1, 0].set_ylabel('Time (ms)')
-# axs[1, 0].set_xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 1.0))
+# axs[1, 0].set_xticks(nodes_disconnected)
+# axs[1, 0].legend()
 
-# # Plot Mean Jitter
-# axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m')
-# axs[1, 1].set_title('Mean Jitter')
-# axs[1, 1].set_xlabel('Nodes Disconnected')
-# axs[1, 1].set_ylabel('Time (ms)')
-# axs[1, 1].set_xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 1.0))
+# Plot Mean Delay
+axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y')
+axs[1, 0].set_title('Mean Delay')
+axs[1, 0].set_xlabel('Nodes Disconnected')
+axs[1, 0].set_ylabel('Time (ms)')
+axs[1, 0].set_xticks(nodes_disconnected)
 
-# fig.xticks(np.arange(min(nodes_disconnected), max(nodes_disconnected)+1, 2.0))
+# Plot Mean Jitter
+axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m')
+axs[1, 1].set_title('Mean Jitter')
+axs[1, 1].set_xlabel('Nodes Disconnected')
+axs[1, 1].set_ylabel('Time (ms)')
+axs[1, 1].set_xticks(nodes_disconnected)
+
 # Adjust layout
 plt.tight_layout()
 

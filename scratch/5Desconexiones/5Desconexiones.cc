@@ -3,14 +3,15 @@
 /*
  * Simulation Parameters
 */
-float stopSendingTime = 10;                               // Time to stop sending packets
-float stopTime = 10;                                      // Simulation stop time
+float stopTime = 20;                                      // Simulation stop time
 StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
-StringValue p2pDataRate = StringValue("10Mbps");          // Data rate for point-to-point links
-StringValue onoffDataRate = StringValue("100Kbps");       // Data rate for OnOff applications
+StringValue p2pDataRate = StringValue("100Kbps");         // Max data rate for point-to-point links
+StringValue onoffDataRate = StringValue("1000Kbps");      // Data rate for OnOff applications
 UintegerValue onoffPacketSize = UintegerValue(1500);      // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno"); // Congestion control algorithm
-int nodesToDisconnect = 10;                               // Number of nodes to disconnect
+StringValue packetQueueSize = StringValue("1000p");         // Packet queue size for each link
+std::string queueDiscipline = "ns3::DropTailQueue";       // Queue discipline to handle excess packets
+int nodesToDisconnect = 0;                               // Number of nodes to disconnect
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();  // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.0001);              // Error rate for package loss
@@ -106,9 +107,19 @@ int main(int argc, char* argv[]) {
     p2p.SetChannelAttribute("Delay", p2pDelay);
     p2p.SetDeviceAttribute("DataRate", p2pDataRate);
     p2p.SetDeviceAttribute("ReceiveErrorModel", PointerValue(em));
+    p2p.SetQueue(queueDiscipline, "MaxSize", packetQueueSize);
 
     // Install net devices for point-to-point communication
     ndc[i] = p2p.Install(nc[i]);
+
+    // Get the queue associated with the net device
+    Ptr<Queue<Packet>> queue = ndc[i].Get(0)->GetObject<PointToPointNetDevice>()->GetQueue();
+
+    // Connect trace to the Enqueue event of the queue
+    queue->TraceConnectWithoutContext("Enqueue", MakeCallback(&nodeQueueEnqueueTrace));
+
+    // Callback to the trace function for queue length
+    queue->TraceConnect("PacketsInQueue", std::to_string(i), MakeCallback(&QueueLengthTrace));
 
     // Assign IPv4 addresses to net devices
     ipic[i] = address.Assign(ndc[i]);
@@ -168,7 +179,7 @@ int main(int argc, char* argv[]) {
         Ptr<NetDevice> dev = clientNode->GetDevice(j);
         Ptr<PointToPointNetDevice> p2pDev = DynamicCast<PointToPointNetDevice>(dev);
         if (p2pDev) {
-            // Connect trace only for point-to-point devices
+            // Connect trace for point-to-point devices to trace receiving packets
             Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
                                           "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
                                           "/$ns3::PointToPointNetDevice/PhyRxEnd",
