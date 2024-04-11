@@ -1,6 +1,8 @@
 #include "main.h"
 
-// Simulation parameters
+/*
+ * Simulation Parameters
+*/
 float stopSendingTime = 10;                               // Time to stop sending packets
 float stopTime = 10;                                      // Simulation stop time
 StringValue p2pDelay = StringValue("2ms");                // Delay for point-to-point links
@@ -20,7 +22,9 @@ std::string dataFile = "5Desconexiones.dat";
 std::string format("Inet");
 std::string input("19nodes.txt");
 
-// Main function
+/*
+* Main function
+*/
 int main(int argc, char* argv[]) {
   // Command line parser
   CommandLine cmd;
@@ -33,7 +37,10 @@ int main(int argc, char* argv[]) {
   uint32_t seed = static_cast<uint32_t>(time(NULL)); // Replace with your desired seed value 12345
   SeedManager::SetSeed(seed);
 
-  // Read topology data.
+  /**
+   * Read topology data
+   */
+  // Pick a topology reader based on the requested format.
   TopologyReaderHelper topoHelp;
   topoHelp.SetFileName(topologyDirectory + input);
   topoHelp.SetFileType(format);
@@ -50,13 +57,15 @@ int main(int argc, char* argv[]) {
     return -1;
   }
 
+  // Get the number of nodes in the topology
   uint32_t totalNodes = nodes.GetN();
 
   std::cout << "Number of nodes: " << totalNodes << std::endl;
 
-  // Create nodes and network stacks
+  /*
+   * Create nodes and network stacks
+  */
   InternetStackHelper stack;
-
   Ipv4NixVectorHelper nixRouting;
   stack.SetRoutingHelper(nixRouting);
   stack.Install(nodes);
@@ -69,7 +78,7 @@ int main(int argc, char* argv[]) {
   auto nc = new NodeContainer[totlinks];
   TopologyReader::ConstLinksIterator iter;
   int i = 0;
-  for (iter = inFile->LinksBegin(); iter != inFile->LinksEnd(); iter++, i++) {
+  for (iter = inFile->LinksBegin(); iter != inFile->LinksEnd(); ++iter, ++i) {
     // Create a NodeContainer for each link
     nc[i] = NodeContainer(iter->GetFromNode(), iter->GetToNode());
   }
@@ -82,10 +91,17 @@ int main(int argc, char* argv[]) {
     DisconnectRandomNode();
   }
 
-  // Create point-to-point links between nodes
+  /**
+   * Point-to-point links and configure communication attributes
+  */
+
+  // Create container for point-to-point links
   auto ndc = new NetDeviceContainer[totlinks];
   PointToPointHelper p2p;
-  for (int i = 0; i < totlinks; i++) {
+  // Create a container to hold the addresses
+  auto ipic = new Ipv4InterfaceContainer[totlinks];
+  i=0;
+  for (int i = 0; i < totlinks; ++i) {
     // Configure point-to-point communication attributes
     p2p.SetChannelAttribute("Delay", p2pDelay);
     p2p.SetDeviceAttribute("DataRate", p2pDataRate);
@@ -93,16 +109,15 @@ int main(int argc, char* argv[]) {
 
     // Install net devices for point-to-point communication
     ndc[i] = p2p.Install(nc[i]);
-  }
 
-  auto ipic = new Ipv4InterfaceContainer[totlinks];
-  for (int i = 0; i < totlinks; i++) {
     // Assign IPv4 addresses to net devices
     ipic[i] = address.Assign(ndc[i]);
     address.NewNetwork();
   }
 
-  // Send around packets
+  /*
+   *  Send around packets and receive them
+  */
   // Use Congestion Control
   Config::SetDefault("ns3::TcpL4Protocol::SocketType", CCAlgorithm);
 
@@ -114,7 +129,7 @@ int main(int argc, char* argv[]) {
   ApplicationContainer onOffApps;
 
   // Create a packet sink for each node to measure packet reception
-  for (unsigned int i = 0; i < totalNodes; i++) {
+  for (unsigned int i = 0; i < totalNodes; ++i) {
     Ptr<Node> clientNode = nodes.Get(i);
 
     // Get the IPv4 address of the client node
@@ -134,6 +149,7 @@ int main(int argc, char* argv[]) {
       OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
       onoff.SetAttribute("DataRate", onoffDataRate);
       onoff.SetAttribute("PacketSize", onoffPacketSize);
+      // Set constant rate for packet transmission
       onoff.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
       onoff.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
 
@@ -160,21 +176,24 @@ int main(int argc, char* argv[]) {
         }
       }
     }
-
-
   }
 
   // Connect trace to transmited packets
   Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
 
-  // Start the sink and OnOff applications
+  /**
+   * Start applications
+  */
+  // Start the sink applications
   sinkApps.Start(Seconds(0.0));
   sinkApps.Stop(Seconds(stopTime));
-
+  // Start the onOff applications
   onOffApps.Start(Seconds(0.0));
   onOffApps.Stop(Seconds(stopTime));
 
-  // Run the simulation
+  /**
+   * Schedule simulation run and print function
+  */
   std::cout << "Run Simulation." << std::endl;
 
   // Schedule reset stats
@@ -184,6 +203,7 @@ int main(int argc, char* argv[]) {
 
   // Stop simulation at stop time
   Simulator::Stop(Seconds(stopTime+1));
+  // Run the simulation
   Simulator::Run();
   Simulator::Destroy();
 

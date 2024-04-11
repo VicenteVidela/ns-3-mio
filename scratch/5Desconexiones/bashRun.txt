@@ -4,3 +4,5 @@ do
 ∙ --input=3000nodes.txt
 ∙ --output=5Desconexiones3000.dat"
 done
+
+./ns3 run 5Desconexiones
