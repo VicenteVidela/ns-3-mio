@@ -21,5 +21,5 @@ void DisconnectRandomNode() {
 
   // Add the node to the set of disconnected nodes
   disconnectedNodes.insert(randomIndex);
-  std::cout << "Disconnecting node " << randomIndex << std::endl;
+  // std::cout << "Disconnecting node " << randomIndex << std::endl;
 }

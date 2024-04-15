@@ -27,8 +27,8 @@ using namespace ns3;
 extern float stopTime;                                      // Simulation stop time
 extern ns3::StringValue p2pDelay;                           // Delay for point-to-point links
 extern ns3::StringValue p2pDataRate;                        // Data rate for point-to-point links
-extern ns3::StringValue onoffDataRate;                      // Data rate for OnOff applications
-extern ns3::UintegerValue onoffPacketSize;                  // Packet size for OnOff applications
+extern ns3::DataRate onoffDataRate;                      // Data rate for OnOff applications
+extern uint32_t onoffPacketSize;                  // Packet size for OnOff applications
 extern ns3::StringValue CCAlgorithm;                        // Congestion control algorithm
 extern ns3::StringValue packetQueueSize;                    // Packet queue size for each link
 extern std::string queueDiscipline;                         // Queue discipline to handle excess packets

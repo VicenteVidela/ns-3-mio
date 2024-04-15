@@ -17,18 +17,31 @@ using namespace ns3;
 
 
 // Variables for statistics
-extern uint64_t totalReceivedBytes;       // Total received bytes
-extern uint64_t totalTransmittedPackets;  // Total transmitted packets
-extern uint64_t totalReceivedPackets;     // Total received packets
 
 extern uint32_t receivedPacketCount;    // Number of packets received
 extern uint32_t transmitedPacketCount;  // Number of packets transmitted
+extern double totalBandwidth;           // Total maximum bandwidth of the network
+extern uint32_t onoffPacketSize;        // Packet size for OnOff applications
+extern uint32_t totalBytesReceived;     // Total bytes received
 
 
 // Function to print throughput and packet statistics at the end of the simulation
 void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime);
 
-// Function to handle TCP packet events
+
+/**
+ * Queue functions
+*/
+// Function for tracing packets entering queue
+void nodeQueueEnqueueTrace(Ptr<const Packet> packet);
+
+// Function for tracing packets leaving queue
+void nodeQueueDequeueTrace(Ptr<const Packet> packet);
+
+/**
+ * Packet functions
+*/
+// Function to handle transmited packets
 void nodeTxTrace(Ptr<const Packet> packet);
 
 // Function to handle reception at each sink
@@ -39,6 +52,5 @@ void disconnectednodeRxTrace(Ptr<const Packet> packet);
 // Function for tracing queue length
 void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue);
 
-void nodeQueueEnqueueTrace(Ptr<const Packet> packet);
 
 #endif
