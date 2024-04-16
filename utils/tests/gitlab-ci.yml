@@ -23,13 +23,19 @@ stages:
   - test
   - code-linting
   - documentation
+  - release
 
 workflow:
+  auto_cancel:
+    on_new_commit: interruptible
   rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      auto_cancel:
+        on_new_commit: none
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
-    - if: $CI_COMMIT_BRANCH
+    - when: always
 
 ###################### BUILD STAGE #############################################
 
@@ -72,6 +78,7 @@ workflow:
     key: "ccache-$CI_JOB_NAME"
     paths:
       - $CCACHE_BASEDIR_VALUE/
+  interruptible: true
   timeout: 12h
   variables:
     CCACHE_BASEDIR_VALUE: ns-3-ccache-storage
@@ -93,3 +100,4 @@ include:
   - "utils/tests/gitlab-ci-code-linting.yml"
   - "utils/tests/gitlab-ci-doc.yml"
   - "utils/tests/gitlab-ci-cppyy.yml"
+  - "utils/tests/gitlab-ci-release.yml"

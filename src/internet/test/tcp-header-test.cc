@@ -460,12 +460,13 @@ class TcpHeaderTestSuite : public TestSuite
 {
   public:
     TcpHeaderTestSuite()
-        : TestSuite("tcp-header", UNIT)
+        : TestSuite("tcp-header", Type::UNIT)
     {
-        AddTestCase(new TcpHeaderGetSetTestCase("GetSet test cases"), TestCase::QUICK);
+        AddTestCase(new TcpHeaderGetSetTestCase("GetSet test cases"), TestCase::Duration::QUICK);
         AddTestCase(new TcpHeaderWithRFC793OptionTestCase("Test for options in RFC 793"),
-                    TestCase::QUICK);
-        AddTestCase(new TcpHeaderFlagsToString("Test flags to string function"), TestCase::QUICK);
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcpHeaderFlagsToString("Test flags to string function"),
+                    TestCase::Duration::QUICK);
     }
 };
 

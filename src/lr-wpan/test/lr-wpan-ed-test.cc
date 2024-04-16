@@ -168,7 +168,7 @@ LrWpanEdTestCase::DoRun()
     NS_TEST_EXPECT_MSG_EQ(m_status, IEEE_802_15_4_PHY_SUCCESS, "ED status SUCCESS (as expected)");
     NS_TEST_EXPECT_MSG_EQ(m_level, 0, "ED reported signal level 0 (as expected)");
 
-    // Configure the RX Power to be -106.58 dBm, i.e. exectly to receiver sensitivity.
+    // Configure the RX Power to be -106.58 dBm, i.e. exactly to receiver sensitivity.
     propModel->SetRss(-106.58);
 
     m_status = IEEE_802_15_4_PHY_UNSPECIFIED;
@@ -266,9 +266,9 @@ class LrWpanEdTestSuite : public TestSuite
 };
 
 LrWpanEdTestSuite::LrWpanEdTestSuite()
-    : TestSuite("lr-wpan-energy-detection", UNIT)
+    : TestSuite("lr-wpan-energy-detection", Type::UNIT)
 {
-    AddTestCase(new LrWpanEdTestCase, TestCase::QUICK);
+    AddTestCase(new LrWpanEdTestCase, TestCase::Duration::QUICK);
 }
 
 static LrWpanEdTestSuite g_lrWpanEdTestSuite; //!< Static variable for test initialization

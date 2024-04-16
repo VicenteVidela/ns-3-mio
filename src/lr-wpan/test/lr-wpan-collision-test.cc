@@ -225,9 +225,9 @@ class LrWpanCollisionTestSuite : public TestSuite
 };
 
 LrWpanCollisionTestSuite::LrWpanCollisionTestSuite()
-    : TestSuite("lr-wpan-collision", UNIT)
+    : TestSuite("lr-wpan-collision", Type::UNIT)
 {
-    AddTestCase(new LrWpanCollisionTestCase, TestCase::QUICK);
+    AddTestCase(new LrWpanCollisionTestCase, TestCase::Duration::QUICK);
 }
 
 static LrWpanCollisionTestSuite

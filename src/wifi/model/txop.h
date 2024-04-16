@@ -30,6 +30,12 @@
 #include <memory>
 #include <vector>
 
+#define WIFI_TXOP_NS_LOG_APPEND_CONTEXT                                                            \
+    if (m_mac)                                                                                     \
+    {                                                                                              \
+        std::clog << "[mac=" << m_mac->GetAddress() << "] ";                                       \
+    }
+
 class EmlsrUlTxopTest;
 
 namespace ns3
@@ -396,11 +402,30 @@ class Txop : public Object
     virtual ChannelAccessStatus GetAccessStatus(uint8_t linkId) const;
 
     /**
-     * Request access from Txop on the given link if needed.
+     * Request channel access on the given link after the occurrence of an event that possibly
+     * requires to generate a new backoff value. Examples of such an event are: a packet has been
+     * enqueued by the upper layer; the given link has been unblocked after being blocked for some
+     * reason (e.g., wait for ADDBA Response, wait for TX on another EMLSR link to finish, etc.);
+     * the PHY operating on the given link just woke up from sleep mode. The <i>checkMediumBusy</i>
+     * argument is forwarded to the NeedBackoffUponAccess method of the ChannelAccessManager.
      *
      * \param linkId the ID of the given link
+     * \param hadFramesToTransmit whether packets available for transmission were queued just
+     *                            before the occurrence of the event causing this channel access
+     *                            request
+     * \param checkMediumBusy whether generation of backoff (also) depends on the busy/idle state
+     *                        of the medium
      */
-    void StartAccessIfNeeded(uint8_t linkId);
+    void StartAccessAfterEvent(uint8_t linkId, bool hadFramesToTransmit, bool checkMediumBusy);
+
+    static constexpr bool HAD_FRAMES_TO_TRANSMIT =
+        true; //!< packets available for transmission were in the queue
+    static constexpr bool DIDNT_HAVE_FRAMES_TO_TRANSMIT =
+        false; //!< no packet available for transmission was in the queue
+    static constexpr bool CHECK_MEDIUM_BUSY =
+        true; //!< generation of backoff (also) depends on the busy/idle state of the medium
+    static constexpr bool DONT_CHECK_MEDIUM_BUSY =
+        false; //!< generation of backoff is independent of the busy/idle state of the medium
 
     /**
      * \param nSlots the number of slots of the backoff.

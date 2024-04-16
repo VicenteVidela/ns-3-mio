@@ -145,6 +145,8 @@ SOURCEFIGS = \
 	$(SRC)/wifi/doc/source/figures/ack-su-format.pdf \
 	$(SRC)/wifi/doc/source/figures/ack-su-format.png \
 	$(SRC)/wifi/doc/source/figures/assoc-manager.eps \
+	$(SRC)/wifi/doc/source/figures/emlsr-dl-txop.eps \
+	$(SRC)/wifi/doc/source/figures/emlsr-ul-txop.eps \
 	$(SRC)/wifi/doc/source/figures/mu-bar.pdf \
 	$(SRC)/wifi/doc/source/figures/mu-bar.png \
 	$(SRC)/wifi/doc/source/figures/aggr-mu-bar.pdf \
@@ -466,6 +468,8 @@ IMAGES_EPS = \
 	$(FIGURES)/energyFramework.eps \
 	$(FIGURES)/clear-channel.eps \
 	$(FIGURES)/assoc-manager.eps \
+	$(FIGURES)/emlsr-dl-txop.eps \
+	$(FIGURES)/emlsr-ul-txop.eps \
 	$(FIGURES)/nist-frame-success-rate.eps \
 	$(FIGURES)/nist-frame-success-rate-n.eps \
 	$(FIGURES)/nist-frame-success-rate-ac.eps \
@@ -545,6 +549,8 @@ $(FIGURES)/nist-frame-success-rate-n.pdf_width = 12cm
 $(FIGURES)/nist-frame-success-rate-ac.pdf_width = 12cm
 $(FIGURES)/nist-frame-success-rate-ax.pdf_width = 12cm
 $(FIGURES)/assoc-manager.pdf_width = 12cm
+$(FIGURES)/emlsr-dl-txop.pdf_width = 12cm
+$(FIGURES)/emlsr-ul-txop.pdf_width = 12cm
 
 IMAGES_PNG = ${IMAGES_EPS:.eps=.png}
 IMAGES_PDF = ${IMAGES_EPS:.eps=.pdf}
@@ -571,7 +577,7 @@ RESCALE = ../../utils/rescale-pdf.sh
 	@if test x$($@_width) != x; then $(RESCALE) $($@_width) $@ ; fi
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -W --keep-going
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build

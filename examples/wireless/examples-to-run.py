@@ -85,7 +85,7 @@ cpp_examples = [
         "True",
     ),
     (
-        "wifi-vht-network --simulationTime=0.2 --useRts=0  --minExpectedThroughput=5 --maxExpectedThroughput=583",
+        "wifi-vht-network --simulationTime=0.2 --useRts=0  --minExpectedThroughput=5 --maxExpectedThroughput=620",
         "True",
         "True",
     ),
@@ -140,12 +140,12 @@ cpp_examples = [
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.1 --frequency=5 --useRts=0 --minExpectedThroughput=6 --maxExpectedThroughput=550",
+        "wifi-eht-network --simulationTime=0.1 --frequency=5 --useRts=0 --minExpectedThroughput=6 --maxExpectedThroughput=760",
         "True",
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.1 --frequency=5 --useRts=0 --mpduBufferSize=1024 --frequency2=6 --minExpectedThroughput=12 --maxExpectedThroughput=550",
+        "wifi-eht-network --simulationTime=0.1 --frequency=5 --useRts=0 --mpduBufferSize=1024 --frequency2=6 --minExpectedThroughput=7 --maxExpectedThroughput=1300",
         "True",
         "True",
     ),
@@ -155,17 +155,17 @@ cpp_examples = [
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.1 --frequency=2.4 --useRts=0 --mpduBufferSize=512 --frequency2=5 --minExpectedThroughput=12 --maxExpectedThroughput=500",
+        "wifi-eht-network --simulationTime=0.1 --frequency=2.4 --useRts=0 --mpduBufferSize=512 --frequency2=5 --minExpectedThroughput=7 --maxExpectedThroughput=330",
         "True",
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.1 --frequency=2.4 --useRts=1 --minExpectedThroughput=6 --maxExpectedThroughput=240",
+        "wifi-eht-network --simulationTime=0.1 --frequency=2.4 --useRts=1 --minExpectedThroughput=5 --maxExpectedThroughput=240",
         "True",
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.22 --udp=0 --downlink=1 --useRts=0 --nStations=4 --dlAckType=ACK-SU-FORMAT --enableUlOfdma=1 --enableBsrp=0 --mcs=4 --frequency2=6  --minExpectedThroughput=35 --maxExpectedThroughput=280",
+        "wifi-eht-network --simulationTime=0.23 --udp=0 --downlink=1 --useRts=0 --nStations=4 --dlAckType=ACK-SU-FORMAT --enableUlOfdma=1 --enableBsrp=0 --mcs=5 --frequency2=6  --minExpectedThroughput=35 --maxExpectedThroughput=280",
         "True",
         "True",
     ),
@@ -180,7 +180,7 @@ cpp_examples = [
         "True",
     ),
     (
-        "wifi-eht-network --simulationTime=0.2 --udp=1 --downlink=0 --useRts=0 --nStations=5 --dlAckType=AGGR-MU-BAR --enableUlOfdma=1 --enableBsrp=1 --mpduBufferSize=1024 --mcs=5 --muSchedAccessReqInterval=45ms --frequency2=6 --minExpectedThroughput=70 --maxExpectedThroughput=715",
+        "wifi-eht-network --simulationTime=0.2 --udp=0 --downlink=0 --useRts=0 --nStations=4 --dlAckType=AGGR-MU-BAR --enableUlOfdma=1 --enableBsrp=1 --mpduBufferSize=1024 --mcs=4 --muSchedAccessReqInterval=45ms --frequency2=6 --minExpectedThroughput=50 --maxExpectedThroughput=415",
         "True",
         "True",
     ),

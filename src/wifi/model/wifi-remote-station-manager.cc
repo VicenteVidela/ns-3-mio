@@ -100,7 +100,8 @@ WifiRemoteStationManager::GetTypeId()
                           "Protection mode used when non-ERP STAs are connected to an ERP AP: "
                           "Rts-Cts or Cts-To-Self",
                           EnumValue(WifiRemoteStationManager::CTS_TO_SELF),
-                          MakeEnumAccessor(&WifiRemoteStationManager::m_erpProtectionMode),
+                          MakeEnumAccessor<WifiRemoteStationManager::ProtectionMode>(
+                              &WifiRemoteStationManager::m_erpProtectionMode),
                           MakeEnumChecker(WifiRemoteStationManager::RTS_CTS,
                                           "Rts-Cts",
                                           WifiRemoteStationManager::CTS_TO_SELF,
@@ -109,7 +110,8 @@ WifiRemoteStationManager::GetTypeId()
                           "Protection mode used when non-HT STAs are connected to a HT AP: Rts-Cts "
                           "or Cts-To-Self",
                           EnumValue(WifiRemoteStationManager::CTS_TO_SELF),
-                          MakeEnumAccessor(&WifiRemoteStationManager::m_htProtectionMode),
+                          MakeEnumAccessor<WifiRemoteStationManager::ProtectionMode>(
+                              &WifiRemoteStationManager::m_htProtectionMode),
                           MakeEnumChecker(WifiRemoteStationManager::RTS_CTS,
                                           "Rts-Cts",
                                           WifiRemoteStationManager::CTS_TO_SELF,
@@ -142,6 +144,8 @@ WifiRemoteStationManager::WifiRemoteStationManager()
       m_shortSlotTimeEnabled(false)
 {
     NS_LOG_FUNCTION(this);
+    m_ssrc.fill(0);
+    m_slrc.fill(0);
 }
 
 WifiRemoteStationManager::~WifiRemoteStationManager()
@@ -166,13 +170,6 @@ WifiRemoteStationManager::SetupPhy(const Ptr<WifiPhy> phy)
     // transmit rate for automatic control responses like
     // acknowledgments.
     m_wifiPhy = phy;
-    m_defaultTxMode = phy->GetDefaultMode();
-    NS_ASSERT(m_defaultTxMode.IsMandatory());
-    if (GetHtSupported())
-    {
-        m_defaultTxMcs = HtPhy::GetHtMcs(0);
-    }
-    Reset();
 }
 
 void
@@ -182,7 +179,6 @@ WifiRemoteStationManager::SetupMac(const Ptr<WifiMac> mac)
     // We need to track our MAC because it is the object that knows the
     // full set of interframe spaces.
     m_wifiMac = mac;
-    Reset();
 }
 
 int64_t
@@ -1699,13 +1695,16 @@ WifiRemoteStationManager::GetLdpcSupported(Mac48Address address) const
 WifiMode
 WifiRemoteStationManager::GetDefaultMode() const
 {
-    return m_defaultTxMode;
+    NS_ASSERT(m_wifiPhy);
+    auto defaultTxMode = m_wifiPhy->GetDefaultMode();
+    NS_ASSERT(defaultTxMode.IsMandatory());
+    return defaultTxMode;
 }
 
 WifiMode
 WifiRemoteStationManager::GetDefaultMcs() const
 {
-    return m_defaultTxMcs;
+    return HtPhy::GetHtMcs0();
 }
 
 WifiMode

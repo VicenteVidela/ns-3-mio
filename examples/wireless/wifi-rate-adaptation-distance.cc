@@ -24,7 +24,7 @@
  * highlighting the power adaptation.
  *
  * This simulation consist of 2 nodes, one AP and one STA.
- * The AP generates UDP traffic with a CBR of 54 Mbps to the STA.
+ * The AP generates UDP traffic with a CBR of 400 Mbps to the STA.
  * The AP can use any power and rate control mechanism and the STA uses
  * only Minstrel rate control.
  * The STA can be configured to move away from (or towards to) the AP.
@@ -224,7 +224,7 @@ main(int argc, char* argv[])
     int simuTime = steps * stepsTime;
 
     if (standard != "802.11a" && standard != "802.11b" && standard != "802.11g" &&
-        standard == "802.11n-2.4GHz" && standard != "802.11n-5GHz" && standard != "802.11ac")
+        standard != "802.11n-2.4GHz" && standard != "802.11n-5GHz" && standard != "802.11ac")
     {
         NS_FATAL_ERROR("Standard " << standard << " is not supported by this program");
     }

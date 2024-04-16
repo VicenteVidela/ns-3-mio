@@ -488,19 +488,23 @@ class EmlsrDlTxopTest : public EmlsrOperationsTestBase
  *   of transmitting, we block transmissions on the link where the main PHY is operating and
  *   generate new UL packets, which will then be transmitted on a link where an aux PHY is
  *   operating. Thus, the aux PHY transmits an RTS frame and the main PHY will take over and
- *   transmit the second UL data frame. We check that the number of backoff slots on the link
- *   where the main PHY was operating (which is blocked because another EMLSR link is being used)
- *   at the end of the frame exchange on the other EMLSR link is the same as the one at the
- *   beginning of that frame exchange.
+ *   transmit the second UL data frame. We check that, while the link on which the main PHY was
+ *   operating is blocked because another EMLSR link is being used, new backoff values for that
+ *   link are generated if and only if the QosTxop::GenerateBackoffIfTxopWithoutTx attribute is
+ *   true; otherwise, a new backoff value is generated when the link is unblocked.
  * - When the exchange of the second UL data frame terminates, we make the aux PHY unable to
  *   transmit, block transmissions on the non-EMLSR link (if any) and generate some more UL
  *   packets, which will then be transmitted by the main PHY. However, a MediumSyncDelay timer
  *   is now running on the link where the main PHY is operating, hence transmissions are protected
  *   by an RTS frame. We install a post reception error model on the AP MLD so that all RTS frames
  *   sent by the EMLSR client are not received by the AP MLD. We check that the EMLSR client makes
- *   at most the configured max number of transmission attempts and that the last UL data frame is
+ *   at most the configured max number of transmission attempts and that another UL data frame is
  *   sent once the MediumSyncDelay timer is expired. We also check that the TX width of the RTS
- *   frames and the last UL data frame equal the channel width used by the main PHY.
+ *   frames and the UL data frame equal the channel width used by the main PHY.
+ * - We check that no issue arises in case an aux PHY sends an RTS frame but the CTS response is
+ *   not transmitted successfully. Specifically, we check that the main PHY is completing the
+ *   channel switch when the (unsuccessful) reception of the CTS ends and that a new RTS/CTS
+ *   exchange is carried out to protect the transmission of the last data frame.
  */
 class EmlsrUlTxopTest : public EmlsrOperationsTestBase
 {
@@ -511,13 +515,16 @@ class EmlsrUlTxopTest : public EmlsrOperationsTestBase
     struct Params
     {
         std::set<uint8_t>
-            linksToEnableEmlsrOn;    //!< IDs of links on which EMLSR mode should be enabled
-        uint16_t channelWidth;       //!< width (MHz) of the channels used by MLDs
-        uint16_t auxPhyChannelWidth; //!< max width (MHz) supported by aux PHYs
-        Time mediumSyncDuration;     //!< duration of the MediumSyncDelay timer
-        uint8_t msdMaxNTxops;        //!< Max number of TXOPs that an EMLSR client is allowed
-                                     //!< to attempt to initiate while the MediumSyncDelay
-                                     //!< timer is running (zero indicates no limit)
+            linksToEnableEmlsrOn;       //!< IDs of links on which EMLSR mode should be enabled
+        uint16_t channelWidth;          //!< width (MHz) of the channels used by MLDs
+        uint16_t auxPhyChannelWidth;    //!< max width (MHz) supported by aux PHYs
+        Time mediumSyncDuration;        //!< duration of the MediumSyncDelay timer
+        uint8_t msdMaxNTxops;           //!< Max number of TXOPs that an EMLSR client is allowed
+                                        //!< to attempt to initiate while the MediumSyncDelay
+                                        //!< timer is running (zero indicates no limit)
+        bool genBackoffIfTxopWithoutTx; //!< whether the backoff should be invoked when the AC
+                                        //!< gains the right to start a TXOP but it does not
+                                        //!< transmit any frame
     };
 
     /**
@@ -551,6 +558,16 @@ class EmlsrUlTxopTest : public EmlsrOperationsTestBase
      * \param linkId the ID of the given link
      */
     void CheckRtsFrames(Ptr<const WifiMpdu> mpdu, const WifiTxVector& txVector, uint8_t linkId);
+
+    /**
+     * Check that appropriate actions are taken by the EMLSR client when receiving a CTS
+     * frame on the given link.
+     *
+     * \param mpdu the MPDU carrying the CTS frame
+     * \param txVector the TXVECTOR used to send the PPDU
+     * \param linkId the ID of the given link
+     */
+    void CheckCtsFrames(Ptr<const WifiMpdu> mpdu, const WifiTxVector& txVector, uint8_t linkId);
 
     /**
      * Check that appropriate actions are taken when an MLD transmits a PPDU containing
@@ -601,13 +618,16 @@ class EmlsrUlTxopTest : public EmlsrOperationsTestBase
                                           //!< generated and the time transmissions are unblocked
                                           //!< on the link where the main PHY is operating on
     Time m_lastMsdExpiryTime;             //!< expiry time of the last MediumSyncDelay timer
+    bool m_checkBackoffStarted;           //!< whether we are checking the generated backoff values
+    std::optional<Time> m_backoffEndTime; //!< expected backoff end time on main PHY link
     Ptr<ListErrorModel> m_errorModel;     ///< error rate model to corrupt packets
     std::size_t m_countQoSframes;         //!< counter for QoS frames
     std::size_t m_countBlockAck;          //!< counter for BlockAck frames
     std::size_t m_countRtsframes;         //!< counter for RTS frames
-    uint32_t m_backoffSlots;              //!< backoff slots on the link where the main PHY is
-                                          //!< operating when an RTS is sent by the aux PHY to
-                                          //!< start an UL TXOP
+    bool m_genBackoffIfTxopWithoutTx;     //!< whether the backoff should be invoked when the AC
+                                          //!< gains the right to start a TXOP but it does not
+                                          //!< transmit any frame
+    std::optional<bool> m_corruptCts;     //!< whether the transmitted CTS must be corrupted
 };
 
 /**

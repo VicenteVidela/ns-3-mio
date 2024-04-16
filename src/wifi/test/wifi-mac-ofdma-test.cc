@@ -100,11 +100,12 @@ TestMultiUserScheduler::GetTypeId()
             .SetParent<MultiUserScheduler>()
             .SetGroupName("Wifi")
             .AddConstructor<TestMultiUserScheduler>()
-            .AddAttribute("ModulationClass",
-                          "Modulation class for DL MU PPDUs and TB PPDUs.",
-                          EnumValue(WIFI_MOD_CLASS_HE),
-                          MakeEnumAccessor(&TestMultiUserScheduler::m_modClass),
-                          MakeEnumChecker(WIFI_MOD_CLASS_HE, "HE", WIFI_MOD_CLASS_EHT, "EHT"));
+            .AddAttribute(
+                "ModulationClass",
+                "Modulation class for DL MU PPDUs and TB PPDUs.",
+                EnumValue(WIFI_MOD_CLASS_HE),
+                MakeEnumAccessor<WifiModulationClass>(&TestMultiUserScheduler::m_modClass),
+                MakeEnumChecker(WIFI_MOD_CLASS_HE, "HE", WIFI_MOD_CLASS_EHT, "EHT"));
     return tid;
 }
 
@@ -366,7 +367,6 @@ TestMultiUserScheduler::ComputeUlMuInfo()
 
 /**
  * \ingroup wifi-test
- * \ingroup tests
  * The scenarios
  */
 enum class WifiOfdmaScenario : uint8_t
@@ -2283,7 +2283,7 @@ class WifiMacOfdmaTestSuite : public TestSuite
 };
 
 WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
-    : TestSuite("wifi-mac-ofdma", UNIT)
+    : TestSuite("wifi-mac-ofdma", Type::UNIT)
 {
     using MuEdcaParams = std::initializer_list<OfdmaAckSequenceTest::MuEdcaParameterSet>;
 
@@ -2301,7 +2301,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new OfdmaAckSequenceTest(20,
                                                  WifiAcknowledgment::DL_MU_AGGREGATE_TF,
                                                  10000,
@@ -2309,7 +2309,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new OfdmaAckSequenceTest(20,
                                                  WifiAcknowledgment::DL_MU_TF_MU_BAR,
                                                  10000,
@@ -2317,7 +2317,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new OfdmaAckSequenceTest(40,
                                                  WifiAcknowledgment::DL_MU_BAR_BA_SEQUENCE,
                                                  10000,
@@ -2325,7 +2325,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new OfdmaAckSequenceTest(40,
                                                  WifiAcknowledgment::DL_MU_AGGREGATE_TF,
                                                  10000,
@@ -2333,7 +2333,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new OfdmaAckSequenceTest(40,
                                                  WifiAcknowledgment::DL_MU_TF_MU_BAR,
                                                  10000,
@@ -2341,7 +2341,7 @@ WifiMacOfdmaTestSuite::WifiMacOfdmaTestSuite()
                                                  15,
                                                  muEdcaParameterSet,
                                                  scenario),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
         }
     }
 }

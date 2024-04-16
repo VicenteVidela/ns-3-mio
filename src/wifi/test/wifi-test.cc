@@ -328,7 +328,7 @@ void
 InterferenceHelperSequenceTest::SwitchCh(Ptr<WifiNetDevice> dev)
 {
     Ptr<WifiPhy> p = dev->GetPhy();
-    p->SetOperatingChannel(WifiPhy::ChannelTuple{40, 0, (int)(WIFI_PHY_BAND_5GHZ), 0});
+    p->SetOperatingChannel(WifiPhy::ChannelTuple{40, 0, WIFI_PHY_BAND_5GHZ, 0});
 }
 
 Ptr<Node>
@@ -1772,8 +1772,8 @@ Bug2831TestCase::~Bug2831TestCase()
 void
 Bug2831TestCase::ChangeSupportedChannelWidth()
 {
-    m_apPhy->SetOperatingChannel(WifiPhy::ChannelTuple{38, 40, (int)(WIFI_PHY_BAND_5GHZ), 0});
-    m_staPhy->SetOperatingChannel(WifiPhy::ChannelTuple{38, 40, (int)(WIFI_PHY_BAND_5GHZ), 0});
+    m_apPhy->SetOperatingChannel(WifiPhy::ChannelTuple{38, 40, WIFI_PHY_BAND_5GHZ, 0});
+    m_staPhy->SetOperatingChannel(WifiPhy::ChannelTuple{38, 40, WIFI_PHY_BAND_5GHZ, 0});
 }
 
 void
@@ -1843,7 +1843,7 @@ Bug2831TestCase::DoRun()
     m_apPhy->SetMobility(apMobility);
     m_apPhy->SetDevice(apDev);
     m_apPhy->ConfigureStandard(WIFI_STANDARD_80211ax);
-    m_apPhy->SetOperatingChannel(WifiPhy::ChannelTuple{36, 20, (int)(WIFI_PHY_BAND_5GHZ), 0});
+    m_apPhy->SetOperatingChannel(WifiPhy::ChannelTuple{36, 20, WIFI_PHY_BAND_5GHZ, 0});
 
     ObjectFactory mac;
     mac.SetTypeId("ns3::ApWifiMac");
@@ -1884,7 +1884,7 @@ Bug2831TestCase::DoRun()
     m_staPhy->SetMobility(staMobility);
     m_staPhy->SetDevice(apDev);
     m_staPhy->ConfigureStandard(WIFI_STANDARD_80211ax);
-    m_staPhy->SetOperatingChannel(WifiPhy::ChannelTuple{36, 20, (int)(WIFI_PHY_BAND_5GHZ), 0});
+    m_staPhy->SetOperatingChannel(WifiPhy::ChannelTuple{36, 20, WIFI_PHY_BAND_5GHZ, 0});
 
     mac.SetTypeId("ns3::StaWifiMac");
     auto staMac = mac.Create<WifiMac>();
@@ -3791,26 +3791,26 @@ class WifiTestSuite : public TestSuite
 };
 
 WifiTestSuite::WifiTestSuite()
-    : TestSuite("wifi-devices", UNIT)
+    : TestSuite("wifi-devices", Type::UNIT)
 {
-    AddTestCase(new WifiTest, TestCase::QUICK);
-    AddTestCase(new QosUtilsIsOldPacketTest, TestCase::QUICK);
-    AddTestCase(new InterferenceHelperSequenceTest, TestCase::QUICK); // Bug 991
-    AddTestCase(new DcfImmediateAccessBroadcastTestCase, TestCase::QUICK);
-    AddTestCase(new Bug730TestCase, TestCase::QUICK); // Bug 730
-    AddTestCase(new QosFragmentationTestCase, TestCase::QUICK);
-    AddTestCase(new SetChannelFrequencyTest, TestCase::QUICK);
-    AddTestCase(new Bug2222TestCase, TestCase::QUICK);            // Bug 2222
-    AddTestCase(new Bug2843TestCase, TestCase::QUICK);            // Bug 2843
-    AddTestCase(new Bug2831TestCase, TestCase::QUICK);            // Bug 2831
-    AddTestCase(new StaWifiMacScanningTestCase, TestCase::QUICK); // Bug 2399
-    AddTestCase(new Bug2470TestCase, TestCase::QUICK);            // Bug 2470
-    AddTestCase(new Issue40TestCase, TestCase::QUICK);            // Issue #40
-    AddTestCase(new Issue169TestCase, TestCase::QUICK);           // Issue #169
-    AddTestCase(new IdealRateManagerChannelWidthTest, TestCase::QUICK);
-    AddTestCase(new IdealRateManagerMimoTest, TestCase::QUICK);
-    AddTestCase(new HeRuMcsDataRateTestCase, TestCase::QUICK);
-    AddTestCase(new WifiMgtHeaderTest, TestCase::QUICK);
+    AddTestCase(new WifiTest, TestCase::Duration::QUICK);
+    AddTestCase(new QosUtilsIsOldPacketTest, TestCase::Duration::QUICK);
+    AddTestCase(new InterferenceHelperSequenceTest, TestCase::Duration::QUICK); // Bug 991
+    AddTestCase(new DcfImmediateAccessBroadcastTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new Bug730TestCase, TestCase::Duration::QUICK); // Bug 730
+    AddTestCase(new QosFragmentationTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new SetChannelFrequencyTest, TestCase::Duration::QUICK);
+    AddTestCase(new Bug2222TestCase, TestCase::Duration::QUICK);            // Bug 2222
+    AddTestCase(new Bug2843TestCase, TestCase::Duration::QUICK);            // Bug 2843
+    AddTestCase(new Bug2831TestCase, TestCase::Duration::QUICK);            // Bug 2831
+    AddTestCase(new StaWifiMacScanningTestCase, TestCase::Duration::QUICK); // Bug 2399
+    AddTestCase(new Bug2470TestCase, TestCase::Duration::QUICK);            // Bug 2470
+    AddTestCase(new Issue40TestCase, TestCase::Duration::QUICK);            // Issue #40
+    AddTestCase(new Issue169TestCase, TestCase::Duration::QUICK);           // Issue #169
+    AddTestCase(new IdealRateManagerChannelWidthTest, TestCase::Duration::QUICK);
+    AddTestCase(new IdealRateManagerMimoTest, TestCase::Duration::QUICK);
+    AddTestCase(new HeRuMcsDataRateTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new WifiMgtHeaderTest, TestCase::Duration::QUICK);
 }
 
 static WifiTestSuite g_wifiTestSuite; ///< the test suite

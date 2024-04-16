@@ -36,6 +36,7 @@
 #include "ns3/ssid.h"
 #include "ns3/string.h"
 #include "ns3/udp-client-server-helper.h"
+#include "ns3/udp-server.h"
 #include "ns3/uinteger.h"
 #include "ns3/wifi-acknowledgment.h"
 #include "ns3/yans-wifi-channel.h"
@@ -213,7 +214,7 @@ main(int argc, char* argv[])
     cmd.AddValue("mpduBufferSize",
                  "Size (in number of MPDUs) of the BlockAck buffer",
                  mpduBufferSize);
-    cmd.AddValue("nStations", "Number of non-AP HE stations", nStations);
+    cmd.AddValue("nStations", "Number of non-AP EHT stations", nStations);
     cmd.AddValue("dlAckType",
                  "Ack sequence type for DL OFDMA (NO-OFDMA, ACK-SU-FORMAT, MU-BAR, AGGR-MU-BAR)",
                  dlAckSeqType);
@@ -481,6 +482,8 @@ main(int argc, char* argv[])
                     clientNodes.Add(downlink ? wifiApNode.Get(0) : wifiStaNodes.Get(i));
                 }
 
+                const auto maxLoad =
+                    nLinks * EhtPhy::GetDataRate(mcs, channelWidth, gi, 1) / nStations;
                 if (udp)
                 {
                     // UDP flow
@@ -489,12 +492,13 @@ main(int argc, char* argv[])
                     serverApp = server.Install(serverNodes.get());
                     serverApp.Start(Seconds(0.0));
                     serverApp.Stop(Seconds(simulationTime + 1));
+                    const auto packetInterval = payloadSize * 8.0 / maxLoad;
 
                     for (std::size_t i = 0; i < nStations; i++)
                     {
                         UdpClientHelper client(serverInterfaces.GetAddress(i), port);
                         client.SetAttribute("MaxPackets", UintegerValue(4294967295U));
-                        client.SetAttribute("Interval", TimeValue(Time("0.00001"))); // packets/s
+                        client.SetAttribute("Interval", TimeValue(Seconds(packetInterval)));
                         client.SetAttribute("PacketSize", UintegerValue(payloadSize));
                         ApplicationContainer clientApp = client.Install(clientNodes.Get(i));
                         clientApp.Start(Seconds(1.0));
@@ -519,7 +523,7 @@ main(int argc, char* argv[])
                         onoff.SetAttribute("OffTime",
                                            StringValue("ns3::ConstantRandomVariable[Constant=0]"));
                         onoff.SetAttribute("PacketSize", UintegerValue(payloadSize));
-                        onoff.SetAttribute("DataRate", DataRateValue(1000000000)); // bit/s
+                        onoff.SetAttribute("DataRate", DataRateValue(maxLoad));
                         AddressValue remoteAddress(
                             InetSocketAddress(serverInterfaces.GetAddress(i), port));
                         onoff.SetAttribute("Remote", remoteAddress);

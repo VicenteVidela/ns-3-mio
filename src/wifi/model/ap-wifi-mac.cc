@@ -719,9 +719,9 @@ ApWifiMac::GetMultiLinkElement(uint8_t linkId, WifiMacType frameType, const Mac4
         mldCapabilities.emplace();
         mldCapabilities->maxNSimultaneousLinks = GetNLinks() - 1; // assuming STR for now
         mldCapabilities->srsSupport = 0;
-        EnumValue negSupport;
+        EnumValue<WifiTidToLinkMappingNegSupport> negSupport;
         ehtConfiguration->GetAttributeFailSafe("TidToLinkMappingNegSupport", negSupport);
-        mldCapabilities->tidToLinkMappingSupport = negSupport.Get();
+        mldCapabilities->tidToLinkMappingSupport = static_cast<uint8_t>(negSupport.Get());
         mldCapabilities->freqSepForStrApMld = 0; // not supported yet
         mldCapabilities->aarSupport = 0;         // not supported yet
     }
@@ -1978,10 +1978,10 @@ ApWifiMac::ReceiveAssocRequest(const AssocReqRefVariant& assoc,
                     return failure("Incorrect directions in TID-to-Link Mapping IEs");
                 }
 
-                EnumValue negSupport;
+                EnumValue<WifiTidToLinkMappingNegSupport> negSupport;
                 ehtConfig->GetAttributeFailSafe("TidToLinkMappingNegSupport", negSupport);
 
-                if (negSupport.Get() == 0)
+                if (negSupport.Get() == WifiTidToLinkMappingNegSupport::NOT_SUPPORTED)
                 {
                     return failure("TID-to-Link Mapping negotiation not supported");
                 }
@@ -2019,7 +2019,7 @@ ApWifiMac::ReceiveAssocRequest(const AssocReqRefVariant& assoc,
                     break;
                 }
 
-                if (negSupport.Get() == 1 &&
+                if (negSupport.Get() == WifiTidToLinkMappingNegSupport::SAME_LINK_SET &&
                     !TidToLinkMappingValidForNegType1(dlMapping, ulMapping))
                 {
                     return failure("Mapping TIDs to distinct link sets is incompatible with "
@@ -2378,7 +2378,7 @@ ApWifiMac::GetNextAssociationId(std::list<uint8_t> linkIds)
     {
         if (std::all_of(linkIds.begin(), linkIds.end(), [&](auto&& linkId) {
                 auto& staList = GetLink(linkId).staList;
-                return staList.find(nextAid) == staList.end();
+                return !staList.contains(nextAid);
             }))
         {
             return nextAid;

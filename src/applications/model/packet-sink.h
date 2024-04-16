@@ -121,9 +121,8 @@ class PacketSink : public Application
      */
 
   private:
-    // inherited from Application base class.
-    void StartApplication() override; // Called at time specified by Start
-    void StopApplication() override;  // Called at time specified by Stop
+    void StartApplication() override;
+    void StopApplication() override;
 
     /**
      * \brief Handle a packet received by the application

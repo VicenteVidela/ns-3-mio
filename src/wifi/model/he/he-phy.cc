@@ -38,6 +38,9 @@
 
 #include <algorithm>
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(m_wifiPhy)
+
 namespace ns3
 {
 
@@ -382,7 +385,7 @@ HePhy::StartReceivePreamble(Ptr<const WifiPpdu> ppdu,
                         << GetDuration(WIFI_PPDU_FIELD_TRAINING, txVector).As(Time::NS));
             auto event = CreateInterferenceEvent(ppdu, rxDuration, rxPowersW, !hePortionStarted);
             uint16_t staId = GetStaId(ppdu);
-            NS_ASSERT(m_beginMuPayloadRxEvents.find(staId) == m_beginMuPayloadRxEvents.end());
+            NS_ASSERT(!m_beginMuPayloadRxEvents.contains(staId));
             m_beginMuPayloadRxEvents[staId] =
                 Simulator::Schedule(GetDuration(WIFI_PPDU_FIELD_TRAINING, txVector),
                                     &HePhy::StartReceiveMuPayload,
@@ -668,8 +671,7 @@ HePhy::ProcessSigA(Ptr<Event> event, PhyFieldRxStatus status)
                 return PhyFieldRxStatus(false, FILTERED, DROP);
             }
             uint16_t staId = ppdu->GetStaId();
-            if (m_trigVector->GetHeMuUserInfoMap().find(staId) ==
-                m_trigVector->GetHeMuUserInfoMap().end())
+            if (!m_trigVector->GetHeMuUserInfoMap().contains(staId))
             {
                 NS_LOG_DEBUG("TB PPDU received from un unexpected STA ID");
                 return PhyFieldRxStatus(false, FILTERED, DROP);
@@ -863,7 +865,6 @@ HePhy::RxPayloadSucceeded(Ptr<const WifiPsdu> psdu,
                           const std::vector<bool>& statusPerMpdu)
 {
     NS_LOG_FUNCTION(this << *psdu << txVector);
-    m_state->NotifyRxPsduSucceeded(psdu, rxSignalInfo, txVector, staId, statusPerMpdu);
     if (!IsUlMu(txVector.GetPreambleType()))
     {
         m_state->SwitchFromRxEndOk();
@@ -878,7 +879,6 @@ void
 HePhy::RxPayloadFailed(Ptr<const WifiPsdu> psdu, double snr, const WifiTxVector& txVector)
 {
     NS_LOG_FUNCTION(this << *psdu << txVector << snr);
-    m_state->NotifyRxPsduFailed(psdu, snr);
     if (!txVector.IsUlMu())
     {
         m_state->SwitchFromRxEndError();
@@ -1519,8 +1519,7 @@ HePhy::CalculateTxDuration(WifiConstPsduMap psduMap,
         if (txVector.IsDlMu())
         {
             NS_ASSERT(txVector.GetModulationClass() >= WIFI_MOD_CLASS_HE);
-            WifiTxVector::HeMuUserInfoMap userInfoMap = txVector.GetHeMuUserInfoMap();
-            NS_ABORT_MSG_IF(userInfoMap.find(staIdPsdu.first) == userInfoMap.end(),
+            NS_ABORT_MSG_IF(!txVector.GetHeMuUserInfoMap().contains(staIdPsdu.first),
                             "STA-ID in psduMap (" << staIdPsdu.first
                                                   << ") should be referenced in txVector");
         }

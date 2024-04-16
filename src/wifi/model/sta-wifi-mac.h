@@ -22,6 +22,7 @@
 #ifndef STA_WIFI_MAC_H
 #define STA_WIFI_MAC_H
 
+#include "eht/eht-configuration.h"
 #include "mgt-headers.h"
 #include "wifi-mac.h"
 
@@ -307,8 +308,9 @@ class StaWifiMac : public WifiMac
      *
      * \param phy the given PHY
      * \param linkId the ID of the EMLSR link on which the given PHY is operating
+     * \param delay the delay after which the channel switch will be completed
      */
-    void NotifySwitchingEmlsrLink(Ptr<WifiPhy> phy, uint8_t linkId);
+    void NotifySwitchingEmlsrLink(Ptr<WifiPhy> phy, uint8_t linkId, Time delay);
 
     /**
      * Block transmissions on the given link for the given reason.
@@ -533,7 +535,8 @@ class StaWifiMac : public WifiMac
      * \param apNegSupport the negotiation type supported by the AP MLD
      * \return the TID-to-Link Mapping element(s) to include in Association Request frame.
      */
-    std::vector<TidToLinkMapping> GetTidToLinkMappingElements(uint8_t apNegSupport);
+    std::vector<TidToLinkMapping> GetTidToLinkMappingElements(
+        WifiTidToLinkMappingNegSupport apNegSupport);
 
     /**
      * Set the current MAC state.
