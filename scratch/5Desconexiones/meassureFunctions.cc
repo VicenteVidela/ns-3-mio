@@ -1,77 +1,124 @@
 #include "meassureFunctions.h"
 
-using namespace ns3;
+std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
+std::vector<double> latencies;              // Vector to store latencies for each packet
+Time lastArrivalTime;                       // Time of last packet arrival
+std::vector<double> jitters;                // Vector to store jitters for each packet
 
-std::map<uint32_t, Time> transmissionTimes; // Map to store transmission times for each packet
-std::vector<double> latencies;         // Vector to store latencies for each packet
-Time lastArrivalTime;                  // Time of last packet arrival
-std::vector<double> jitters;           // Vector to store jitters for each packet
+uint32_t receivedPacketCount = 0;           // Number of packets received
+uint32_t transmitedPacketCount = 0;         // Number of packets transmitted
+double totalBandwidth = 0.0;                // Total maximum bandwidth of the network
+uint32_t totalBytesReceived = 0;            // Total bytes received
 
-// Flow monitor
-FlowMonitorHelper flowmon;
-Ptr<FlowMonitor> monitor;
+std::vector<double> queueDelays;            // Vector to store queue delays for each packet
 
-// Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(bool detailedPrinting, std::ostream& output) {
-  // Print the current simulation time
-  output << "Seconds: " << Simulator::Now().GetSeconds() << std::endl;
-  // Variable Declarations
-  double totalDelay = 0;                  // Accumulator for total delay of all flows
-  uint64_t totalPackets = 0;              // Total received packets across all flows
-  uint64_t totalLostPackets = 0;          // Total lost packets across all flows
-  uint64_t totalTransmittedPackets = 0;   // Total transmitted packets across all flows
-  double totalReceivedBytes = 0;          // Total received bytes across all flows
-  double totalDuration = 0;                // Accumulator for total duration of all flows
-  double totalJitter = 0;                  // Accumulator for total jitter of all flows
+// Function to print statistics at the end of the simulation
+void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime) {
+  // Print the number of disconnected nodes
+  output << "Nodes disconnected: " << nodesDisconnected << std::endl;
 
-  // Check for lost packets and get flow statistics
-  monitor->CheckForLostPackets();
-  Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
-  std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
+  // Print max available bandwidth in Kbps
+  output << "Max available bandwidth: " << totalBandwidth / 1e3 << " Kbps" << std::endl;
+  // Calculate and print average throughput in Kbps
+  double averageThroughput = static_cast<double>(totalBytesReceived * 8) / (stopTime * 1e3);
+  output << "Average throughput: " << averageThroughput << " Kbps" << std::endl;
 
-  // Iterate through flow statistics and accumulate values
-  for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin(); i != stats.end(); ++i) {
-    totalReceivedBytes += i->second.rxBytes;
-    totalDuration += i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds();
-    totalDelay += i->second.delaySum.GetSeconds();
-    totalPackets += i->second.rxPackets;
-    totalLostPackets += i->second.lostPackets;
-    totalTransmittedPackets += i->second.txPackets;
-    totalJitter += i->second.jitterSum.GetSeconds();
-  }
+  // Calculate and print througput to bandwidth ratio
+  double throughputToBandwidthRatio = averageThroughput / (totalBandwidth / 1e3);
+  output << "Throughput to bandwidth ratio: " << throughputToBandwidthRatio << std::endl;
 
-  // Calculate and print average throughput
-  double averageThroughput = totalReceivedBytes * 8.0 / totalDuration;
-  output << "Average Throughput: " << averageThroughput << " bps" << std::endl;
+  // Calculate and print packet loss percentage
+  double packetLossPercentage = 100.0 * (1.0 - static_cast<double>(receivedPacketCount) / transmitedPacketCount);
+  output << "Packet loss percentage: " << packetLossPercentage << "%" << std::endl;
 
-  // Calculate and print average packet delivery ratio and percentage
-  if (totalTransmittedPackets) {
-    double averagePacketDeliveryRatio = std::min(1.0, static_cast<double>(totalPackets) / static_cast<double>(totalTransmittedPackets));
-    double averagePacketDeliveryPercentage = averagePacketDeliveryRatio * 100;
-    output << "Average Packet Delivery Ratio: " << averagePacketDeliveryPercentage << "%" << std::endl;
-  } else {
-    output << "Average Packet Delivery Ratio: -nan%" << std::endl;
-  }
-
-  // Calculate and print average packet loss rate and percentage
-  double averagePacketLossRate = static_cast<double>(totalLostPackets) / static_cast<double>(totalTransmittedPackets);
-  double averagePacketLossPercentage = averagePacketLossRate * 100;
-  output << "Average Packet Loss Rate: " << averagePacketLossPercentage << "%" << std::endl;
-
-  // Check if there are received packets and print average delay if applicable
-  if (totalPackets > 0) {
-    double averageDelayMs = (totalDelay / totalPackets) * 1000;
-    output << "Average delay: " << averageDelayMs << " ms" << std::endl;
-  } else {
-    output << "Average delay: 0 ms" << std::endl;
-  }
+  // Calculate and print average delay
+  double totalDelay = std::accumulate(latencies.begin(), latencies.end(), 0.0);
+  double averageDelay = totalDelay * 1000/ latencies.size();
+  output << "Average delay: " << averageDelay << " ms" << std::endl;
 
   // Calculate and print average jitter
-  double averageJitterMs = (totalJitter / stats.size()) * 1000;
-  output << "Average Jitter: " << averageJitterMs << " ms" << std::endl;
+  double totalJitter = std::accumulate(jitters.begin(), jitters.end(), 0.0);
+  double averageJitter = totalJitter * 1000 / jitters.size();
+  output << "Average jitter: " << averageJitter << " ms" << std::endl;
+
+  // Calculate and print average queue delay
+  double totalQueueDelay = std::accumulate(queueDelays.begin(), queueDelays.end(), 0.0);
+  double averageQueueDelay = totalQueueDelay * 1000/ queueDelays.size();
+  output << "Average queue delay: " << averageQueueDelay << " ms" << std::endl;
 
   // Print an empty line for better readability
   output << std::endl;
-  // Reset flowmonitor
-  monitor->ResetAllStats();
 }
+
+/**
+ * Queue functions
+*/
+// Function for tracing packets entering queue
+void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
+  // Get the packet transmission time
+  Time enqueueTime = Simulator::Now();
+  // Get the packet ID
+  uint32_t packetId = packet->GetUid();
+  // Store the transmission time
+  enqueueTimes[packetId] = enqueueTime;
+}
+
+// Function for tracing packets leaving queue
+void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
+  // Get the packet dequeue time
+  Time dequeueTime = Simulator::Now();
+  // Get the packet ID
+  uint32_t packetId = packet->GetUid();
+  // Get the packet enqueue time
+  Time enqueueTime = enqueueTimes[packetId];
+  // Calculate the queue delay
+  double queueDelay = (dequeueTime - enqueueTime).GetSeconds();
+  // Store the queue delay
+  queueDelays.push_back(queueDelay);
+}
+
+/**
+ * Packet functions
+*/
+// Function to handle transmited packets
+void nodeTxTrace(Ptr<const Packet> packet) {
+  transmitedPacketCount++;
+}
+
+// Function to handle reception at each sink
+void nodeRxTrace(Ptr<const Packet> packet) {
+  // Get the packet reception time
+  Time rxTime = Simulator::Now();
+  // Get the packet ID
+  uint32_t packetId = packet->GetUid();
+  // Get the packet transmission time
+  Time txTime = enqueueTimes[packetId];
+  // Calculate the latency
+  double latency = (rxTime - txTime).GetSeconds();
+  // Store the latency
+  latencies.push_back(latency);
+  // Calculate the jitter
+  double jitter = (rxTime - lastArrivalTime).GetSeconds();
+  // Store the jitter
+  jitters.push_back(jitter);
+  // Update the last arrival time
+  lastArrivalTime = rxTime;
+  // Increment the number of received packets
+  receivedPacketCount++;
+
+  // Calculate and store the size of the received packet
+  uint32_t packetSize = packet->GetSize(); // Size of the packet in bytes
+  totalBytesReceived += packetSize; // Assuming totalBytesReceived is a global variable to store the total bytes received
+}
+
+// Function for dropping packets at disconnected sinks
+void disconnectednodeRxTrace(Ptr<const Packet> packet) {
+  return;
+}
+
+// Function for tracing queue length
+void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue) {
+  // std::cout << "Queue length changed from " << oldValue << " to " << newValue << std::endl;
+  return;
+}
+
