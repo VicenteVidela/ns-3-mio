@@ -10,7 +10,7 @@ DataRate onoffDataRate = DataRate("100Kbps");                     // Data rate f
 uint32_t onoffPacketSize = 1500;                                  // Packet size for OnOff applications
 UintegerValue TCPSegmentSize = UintegerValue(onoffPacketSize);    // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno");         // Congestion control algorithm
-StringValue packetQueueSize = StringValue("100p");                // Packet queue size for each link
+StringValue packetQueueSize = StringValue("100p");                 // Packet queue size for each link
 std::string queueDiscipline = "ns3::DropTailQueue";               // Queue discipline to handle excess packets
 int nodesToDisconnect = 0;                                        // Number of nodes to disconnect
 // Error rate for package loss
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   cmd.Parse(argc, argv);
 
   // Randomize the seed based on current time
-  uint32_t seed = static_cast<uint32_t>(time(NULL));
+  uint32_t seed = static_cast<uint32_t>(12345);
   SeedManager::SetSeed(seed);
 
   /**
@@ -70,10 +70,7 @@ int main(int argc, char* argv[]) {
   InternetStackHelper stack;
   Ipv4NixVectorHelper nixRouting;
   stack.SetRoutingHelper(nixRouting);
-  // Create an empty IPv4 static routing helper
-  InternetStackHelper emptyStack;
-  Ipv4StaticRoutingHelper emptyRoutingHelper;
-  emptyStack.SetRoutingHelper(emptyRoutingHelper);
+  stack.Install(nodes);
 
   Ipv4AddressHelper address;
   address.SetBase("10.0.0.0", "255.255.255.252");
@@ -95,14 +92,6 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < nodesToDisconnect; i++) {
     DisconnectRandomNode();
   }
-
-  // If a node is disconnected, set its routing helper to null
-  for (unsigned int i = 0; i < totalNodes; ++i) {
-      Ptr<Node> clientNode = nodes.Get(i);
-      if (disconnectedNodes.find(i) != disconnectedNodes.end()) emptyStack.Install(clientNode); // Set routing helper to null
-      else stack.Install(clientNode);   // Otherwise, install the stack normally
-  }
-
 
 
   /**
@@ -141,16 +130,15 @@ int main(int argc, char* argv[]) {
 
     // Get the endpoints of the current link
     Ptr<Node> fromNode = nodeCont[i].Get(0);
-    Ptr<Node> toNode = nodeCont[i].Get(1);
 
     // Check if either endpoint is in the set of disconnected nodes
-    bool isDisconnected = (disconnectedNodes.find(fromNode->GetId()) != disconnectedNodes.end()) ||
-                          (disconnectedNodes.find(toNode->GetId()) != disconnectedNodes.end());
+    bool isDisconnected = (disconnectedNodes.find(fromNode->GetId()) != disconnectedNodes.end());
 
+    // Set queue policy to drop all packets
     if (!isDisconnected) {
-        DataRate rate = DataRate(p2pDataRate.Get());
-        // Add the data rate to the total bandwidth
-        totalBandwidth += rate.GetBitRate();
+      DataRate rate = DataRate(p2pDataRate.Get());
+      // Add the data rate to the total bandwidth
+      totalBandwidth += rate.GetBitRate();
     }
 
   }
@@ -168,7 +156,6 @@ int main(int argc, char* argv[]) {
   ApplicationContainer sinkApps;
   ApplicationContainer onOffApps;
 
-  int a = 0;
   // Create a packet sink for each node to measure packet reception
   for (unsigned int i = 0; i < totalNodes; ++i) {
     Ptr<Node> clientNode = nodes.Get(i);
@@ -211,7 +198,6 @@ int main(int argc, char* argv[]) {
                                         "/$ns3::PointToPointNetDevice/PhyRxEnd",
                                         MakeCallback(&nodeRxTrace));
 
-          a++;
           // DataRate rate = DataRate(p2pDataRate.Get());
           // // Add the data rate to the total bandwidth
           // totalBandwidth += rate.GetBitRate()/2;
@@ -219,8 +205,6 @@ int main(int argc, char* argv[]) {
       }
     }
   }
-
-  std::cout << "Connected Links " << a << std::endl;
 
   // Connect trace to transmited packets
   Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));

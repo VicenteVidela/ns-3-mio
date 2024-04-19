@@ -108,7 +108,7 @@ void nodeRxTrace(Ptr<const Packet> packet) {
 
   // Calculate and store the size of the received packet
   uint32_t packetSize = packet->GetSize(); // Size of the packet in bytes
-  totalBytesReceived += packetSize; // Assuming totalBytesReceived is a global variable to store the total bytes received
+  totalBytesReceived += packetSize;
 }
 
 // Function for dropping packets at disconnected sinks
