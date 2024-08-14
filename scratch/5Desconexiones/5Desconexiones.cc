@@ -3,7 +3,7 @@
 /*
  * Simulation Parameters
 */
-float stopTime = 10;                                              // Simulation stop time
+float stopTime = 60;                                              // Simulation stop time
 StringValue p2pDelay = StringValue("2ms");                        // Delay for point-to-point links
 StringValue p2pDataRate = StringValue("100Kbps");                 // Max data rate for point-to-point links
 DataRate onoffDataRate = DataRate("100Kbps");                     // Data rate for OnOff applications
@@ -13,16 +13,18 @@ StringValue CCAlgorithm = StringValue("ns3::TcpNewReno");         // Congestion 
 StringValue packetQueueSize = StringValue("100p");                 // Packet queue size for each link
 std::string queueDiscipline = "ns3::DropTailQueue";               // Queue discipline to handle excess packets
 int nodesToDisconnect = 0;                                        // Number of nodes to disconnect
+
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();          // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.000);                      // Error rate for package loss
 
-// Directory for topology file
-std::string dataFile = "5Desconexiones.dat";
-
 // Default values input paramaters
-std::string format("Inet");
-std::string input("19nodes.txt");
+// std::string format("Csma");
+std::string input("logic_exp_2.5_v1.csv");        // Input file name
+std::string dataFile = "5Desconexiones.dat";    // Where to store the data
+
+// Set random seed
+uint32_t seed = 123;
 
 /*
 * Main function
@@ -33,36 +35,71 @@ int main(int argc, char* argv[]) {
   cmd.AddValue("nodesToDisconnect", "How many nodes to disconnect", nodesToDisconnect);
   cmd.AddValue("input", "Topology input", input);
   cmd.AddValue("output", "Where to store the data", dataFile);
+  cmd.AddValue("seed", "Random seed", seed);
   cmd.Parse(argc, argv);
 
-  // Randomize the seed based on current time
-  uint32_t seed = static_cast<uint32_t>(12345);
+  // Set the random seed
   SeedManager::SetSeed(seed);
 
   /**
    * Read topology data
    */
-  // Pick a topology reader based on the requested format.
-  TopologyReaderHelper topoHelp;
-  topoHelp.SetFileName(topologyDirectory + input);
-  topoHelp.SetFileType(format);
-  Ptr<TopologyReader> inFile = topoHelp.GetTopologyReader();
+  // // Pick a topology reader based on the requested format.
+  // TopologyReaderHelper topoHelp;
+  // topoHelp.SetFileName(topologyDirectory + input);
+  // topoHelp.SetFileType(format);
+  // Ptr<TopologyReader> inFile = topoHelp.GetTopologyReader();
 
-  // Read the topology from the input file
-  if (inFile) {
-    nodes = inFile->Read();
+  // // Read the topology from the input file
+  // if (inFile) {
+  //   nodes = inFile->Read();
+  // }
+
+  // // Check if the topology file is read successfully
+  // if (inFile->LinksSize() == 0) {
+  //   std::cout << "Problems reading the topology file. Failing." << std::endl;
+  //   return -1;
+  // }
+
+  // // Get the number of nodes in the topology
+  // uint32_t totalNodes = nodes.GetN();
+
+  // std::cout << "Number of nodes: " << totalNodes << std::endl;
+
+  // /**
+  //  * Read topology data
+  //  */
+  // Create container for device interfaces
+  std::vector<std::pair<uint32_t, uint32_t>> links;
+  // Read CSV file
+  std::ifstream file(topologyDirectory + input);
+  std::string line;
+
+  while (std::getline(file, line)) {
+    // Parse the CSV line with format "lX,lY"
+    std::istringstream ss(line);
+    std::string nodeA, nodeB;
+    std::getline(ss, nodeA, ',');
+    std::getline(ss, nodeB, ',');
+
+    // Convert node labels (e.g., "l0", "l50") to integers (0, 50)
+    uint32_t nodeAId = std::stoi(nodeA.substr(1));
+    uint32_t nodeBId = std::stoi(nodeB.substr(1));
+
+    // Add to list of links
+    links.push_back(std::make_pair(nodeAId, nodeBId));
   }
 
-  // Check if the topology file is read successfully
-  if (inFile->LinksSize() == 0) {
-    std::cout << "Problems reading the topology file. Failing." << std::endl;
-    return -1;
+  // Determine the maximum node ID to create sufficient nodes
+  uint32_t maxNodeId = 0;
+  for (auto &link : links) {
+    if (link.first > maxNodeId) maxNodeId = link.first;
+    if (link.second > maxNodeId) maxNodeId = link.second;
   }
+  uint32_t totalNodes = maxNodeId + 1;
 
-  // Get the number of nodes in the topology
-  uint32_t totalNodes = nodes.GetN();
-
-  std::cout << "Number of nodes: " << totalNodes << std::endl;
+  // Create nodes
+  nodes.Create(totalNodes);
 
   /*
    * Create nodes and network stacks
@@ -75,14 +112,11 @@ int main(int argc, char* argv[]) {
   Ipv4AddressHelper address;
   address.SetBase("10.0.0.0", "255.255.255.252");
 
-  int totlinks = inFile->LinksSize();
-
+  // Create containers for the links
+  int totlinks = links.size();
   auto nodeCont = new NodeContainer[totlinks];
-  TopologyReader::ConstLinksIterator iter;
-  int i = 0;
-  for (iter = inFile->LinksBegin(); iter != inFile->LinksEnd(); ++iter, ++i) {
-    // Create a NodeContainer for each link
-    nodeCont[i] = NodeContainer(iter->GetFromNode(), iter->GetToNode());
+  for (int i = 0; i < totlinks; ++i) {
+    nodeCont[i] = NodeContainer(nodes.Get(links[i].first), nodes.Get(links[i].second));
   }
 
   // Set error rate
@@ -103,7 +137,6 @@ int main(int argc, char* argv[]) {
   PointToPointHelper p2p;
   // Create a container to hold the addresses
   auto ipv4InterfaceCont = new Ipv4InterfaceContainer[totlinks];
-  i=0;
   for (int i = 0; i < totlinks; ++i) {
     // Configure point-to-point communication attributes
     p2p.SetChannelAttribute("Delay", p2pDelay);
@@ -214,7 +247,7 @@ int main(int argc, char* argv[]) {
   */
   // Start the sink applications
   sinkApps.Start(Seconds(0.0));
-  sinkApps.Stop(Seconds(stopTime));
+  sinkApps.Stop(Seconds(stopTime+1));
   // Start the onOff applications
   onOffApps.Start(Seconds(0.0));
   onOffApps.Stop(Seconds(stopTime));
@@ -230,7 +263,7 @@ int main(int argc, char* argv[]) {
                       std::ref(outputFile.is_open()? outputFile : std::cout), stopTime);
 
   // Stop simulation at stop time
-  Simulator::Stop(Seconds(stopTime+1));
+  Simulator::Stop(Seconds(stopTime));
   // Run the simulation
   Simulator::Run();
   Simulator::Destroy();
