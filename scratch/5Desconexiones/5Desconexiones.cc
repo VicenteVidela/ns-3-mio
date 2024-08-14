@@ -41,31 +41,6 @@ int main(int argc, char* argv[]) {
   // Set the random seed
   SeedManager::SetSeed(seed);
 
-  /**
-   * Read topology data
-   */
-  // // Pick a topology reader based on the requested format.
-  // TopologyReaderHelper topoHelp;
-  // topoHelp.SetFileName(topologyDirectory + input);
-  // topoHelp.SetFileType(format);
-  // Ptr<TopologyReader> inFile = topoHelp.GetTopologyReader();
-
-  // // Read the topology from the input file
-  // if (inFile) {
-  //   nodes = inFile->Read();
-  // }
-
-  // // Check if the topology file is read successfully
-  // if (inFile->LinksSize() == 0) {
-  //   std::cout << "Problems reading the topology file. Failing." << std::endl;
-  //   return -1;
-  // }
-
-  // // Get the number of nodes in the topology
-  // uint32_t totalNodes = nodes.GetN();
-
-  // std::cout << "Number of nodes: " << totalNodes << std::endl;
-
   // /**
   //  * Read topology data
   //  */
@@ -257,7 +232,13 @@ int main(int argc, char* argv[]) {
   */
   std::cout << "Run Simulation." << std::endl;
 
-  // Schedule reset stats
+  // Schedule progress update
+  for (int i = 0; i < stopTime + 1; i++) {
+    Simulator::Schedule(Seconds(i), &PrintProgress, i, stopTime);
+  }
+
+
+  // Schedule print measures at the end of simulation
   outputFile.open(dataDirectory + dataFile, std::ios::app);
   Simulator::Schedule(Seconds(stopTime), &PrintMeasures, nodesToDisconnect,
                       std::ref(outputFile.is_open()? outputFile : std::cout), stopTime);
@@ -276,7 +257,8 @@ int main(int argc, char* argv[]) {
   delete[] netDeviceCont;
   delete[] nodeCont;
 
-  std::cout << "Done." << std::endl;
+  std::cout << "\nDone." << std::endl;
 
   return 0;
 }
+

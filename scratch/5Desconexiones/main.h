@@ -20,6 +20,7 @@
 
 #include "meassureFunctions.h"
 #include "disconnections.h"
+#include "otros.h"
 
 using namespace ns3;
 
