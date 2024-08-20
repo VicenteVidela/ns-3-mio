@@ -13,9 +13,6 @@ uint32_t totalBytesReceived = 0;            // Total bytes received
 
 std::vector<double> queueDelays;            // Vector to store queue delays for each packet
 
-int packetCount = 0;
-int packetMalo = 0;
-
 // Function to print statistics at the end of the simulation
 void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, float stopTime, std::string nodesDisconnectedString) {
   // Print the disconnected nodes as a list
@@ -55,9 +52,6 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
 
   // Print an empty line for better readability
   output << std::endl;
-
-  // output << "Packet count: " << packetCount << std::endl;
-  // output << "Packet malo: " << packetMalo << std::endl;
 }
 
 /**
@@ -107,8 +101,6 @@ void nodeRxTrace(Ptr<const Packet> packet) {
   Time txTime = enqueueTimes[packetId];
   // Calculate the latency
   double latency = (rxTime - txTime).GetSeconds();
-  // if (txTime <= Time(0.1) && rxTime > Time(0.1)) packetMalo++;
-  // packetCount++;
   // Store the latency
   latencies.push_back(latency);
   // Calculate the jitter

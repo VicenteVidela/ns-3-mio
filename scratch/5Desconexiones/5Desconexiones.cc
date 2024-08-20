@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
   cmd.AddValue("input", "Topology input", input);
   cmd.AddValue("output", "Where to store the data", dataFile);
   cmd.AddValue("seed", "Random seed", seed);
+  cmd.AddValue("stopTime", "Simulation time", stopTime);
   cmd.Parse(argc, argv);
 
   // Set the random seed
