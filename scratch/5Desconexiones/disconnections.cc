@@ -1,7 +1,8 @@
 #include "disconnections.h"
 
-NodeContainer nodes;                            // Container for client nodes
-std::set<uint32_t> disconnectedNodes;                 // Set to store disconnected nodes
+NodeContainer nodes;                                // Container for client nodes
+std::set<uint32_t> disconnectedNodes;     // Set to store disconnected nodes
+std::string nodesDisconnectedString;           // String to store disconnected nodes in order
 
 // Function to disconnect a random node
 void DisconnectRandomNode() {
@@ -21,5 +22,6 @@ void DisconnectRandomNode() {
 
   // Add the node to the set of disconnected nodes
   disconnectedNodes.insert(randomIndex);
+  nodesDisconnectedString += std::to_string(randomIndex) + ' ';
   // std::cout << "Disconnecting node " << randomIndex << std::endl;
 }

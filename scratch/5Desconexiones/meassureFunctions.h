@@ -26,7 +26,7 @@ extern uint32_t totalBytesReceived;     // Total bytes received
 
 
 // Function to print throughput and packet statistics at the end of the simulation
-void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime);
+void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, float stopTime, std::string nodesDisconnectedString);
 
 
 /**

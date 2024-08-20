@@ -1,6 +1,7 @@
 #include "meassureFunctions.h"
 
 std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
+std::map<uint32_t, Time> dequeueTimes;      // Map to store dequeue times for each packet
 std::vector<double> latencies;              // Vector to store latencies for each packet
 Time lastArrivalTime;                       // Time of last packet arrival
 std::vector<double> jitters;                // Vector to store jitters for each packet
@@ -12,10 +13,16 @@ uint32_t totalBytesReceived = 0;            // Total bytes received
 
 std::vector<double> queueDelays;            // Vector to store queue delays for each packet
 
+int packetCount = 0;
+int packetMalo = 0;
+
 // Function to print statistics at the end of the simulation
-void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime) {
+void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, float stopTime, std::string nodesDisconnectedString) {
+  // Print the disconnected nodes as a list
+  output << "Nodes disconnected: " << nodesDisconnectedString << std::endl;
+
   // Print the number of disconnected nodes
-  output << "Nodes disconnected: " << nodesDisconnected << std::endl;
+  output << "Number of disconnected nodes: " << nodesDisconnected.size() << std::endl;
 
   // Print max available bandwidth in Kbps
   output << "Max available bandwidth: " << totalBandwidth / 1e3 << " Kbps" << std::endl;
@@ -48,6 +55,9 @@ void PrintMeasures(int nodesDisconnected, std::ostream& output, float stopTime) 
 
   // Print an empty line for better readability
   output << std::endl;
+
+  // output << "Packet count: " << packetCount << std::endl;
+  // output << "Packet malo: " << packetMalo << std::endl;
 }
 
 /**
@@ -75,6 +85,8 @@ void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
   double queueDelay = (dequeueTime - enqueueTime).GetSeconds();
   // Store the queue delay
   queueDelays.push_back(queueDelay);
+  // Store the dequeue time
+  dequeueTimes[packetId] = dequeueTime;
 }
 
 /**
@@ -95,6 +107,8 @@ void nodeRxTrace(Ptr<const Packet> packet) {
   Time txTime = enqueueTimes[packetId];
   // Calculate the latency
   double latency = (rxTime - txTime).GetSeconds();
+  // if (txTime <= Time(0.1) && rxTime > Time(0.1)) packetMalo++;
+  // packetCount++;
   // Store the latency
   latencies.push_back(latency);
   // Calculate the jitter

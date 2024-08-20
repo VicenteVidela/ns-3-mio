@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
 
   // Set the random seed
   SeedManager::SetSeed(seed);
+  srand(seed);
 
   // /**
   //  * Read topology data
@@ -72,6 +73,8 @@ int main(int argc, char* argv[]) {
     if (link.second > maxNodeId) maxNodeId = link.second;
   }
   uint32_t totalNodes = maxNodeId + 1;
+  // Print number of nodes
+  // std::cout << "Total nodes: " << totalNodes << std::endl;
 
   // Create nodes
   nodes.Create(totalNodes);
@@ -240,8 +243,8 @@ int main(int argc, char* argv[]) {
 
   // Schedule print measures at the end of simulation
   outputFile.open(dataDirectory + dataFile, std::ios::app);
-  Simulator::Schedule(Seconds(stopTime), &PrintMeasures, nodesToDisconnect,
-                      std::ref(outputFile.is_open()? outputFile : std::cout), stopTime);
+  Simulator::Schedule(Seconds(stopTime), &PrintMeasures, disconnectedNodes,
+                      std::ref(outputFile.is_open()? outputFile : std::cout), stopTime, nodesDisconnectedString);
 
   // Stop simulation at stop time
   Simulator::Stop(Seconds(stopTime));
