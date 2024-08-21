@@ -14,4 +14,5 @@ done
 ./ns3 run "5Desconexiones --nodesToDisconnect=0
   --input=logic_exp_2.5_v1.csv
   --output=awa.dat
-  --seed=1"
+  --seed=1
+  --stopTime=10"

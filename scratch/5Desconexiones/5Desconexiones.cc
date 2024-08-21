@@ -204,22 +204,25 @@ int main(int argc, char* argv[]) {
         Ptr<NetDevice> dev = clientNode->GetDevice(j);
         Ptr<PointToPointNetDevice> p2pDev = DynamicCast<PointToPointNetDevice>(dev);
         if (p2pDev) {
-          // Connect trace for point-to-point devices to trace receiving packets
+          // Connect trace for point-to-point devices to trace receiving packets at the physical layer
           Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
                                         "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
                                         "/$ns3::PointToPointNetDevice/PhyRxEnd",
                                         MakeCallback(&nodeRxTrace));
-
-          // DataRate rate = DataRate(p2pDataRate.Get());
-          // // Add the data rate to the total bandwidth
-          // totalBandwidth += rate.GetBitRate()/2;
+          // Connect trace for point-to-point devices to trace receiving packets at the mac layer
+          Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
+                                        "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
+                                        "/$ns3::PointToPointNetDevice/MacRx",
+                                        MakeCallback(&macRxTrace));
         }
       }
     }
   }
 
-  // Connect trace to transmited packets
+  // Connect trace to transmited packets at the physical layer
   Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
+  // Connect trace to transmited packets at the mac layer
+  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacTx", MakeCallback(&macTxTrace));
 
   /**
    * Start applications

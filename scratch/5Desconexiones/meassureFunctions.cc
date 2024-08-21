@@ -1,7 +1,6 @@
 #include "meassureFunctions.h"
 
 std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
-std::map<uint32_t, Time> dequeueTimes;      // Map to store dequeue times for each packet
 std::vector<double> latencies;              // Vector to store latencies for each packet
 Time lastArrivalTime;                       // Time of last packet arrival
 std::vector<double> jitters;                // Vector to store jitters for each packet
@@ -12,6 +11,59 @@ double totalBandwidth = 0.0;                // Total maximum bandwidth of the ne
 uint32_t totalBytesReceived = 0;            // Total bytes received
 
 std::vector<double> queueDelays;            // Vector to store queue delays for each packet
+
+std::map<uint32_t, Time> sendTimes;
+uint32_t uniqueIdCounter = 0;
+
+
+
+UniqueIdentifierHeader::UniqueIdentifierHeader() : m_uniqueId(0) {}
+
+void UniqueIdentifierHeader::SetUniqueId(uint32_t id) {
+  m_uniqueId = id;
+}
+
+uint32_t UniqueIdentifierHeader::GetUniqueId() const {
+  return m_uniqueId;
+}
+
+TypeId UniqueIdentifierHeader::GetTypeId(void) {
+  static TypeId tid = TypeId("UniqueIdentifierHeader")
+    .SetParent<Header>()
+    .AddConstructor<UniqueIdentifierHeader>();
+  return tid;
+}
+
+TypeId UniqueIdentifierHeader::GetInstanceTypeId(void) const {
+  return GetTypeId();
+}
+
+void UniqueIdentifierHeader::Serialize(Buffer::Iterator start) const {
+  start.WriteHtonU32(m_uniqueId);
+}
+
+uint32_t UniqueIdentifierHeader::Deserialize(Buffer::Iterator start) {
+  m_uniqueId = start.ReadNtohU32();
+  return GetSerializedSize();
+}
+
+uint32_t UniqueIdentifierHeader::GetSerializedSize(void) const {
+  return sizeof(uint32_t);
+}
+
+void UniqueIdentifierHeader::Print(std::ostream &os) const {
+  os << "UniqueId=" << m_uniqueId;
+}
+
+
+
+
+
+
+
+
+
+
 
 // Function to print statistics at the end of the simulation
 void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, float stopTime, std::string nodesDisconnectedString) {
@@ -50,6 +102,10 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
   double averageQueueDelay = totalQueueDelay * 1000/ queueDelays.size();
   output << "Average queue delay: " << averageQueueDelay << " ms" << std::endl;
 
+  for (const auto& pair : sendTimes) {
+    output << pair.first << " " << pair.second << std::endl;
+  }
+
   // Print an empty line for better readability
   output << std::endl;
 }
@@ -59,46 +115,76 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
 */
 // Function for tracing packets entering queue
 void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
-  // Get the packet transmission time
-  Time enqueueTime = Simulator::Now();
-  // Get the packet ID
-  uint32_t packetId = packet->GetUid();
-  // Store the transmission time
-  enqueueTimes[packetId] = enqueueTime;
+   // Get the packet ID
+  UniqueIdentifierHeader uidHeader;
+  packet->PeekHeader(uidHeader);
+  // Store the enqueue time
+  enqueueTimes[uidHeader.GetUniqueId()] = Simulator::Now();
+
+
 }
 
 // Function for tracing packets leaving queue
 void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
+   // Get the packet ID
+  UniqueIdentifierHeader uidHeader;
+  packet->PeekHeader(uidHeader);
+  uint32_t uniqueId = uidHeader.GetUniqueId();
+  // Get the packet enqueue time
+  Time enqueueTime = enqueueTimes[uniqueId];
   // Get the packet dequeue time
   Time dequeueTime = Simulator::Now();
-  // Get the packet ID
-  uint32_t packetId = packet->GetUid();
-  // Get the packet enqueue time
-  Time enqueueTime = enqueueTimes[packetId];
   // Calculate the queue delay
   double queueDelay = (dequeueTime - enqueueTime).GetSeconds();
   // Store the queue delay
   queueDelays.push_back(queueDelay);
-  // Store the dequeue time
-  dequeueTimes[packetId] = dequeueTime;
 }
 
 /**
  * Packet functions
 */
-// Function to handle transmited packets
+// Function to handle transmited packets at the physical layer
 void nodeTxTrace(Ptr<const Packet> packet) {
   transmitedPacketCount++;
 }
 
-// Function to handle reception at each sink
+// Function to handle reception at each sink at the physical layer
 void nodeRxTrace(Ptr<const Packet> packet) {
+  receivedPacketCount++;
+
+  // Calculate and store the size of the received packet
+  uint32_t packetSize = packet->GetSize(); // Size of the packet in bytes
+  totalBytesReceived += packetSize;
+}
+
+// Function to handle transmited packets at the mac layer
+void macTxTrace(Ptr<const Packet> packet) {
+  // Add a unique identifier header to the packet
+  // Ptr<Packet> mutablePacket = packet->Copy();
+  UniqueIdentifierHeader uidHeader;
+  if (!packet->PeekHeader(uidHeader)) {
+    std::cout << "Error: No unique identifier header found in packet" << std::endl;
+    return;
+  }
+  // uidHeader.SetUniqueId(uniqueIdCounter);
+  // mutablePacket->AddHeader(uidHeader);
+  // Store the send time
+  sendTimes[uidHeader.GetUniqueId()] = Simulator::Now();
+}
+
+// Function to handle reception at each sink at the mac layer
+void macRxTrace(Ptr<const Packet> packet){
+  // Get the packet ID
+  UniqueIdentifierHeader uidHeader;
+  if (!packet->PeekHeader(uidHeader)) {
+    std::cout << "Error: No unique identifier header found in packet" << std::endl;
+    return;
+  }
+  uint32_t uniqueId = uidHeader.GetUniqueId();
+  // Get the packet transmission time
+  Time txTime = sendTimes[uniqueId];
   // Get the packet reception time
   Time rxTime = Simulator::Now();
-  // Get the packet ID
-  uint32_t packetId = packet->GetUid();
-  // Get the packet transmission time
-  Time txTime = enqueueTimes[packetId];
   // Calculate the latency
   double latency = (rxTime - txTime).GetSeconds();
   // Store the latency
@@ -109,18 +195,19 @@ void nodeRxTrace(Ptr<const Packet> packet) {
   jitters.push_back(jitter);
   // Update the last arrival time
   lastArrivalTime = rxTime;
-  // Increment the number of received packets
-  receivedPacketCount++;
-
-  // Calculate and store the size of the received packet
-  uint32_t packetSize = packet->GetSize(); // Size of the packet in bytes
-  totalBytesReceived += packetSize;
 }
 
-// Function for dropping packets at disconnected sinks
-void disconnectednodeRxTrace(Ptr<const Packet> packet) {
-  return;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 // Function for tracing queue length
 void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue) {
