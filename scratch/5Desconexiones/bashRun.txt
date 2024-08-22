@@ -11,8 +11,12 @@ done
 
 ./ns3 run "5Desconexiones --input=3000nodes.txt --output=5Desconexiones3000.dat"
 
+for i in {0..120..10}
+do
+echo "Corriendo por $i segundos"
 ./ns3 run "5Desconexiones --nodesToDisconnect=0
   --input=logic_exp_2.5_v1.csv
   --output=awa.dat
   --seed=1
-  --stopTime=10"
+  --stopTime=$i"
+done

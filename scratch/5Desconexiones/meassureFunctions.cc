@@ -12,57 +12,7 @@ uint32_t totalBytesReceived = 0;            // Total bytes received
 
 std::vector<double> queueDelays;            // Vector to store queue delays for each packet
 
-std::map<uint32_t, Time> sendTimes;
-uint32_t uniqueIdCounter = 0;
-
-
-
-UniqueIdentifierHeader::UniqueIdentifierHeader() : m_uniqueId(0) {}
-
-void UniqueIdentifierHeader::SetUniqueId(uint32_t id) {
-  m_uniqueId = id;
-}
-
-uint32_t UniqueIdentifierHeader::GetUniqueId() const {
-  return m_uniqueId;
-}
-
-TypeId UniqueIdentifierHeader::GetTypeId(void) {
-  static TypeId tid = TypeId("UniqueIdentifierHeader")
-    .SetParent<Header>()
-    .AddConstructor<UniqueIdentifierHeader>();
-  return tid;
-}
-
-TypeId UniqueIdentifierHeader::GetInstanceTypeId(void) const {
-  return GetTypeId();
-}
-
-void UniqueIdentifierHeader::Serialize(Buffer::Iterator start) const {
-  start.WriteHtonU32(m_uniqueId);
-}
-
-uint32_t UniqueIdentifierHeader::Deserialize(Buffer::Iterator start) {
-  m_uniqueId = start.ReadNtohU32();
-  return GetSerializedSize();
-}
-
-uint32_t UniqueIdentifierHeader::GetSerializedSize(void) const {
-  return sizeof(uint32_t);
-}
-
-void UniqueIdentifierHeader::Print(std::ostream &os) const {
-  os << "UniqueId=" << m_uniqueId;
-}
-
-
-
-
-
-
-
-
-
+std::map<uint32_t, Time> sendTimes;         // Map to store send times for each packet
 
 
 // Function to print statistics at the end of the simulation
@@ -102,9 +52,9 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
   double averageQueueDelay = totalQueueDelay * 1000/ queueDelays.size();
   output << "Average queue delay: " << averageQueueDelay << " ms" << std::endl;
 
-  for (const auto& pair : sendTimes) {
-    output << pair.first << " " << pair.second << std::endl;
-  }
+  // for (const auto& pair : enqueueTimes) {
+  //   output << pair.first << " " << pair.second << std::endl;
+  // }
 
   // Print an empty line for better readability
   output << std::endl;
@@ -115,21 +65,33 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
 */
 // Function for tracing packets entering queue
 void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
-   // Get the packet ID
+  Ptr<Packet> mutablePacket = packet->Copy();
+
+  SeqTsSizeHeader header;
+  packet->PeekHeader(header);
+  mutablePacket->RemoveHeader(header);
+
+  // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  packet->PeekHeader(uidHeader);
+  mutablePacket->PeekHeader(uidHeader);
+
   // Store the enqueue time
-  enqueueTimes[uidHeader.GetUniqueId()] = Simulator::Now();
-
-
+  enqueueTimes[uidHeader.GetId()] = Simulator::Now();
 }
 
 // Function for tracing packets leaving queue
 void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
-   // Get the packet ID
+  Ptr<Packet> mutablePacket = packet->Copy();
+
+  SeqTsSizeHeader header;
+  packet->PeekHeader(header);
+  mutablePacket->RemoveHeader(header);
+
+  // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  packet->PeekHeader(uidHeader);
-  uint32_t uniqueId = uidHeader.GetUniqueId();
+  mutablePacket->PeekHeader(uidHeader);
+
+  uint32_t uniqueId = uidHeader.GetId();
   // Get the packet enqueue time
   Time enqueueTime = enqueueTimes[uniqueId];
   // Get the packet dequeue time
@@ -161,26 +123,33 @@ void nodeRxTrace(Ptr<const Packet> packet) {
 void macTxTrace(Ptr<const Packet> packet) {
   // Add a unique identifier header to the packet
   // Ptr<Packet> mutablePacket = packet->Copy();
+  Ptr<Packet> mutablePacket = packet->Copy();
+
+  SeqTsSizeHeader header;
+  packet->PeekHeader(header);
+  mutablePacket->RemoveHeader(header);
+
+  // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  if (!packet->PeekHeader(uidHeader)) {
-    std::cout << "Error: No unique identifier header found in packet" << std::endl;
-    return;
-  }
-  // uidHeader.SetUniqueId(uniqueIdCounter);
-  // mutablePacket->AddHeader(uidHeader);
+  mutablePacket->PeekHeader(uidHeader);
   // Store the send time
-  sendTimes[uidHeader.GetUniqueId()] = Simulator::Now();
+  sendTimes[uidHeader.GetId()] = Simulator::Now();
 }
 
 // Function to handle reception at each sink at the mac layer
 void macRxTrace(Ptr<const Packet> packet){
+  Ptr<Packet> mutablePacket = packet->Copy();
+
+  SeqTsSizeHeader header;
+  packet->PeekHeader(header);
+  mutablePacket->RemoveHeader(header);
+
   // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  if (!packet->PeekHeader(uidHeader)) {
-    std::cout << "Error: No unique identifier header found in packet" << std::endl;
-    return;
-  }
-  uint32_t uniqueId = uidHeader.GetUniqueId();
+  mutablePacket->PeekHeader(uidHeader);
+
+
+  uint32_t uniqueId = uidHeader.GetId();
   // Get the packet transmission time
   Time txTime = sendTimes[uniqueId];
   // Get the packet reception time

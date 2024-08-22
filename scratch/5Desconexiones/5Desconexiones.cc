@@ -110,7 +110,6 @@ int main(int argc, char* argv[]) {
   /**
    * Point-to-point links and configure communication attributes
   */
-
   // Create container for point-to-point links
   auto netDeviceCont = new NetDeviceContainer[totlinks];
   PointToPointHelper p2p;
@@ -152,7 +151,6 @@ int main(int argc, char* argv[]) {
       // Add the data rate to the total bandwidth
       totalBandwidth += rate.GetBitRate();
     }
-
   }
 
   /*
@@ -186,16 +184,17 @@ int main(int argc, char* argv[]) {
     // Add packet send and connect callback only to connected nodes
     if (disconnectedNodes.find(i) == disconnectedNodes.end()) {
       // Set up OnOff applications for packet transmission using TCP
-      OnOffHelper onoff("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
-      onoff.SetConstantRate(onoffDataRate, onoffPacketSize);
+      Ptr<OnOffApplicationWithExtraHeader> onOffApp = CreateObject<OnOffApplicationWithExtraHeader>();
+      // Set the packet size and data rate for the OnOff application
+      onOffApp->SetAttribute("DataRate", DataRateValue(onoffDataRate));
+      onOffApp->SetAttribute("PacketSize", UintegerValue(onoffPacketSize));
 
       // Choose the next node as destination
       uint32_t destNodeIndex = (i + 1) % totalNodes;
-      AddressValue remoteAddress(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9));
-      onoff.SetAttribute("Remote", remoteAddress);
+      onOffApp->SetAttribute("Remote", AddressValue(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9)));
 
-      // Install OnOff applications on client nodes
-      ApplicationContainer onOffApp = onoff.Install(clientNode);
+      // Install custom OnOff applications on client nodes
+      clientNode->AddApplication(onOffApp);
       onOffApps.Add(onOffApp);
 
       // Connect trace to received packets

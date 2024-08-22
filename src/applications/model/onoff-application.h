@@ -127,30 +127,6 @@ class OnOffApplication : public Application
   protected:
     void DoDispose() override;
 
-  private:
-    void StartApplication() override;
-    void StopApplication() override;
-
-    // helpers
-    /**
-     * \brief Cancel all pending events.
-     */
-    void CancelEvents();
-
-    // Event handlers
-    /**
-     * \brief Start an On period
-     */
-    void StartSending();
-    /**
-     * \brief Start an Off period
-     */
-    void StopSending();
-    /**
-     * \brief Send a packet
-     */
-    void SendPacket();
-
     Ptr<Socket> m_socket;                //!< Associated socket
     Address m_peer;                      //!< Peer address
     Address m_local;                     //!< Local address to bind to
@@ -183,11 +159,45 @@ class OnOffApplication : public Application
     TracedCallback<Ptr<const Packet>, const Address&, const Address&, const SeqTsSizeHeader&>
         m_txTraceWithSeqTsSize;
 
-  private:
+
+
     /**
      * \brief Schedule the next packet transmission
      */
     void ScheduleNextTx();
+
+    /**
+     * \brief Send a packet
+     */
+    virtual void SendPacket();
+
+  private:
+    void StartApplication() override;
+    void StopApplication() override;
+
+    // helpers
+    /**
+     * \brief Cancel all pending events.
+     */
+    void CancelEvents();
+
+    // Event handlers
+    /**
+     * \brief Start an On period
+     */
+    void StartSending();
+    /**
+     * \brief Start an Off period
+     */
+    void StopSending();
+
+
+
+
+
+
+  private:
+
     /**
      * \brief Schedule the next On period start
      */
