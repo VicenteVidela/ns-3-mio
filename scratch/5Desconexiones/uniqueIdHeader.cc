@@ -1,6 +1,5 @@
 #include "uniqueIdHeader.h"
 
-uint32_t uniqueIdCounter = 0;   // Counter for packets unique identifiers
 uint32_t g_nextUniqueId = 0;    // UniqueId for packets
 
 
@@ -61,8 +60,9 @@ OnOffApplicationWithExtraHeader::~OnOffApplicationWithExtraHeader() {}
 void OnOffApplicationWithExtraHeader::SendPacket() {
   // Create packet and set the UniqueIdentifierHeader
   Ptr<Packet> packet;
-  UniqueIdentifierHeader m_header;
-  m_header.SetId(g_nextUniqueId++);
+
+  // NS_LOG_UNCOND("SendPacket called, g_nextUniqueId: " << g_nextUniqueId);
+
 
   // Copy of SendPacket method from OnOffApplication with the addition of the UniqueIdentifierHeader
 
@@ -73,17 +73,25 @@ void OnOffApplicationWithExtraHeader::SendPacket() {
       m_socket->GetSockName(from);
       m_socket->GetPeerName(to);
       SeqTsSizeHeader header;
+      UniqueIdentifierHeader m_header;
+      m_header.SetId(g_nextUniqueId++);
       header.SetSeq(m_seq++);
       header.SetSize(m_pktSize);
       NS_ABORT_IF(m_pktSize < header.GetSerializedSize());
       packet = Create<Packet>(m_pktSize - header.GetSerializedSize() - m_header.GetSerializedSize());
+      packet->AddHeader(m_header);
       // Trace before adding header, for consistency with PacketSink
       m_txTraceWithSeqTsSize(packet, from, to, header);
       packet->AddHeader(header);
   }
-  else packet = Create<Packet>(m_pktSize - m_header.GetSerializedSize());
+  else {
+    UniqueIdentifierHeader m_header;
+    m_header.SetId(g_nextUniqueId++);
+    packet = Create<Packet>(m_pktSize - m_header.GetSerializedSize());
+    packet->AddHeader(m_header);
+  }
 
-  packet->AddHeader(m_header);
+
 
   int actual = m_socket->Send(packet);
   if ((unsigned)actual == m_pktSize)

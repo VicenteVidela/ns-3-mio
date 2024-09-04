@@ -34,12 +34,15 @@ mean_delay = []
 mean_jitter = []
 mean_queue_delay = []
 
+max_nodes = 300
+
 noMuerto = True
 # Parse each entry and extract values
 for entry in entries:
   lines = entry.split('\n')
   lines.pop(0)
-  nodes_disconnected.append(float(lines[0].split(": ")[1]))
+  nodes_disconnected.append(float(lines[0].split(": ")[1]) / max_nodes)
+  # nodes_disconnected.append(float(lines[0].split(": ")[1]))
   t = float(lines[2].split(": ")[1].split()[0])
   if t > 0:
     throughput.append(t)
@@ -58,33 +61,36 @@ for entry in entries:
 # Plotting
 fig, axs = plt.subplots(2, 2, figsize=(16, 12))
 
+x_ticks = np.arange(0, 1.1, 0.2)
+# x_ticks = nodes_disconnected
+
 # Plot Throughput Ratio
 axs[0, 0].plot(nodes_disconnected, throughput_ratio, marker='o', linestyle='-', color='b')
 axs[0, 0].set_title('Throughput to Bandwidth Ratio')
-axs[0, 0].set_xlabel('Nodes Disconnected')
+axs[0, 0].set_xlabel('(1-p)')
 axs[0, 0].set_ylabel('Ratio (%)')
-axs[0, 0].set_xticks(nodes_disconnected)
+axs[0, 0].set_xticks(x_ticks)
 
 # Plot Packet Loss Percentage
 axs[0, 1].plot(nodes_disconnected, packet_loss, marker='o', linestyle='-', color='g')
 axs[0, 1].set_title('Packet Loss Percentage')
-axs[0, 1].set_xlabel('Nodes Disconnected')
+axs[0, 1].set_xlabel('(1-p)')
 axs[0, 1].set_ylabel('Packet Loss (%)')
-axs[0, 1].set_xticks(nodes_disconnected)
+axs[0, 1].set_xticks(x_ticks)
 
 # Plot Mean Delay
 axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y')
 axs[1, 0].set_title('Mean Delay')
-axs[1, 0].set_xlabel('Nodes Disconnected')
+axs[1, 0].set_xlabel('(1-p)')
 axs[1, 0].set_ylabel('Time (ms)')
-axs[1, 0].set_xticks(nodes_disconnected)
+axs[1, 0].set_xticks(x_ticks)
 
 # Plot Mean Jitter
 axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m')
 axs[1, 1].set_title('Mean Jitter')
-axs[1, 1].set_xlabel('Nodes Disconnected')
+axs[1, 1].set_xlabel('(1-p)')
 axs[1, 1].set_ylabel('Time (ms)')
-axs[1, 1].set_xticks(nodes_disconnected)
+axs[1, 1].set_xticks(x_ticks)
 
 plt.tight_layout()
 plt.show()

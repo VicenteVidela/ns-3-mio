@@ -12,7 +12,6 @@
 
 using namespace ns3;
 
-extern uint32_t uniqueIdCounter;  // Counter for packets unique identifiers
 extern uint32_t g_nextUniqueId;  // UniqueId for packets
 
 // UniqueIdentifierHeader class

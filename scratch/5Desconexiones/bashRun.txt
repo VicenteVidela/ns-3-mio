@@ -1,9 +1,9 @@
-for i in {0..10..2}
+for i in {0..300..1}
 do
 echo "Desconectando $i nodos"
 ./ns3 run "5Desconexiones --nodesToDisconnect=$i
   --input=logic_exp_2.5_v1.csv
-  --output=1cortito2.dat
+  --output=1.dat
   --seed=1"
 done
 
@@ -11,7 +11,20 @@ done
 
 ./ns3 run "5Desconexiones --input=3000nodes.txt --output=5Desconexiones3000.dat"
 
-for i in {0..120..10}
+for k in {8..10}
+do
+  for i in {10..120..10}
+  do
+  echo "Corriendo por $i segundos en seed $k"
+  ./ns3 run "5Desconexiones --nodesToDisconnect=0
+    --input=logic_exp_2.5_v1.csv
+    --output=$k.dat
+    --seed=$k
+    --stopTime=$i"
+  done
+done
+
+for i in {10..120..10}
 do
 echo "Corriendo por $i segundos"
 ./ns3 run "5Desconexiones --nodesToDisconnect=0
@@ -20,3 +33,9 @@ echo "Corriendo por $i segundos"
   --seed=1
   --stopTime=$i"
 done
+
+./ns3 run "5Desconexiones --nodesToDisconnect=0
+  --input=logic_exp_2.5_v1.csv
+  --output=awa.dat
+  --seed=1
+  --stopTime=10"

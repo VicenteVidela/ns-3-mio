@@ -3,7 +3,7 @@
 /*
  * Simulation Parameters
 */
-float stopTime = 60;                                              // Simulation stop time
+float stopTime = 50;                                              // Simulation stop time
 StringValue p2pDelay = StringValue("2ms");                        // Delay for point-to-point links
 StringValue p2pDataRate = StringValue("100Kbps");                 // Max data rate for point-to-point links
 DataRate onoffDataRate = DataRate("100Kbps");                     // Data rate for OnOff applications
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     if (link.first > maxNodeId) maxNodeId = link.first;
     if (link.second > maxNodeId) maxNodeId = link.second;
   }
-  uint32_t totalNodes = maxNodeId + 1;
+  totalNodes = maxNodeId + 1;
   // Print number of nodes
   // std::cout << "Total nodes: " << totalNodes << std::endl;
 
@@ -129,11 +129,11 @@ int main(int argc, char* argv[]) {
     Ptr<Queue<Packet>> queue = netDeviceCont[i].Get(0)->GetObject<PointToPointNetDevice>()->GetQueue();
 
     // Callback to the trace event for packets entering queue
-    queue->TraceConnectWithoutContext("Enqueue", MakeCallback(&nodeQueueEnqueueTrace));
-    queue->TraceConnectWithoutContext("Dequeue", MakeCallback(&nodeQueueDequeueTrace));
+    // queue->TraceConnectWithoutContext("Enqueue", MakeCallback(&nodeQueueEnqueueTrace));
+    // queue->TraceConnectWithoutContext("Dequeue", MakeCallback(&nodeQueueDequeueTrace));
 
     // Callback to the trace function for queue length
-    queue->TraceConnect("PacketsInQueue", std::to_string(i), MakeCallback(&QueueLengthTrace));
+    // queue->TraceConnect("PacketsInQueue", std::to_string(i), MakeCallback(&QueueLengthTrace));
 
     // Assign IPv4 addresses to net devices
     ipv4InterfaceCont[i] = address.Assign(netDeviceCont[i]);
@@ -175,12 +175,6 @@ int main(int argc, char* argv[]) {
     Ipv4InterfaceAddress iaddrClient = ipv4Client->GetAddress(1, 0);
     Ipv4Address ipv4AddrClient = iaddrClient.GetLocal();
 
-    // Install sinks
-    PacketSinkHelper sink("ns3::TcpSocketFactory", Address(InetSocketAddress(ipv4AddrClient, 9)));
-    ApplicationContainer sinkApp = sink.Install(clientNode);
-    // Add the sink application to the container
-    sinkApps.Add(sinkApp);
-
     // Add packet send and connect callback only to connected nodes
     if (disconnectedNodes.find(i) == disconnectedNodes.end()) {
       // Set up OnOff applications for packet transmission using TCP
@@ -192,10 +186,22 @@ int main(int argc, char* argv[]) {
       // Choose the next node as destination
       uint32_t destNodeIndex = (i + 1) % totalNodes;
       onOffApp->SetAttribute("Remote", AddressValue(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9)));
+      // Connect trace to transmitted packets at the application layer
+      onOffApp->TraceConnectWithoutContext("Tx", MakeCallback(&applicationTxTrace));
 
       // Install custom OnOff applications on client nodes
       clientNode->AddApplication(onOffApp);
       onOffApps.Add(onOffApp);
+
+      // Create the PacketSink application
+      Ptr<PacketSink> sinkApp = CreateObject<PacketSink>();
+      // Set the address of the sink application
+      sinkApp->SetAttribute("Local", AddressValue(InetSocketAddress(ipv4AddrClient, 9)));
+      // Connect trace to received packets at the application layer
+      sinkApp->TraceConnectWithoutContext("Rx", MakeCallback(&applicationRxTrace));
+      // Install the sink application on the client node
+      clientNode->AddApplication(sinkApp);
+      sinkApps.Add(sinkApp);
 
       // Connect trace to received packets
       // Iterate over net devices of the client node
@@ -203,25 +209,21 @@ int main(int argc, char* argv[]) {
         Ptr<NetDevice> dev = clientNode->GetDevice(j);
         Ptr<PointToPointNetDevice> p2pDev = DynamicCast<PointToPointNetDevice>(dev);
         if (p2pDev) {
+          uint32_t nodeNumber = clientNode->GetId(); // Get the node number
+          uint32_t deviceNumber = p2pDev->GetIfIndex(); // Get the device number
+
           // Connect trace for point-to-point devices to trace receiving packets at the physical layer
-          Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
-                                        "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
+          Config::ConnectWithoutContext("/NodeList/" + std::to_string(nodeNumber) +
+                                        "/DeviceList/" + std::to_string(deviceNumber) +
                                         "/$ns3::PointToPointNetDevice/PhyRxEnd",
                                         MakeCallback(&nodeRxTrace));
-          // Connect trace for point-to-point devices to trace receiving packets at the mac layer
-          Config::ConnectWithoutContext("/NodeList/" + std::to_string(clientNode->GetId()) +
-                                        "/DeviceList/" + std::to_string(p2pDev->GetIfIndex()) +
-                                        "/$ns3::PointToPointNetDevice/MacRx",
-                                        MakeCallback(&macRxTrace));
         }
       }
     }
   }
 
   // Connect trace to transmited packets at the physical layer
-  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
-  // Connect trace to transmited packets at the mac layer
-  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacTx", MakeCallback(&macTxTrace));
+  Config::Connect("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/PhyTxEnd", MakeCallback(&nodeTxTrace));
 
   /**
    * Start applications

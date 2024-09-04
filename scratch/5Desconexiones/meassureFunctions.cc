@@ -1,6 +1,5 @@
 #include "meassureFunctions.h"
 
-std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
 std::vector<double> latencies;              // Vector to store latencies for each packet
 Time lastArrivalTime;                       // Time of last packet arrival
 std::vector<double> jitters;                // Vector to store jitters for each packet
@@ -9,8 +8,10 @@ uint32_t receivedPacketCount = 0;           // Number of packets received
 uint32_t transmitedPacketCount = 0;         // Number of packets transmitted
 double totalBandwidth = 0.0;                // Total maximum bandwidth of the network
 uint32_t totalBytesReceived = 0;            // Total bytes received
+uint32_t totalNodes = 0;                   // Total number of nodes in the network
 
-std::vector<double> queueDelays;            // Vector to store queue delays for each packet
+// std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
+// std::vector<double> queueDelays;            // Vector to store queue delays for each packet
 
 std::map<uint32_t, Time> sendTimes;         // Map to store send times for each packet
 
@@ -48,65 +49,20 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
   output << "Average jitter: " << averageJitter << " ms" << std::endl;
 
   // Calculate and print average queue delay
-  double totalQueueDelay = std::accumulate(queueDelays.begin(), queueDelays.end(), 0.0);
-  double averageQueueDelay = totalQueueDelay * 1000/ queueDelays.size();
-  output << "Average queue delay: " << averageQueueDelay << " ms" << std::endl;
-
-  // for (const auto& pair : enqueueTimes) {
-  //   output << pair.first << " " << pair.second << std::endl;
-  // }
+  // double totalQueueDelay = std::accumulate(queueDelays.begin(), queueDelays.end(), 0.0);
+  // double averageQueueDelay = totalQueueDelay * 1000/ queueDelays.size();
+  // output << "Average queue delay: " << averageQueueDelay << " ms" << std::endl;
 
   // Print an empty line for better readability
   output << std::endl;
 }
 
-/**
- * Queue functions
-*/
-// Function for tracing packets entering queue
-void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
-  Ptr<Packet> mutablePacket = packet->Copy();
-
-  SeqTsSizeHeader header;
-  packet->PeekHeader(header);
-  mutablePacket->RemoveHeader(header);
-
-  // Get the packet ID
-  UniqueIdentifierHeader uidHeader;
-  mutablePacket->PeekHeader(uidHeader);
-
-  // Store the enqueue time
-  enqueueTimes[uidHeader.GetId()] = Simulator::Now();
-}
-
-// Function for tracing packets leaving queue
-void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
-  Ptr<Packet> mutablePacket = packet->Copy();
-
-  SeqTsSizeHeader header;
-  packet->PeekHeader(header);
-  mutablePacket->RemoveHeader(header);
-
-  // Get the packet ID
-  UniqueIdentifierHeader uidHeader;
-  mutablePacket->PeekHeader(uidHeader);
-
-  uint32_t uniqueId = uidHeader.GetId();
-  // Get the packet enqueue time
-  Time enqueueTime = enqueueTimes[uniqueId];
-  // Get the packet dequeue time
-  Time dequeueTime = Simulator::Now();
-  // Calculate the queue delay
-  double queueDelay = (dequeueTime - enqueueTime).GetSeconds();
-  // Store the queue delay
-  queueDelays.push_back(queueDelay);
-}
 
 /**
- * Packet functions
+ * Physical layer functions
 */
 // Function to handle transmited packets at the physical layer
-void nodeTxTrace(Ptr<const Packet> packet) {
+void nodeTxTrace(std::string context, Ptr<const Packet> packet) {
   transmitedPacketCount++;
 }
 
@@ -119,39 +75,30 @@ void nodeRxTrace(Ptr<const Packet> packet) {
   totalBytesReceived += packetSize;
 }
 
-// Function to handle transmited packets at the mac layer
-void macTxTrace(Ptr<const Packet> packet) {
-  // Add a unique identifier header to the packet
-  // Ptr<Packet> mutablePacket = packet->Copy();
-  Ptr<Packet> mutablePacket = packet->Copy();
 
-  SeqTsSizeHeader header;
-  packet->PeekHeader(header);
-  mutablePacket->RemoveHeader(header);
-
+/**
+ * Application layer functions
+*/
+// Function to handle transmited packets at the application layer
+void applicationTxTrace(Ptr<const Packet> packet) {
   // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  mutablePacket->PeekHeader(uidHeader);
+  packet->PeekHeader(uidHeader);
+  uint32_t packetId = uidHeader.GetId();
+
   // Store the send time
-  sendTimes[uidHeader.GetId()] = Simulator::Now();
+  sendTimes[packetId] = Simulator::Now();
 }
 
-// Function to handle reception at each sink at the mac layer
-void macRxTrace(Ptr<const Packet> packet){
-  Ptr<Packet> mutablePacket = packet->Copy();
-
-  SeqTsSizeHeader header;
-  packet->PeekHeader(header);
-  mutablePacket->RemoveHeader(header);
-
+// Function to handle reception at the application layer
+void applicationRxTrace(Ptr<const Packet> packet, const Address &from) {
   // Get the packet ID
   UniqueIdentifierHeader uidHeader;
-  mutablePacket->PeekHeader(uidHeader);
+  packet->PeekHeader(uidHeader);
+  uint32_t packetId = uidHeader.GetId();
 
-
-  uint32_t uniqueId = uidHeader.GetId();
   // Get the packet transmission time
-  Time txTime = sendTimes[uniqueId];
+  Time txTime = sendTimes[packetId];
   // Get the packet reception time
   Time rxTime = Simulator::Now();
   // Calculate the latency
@@ -168,19 +115,59 @@ void macRxTrace(Ptr<const Packet> packet){
 
 
 
+/**
+ * Queue functions
+*/
+// Function for tracing packets entering queue
+// void nodeQueueEnqueueTrace(Ptr<const Packet> packet) {
+//   Ptr<Packet> mutablePacket = packet->Copy();
 
+//   // Remove the Ethernet header
+//   // EthernetHeader ethHeader;
+//   // mutablePacket->RemoveHeader(ethHeader);
 
+//   // Remove the sequence number header
+//   SeqTsSizeHeader header;
+//   mutablePacket->RemoveHeader(header);
 
+//   // Get the packet ID
+//   UniqueIdentifierHeader uidHeader;
+//   mutablePacket->PeekHeader(uidHeader);
 
+//   // Store the enqueue time
+//   enqueueTimes[uidHeader.GetId()] = Simulator::Now();
+// }
 
+// // Function for tracing packets leaving queue
+// void nodeQueueDequeueTrace(Ptr<const Packet> packet) {
+//   Ptr<Packet> mutablePacket = packet->Copy();
 
+//   // Remove the Ethernet header
+//   // EthernetHeader ethHeader;
+//   // mutablePacket->RemoveHeader(ethHeader);
 
+//   // Remove the sequence number header
+//   SeqTsSizeHeader header;
+//   mutablePacket->RemoveHeader(header);
 
+//   // Get the packet ID
+//   UniqueIdentifierHeader uidHeader;
+//   mutablePacket->PeekHeader(uidHeader);
 
+//   uint32_t uniqueId = uidHeader.GetId();
+//   // Get the packet enqueue time
+//   Time enqueueTime = enqueueTimes[uniqueId];
+//   // Get the packet dequeue time
+//   Time dequeueTime = Simulator::Now();
+//   // Calculate the queue delay
+//   double queueDelay = (dequeueTime - enqueueTime).GetSeconds();
+//   // Store the queue delay
+//   queueDelays.push_back(queueDelay);
+// }
 
-// Function for tracing queue length
-void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue) {
-  // std::cout << "Queue length changed from " << oldValue << " to " << newValue << std::endl;
-  return;
-}
+// // Function for tracing queue length
+// void QueueLengthTrace(std::string context, uint32_t oldValue, uint32_t newValue) {
+//   // std::cout << "Queue length changed from " << oldValue << " to " << newValue << std::endl;
+//   return;
+// }
 
