@@ -45,12 +45,14 @@ for entry in entries:
   # nodes_disconnected.append(float(lines[0].split(": ")[1]))
   t = float(lines[2].split(": ")[1].split()[0])
   if t > 0:
+    max_bandwidth.append(float(lines[1].split(": ")[1].split()[0]))
     throughput.append(t)
     throughput_ratio.append(float(lines[3].split(": ")[1])*100)
     packet_loss.append(float(lines[4].split(": ")[1][:-1]))
     mean_delay.append(float(lines[5].split(": ")[1].split()[0]))
     mean_jitter.append(float(lines[6].split(": ")[1].split()[0]))
   else:
+    max_bandwidth.append(None)
     throughput.append(None)
     throughput_ratio.append(None)
     packet_loss.append(None)
@@ -78,19 +80,35 @@ axs[0, 1].set_xlabel('(1-p)')
 axs[0, 1].set_ylabel('Packet Loss (%)')
 axs[0, 1].set_xticks(x_ticks)
 
-# Plot Mean Delay
-axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y')
-axs[1, 0].set_title('Mean Delay')
+# Plot Max bandwidth
+axs[1, 0].plot(nodes_disconnected, max_bandwidth, marker='o', linestyle='-', color='r')
+axs[1, 0].set_title('Max Bandwidth')
 axs[1, 0].set_xlabel('(1-p)')
-axs[1, 0].set_ylabel('Time (ms)')
+axs[1, 0].set_ylabel('Bandwidth (Kbps)')
 axs[1, 0].set_xticks(x_ticks)
 
-# Plot Mean Jitter
-axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m')
-axs[1, 1].set_title('Mean Jitter')
+# # Plot Mean Delay
+# axs[1, 0].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y')
+# axs[1, 0].set_title('Mean Delay')
+# axs[1, 0].set_xlabel('(1-p)')
+# axs[1, 0].set_ylabel('Time (ms)')
+# axs[1, 0].set_xticks(x_ticks)
+
+# # Plot Mean Jitter
+# axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m')
+# axs[1, 1].set_title('Mean Jitter')
+# axs[1, 1].set_xlabel('(1-p)')
+# axs[1, 1].set_ylabel('Time (ms)')
+# axs[1, 1].set_xticks(x_ticks)
+
+# Combined Plot for Mean Delay and Mean Jitter
+axs[1, 1].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y', label='Mean Delay')
+axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m', label='Mean Jitter')
+axs[1, 1].set_title('Mean Delay and Mean Jitter')
 axs[1, 1].set_xlabel('(1-p)')
 axs[1, 1].set_ylabel('Time (ms)')
 axs[1, 1].set_xticks(x_ticks)
+axs[1, 1].legend()
 
 plt.tight_layout()
 plt.show()

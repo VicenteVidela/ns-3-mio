@@ -1,10 +1,13 @@
-for i in {0..300..1}
+for k in {14..50}
 do
-echo "Desconectando $i nodos"
-./ns3 run "5Desconexiones --nodesToDisconnect=$i
-  --input=logic_exp_2.5_v1.csv
-  --output=1.dat
-  --seed=1"
+  for i in {0..300..1}
+  do
+  echo "Desconectando $i nodos en seed $k"
+  ./ns3 run "5Desconexiones --nodesToDisconnect=$i
+    --input=logic_exp_2.5_v1.csv
+    --output=$k.dat
+    --seed=$k"
+  done
 done
 
 ./ns3 run 5Desconexiones
