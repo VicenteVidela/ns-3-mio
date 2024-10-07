@@ -26,6 +26,8 @@ std::string dataFile = "5Desconexiones.dat";    // Where to store the data
 // Set random seed
 uint32_t seed = 123;
 
+std::vector<uint32_t> providerNodes = {30, 114, 71, 87, 162, 99};  // Nodes 0, 1, and 2 are provider nodes.
+
 /*
 * Main function
 */
@@ -101,10 +103,26 @@ int main(int argc, char* argv[]) {
   // Set error rate
   em->SetAttribute("ErrorRate", errorRate);
 
+
+  /**
+   * Disconnect nodes and check connectivity to provider nodes
+   */
   // Disconnect nodes
   for (int i = 0; i < nodesToDisconnect; i++) {
     DisconnectRandomNode();
   }
+  // Check connectivity to provider nodes using BFS
+  std::set<uint32_t> allReachableNodes;
+  for (auto providerId : providerNodes) {
+    Ptr<Node> providerNode = nodes.Get(providerId);
+    std::set<uint32_t> reachableFromProvider = GetReachableNodes(providerNode, links, disconnectedNodes);
+
+    // Union the reachable nodes from this provider to the overall set
+    allReachableNodes.insert(reachableFromProvider.begin(), reachableFromProvider.end());
+  }
+  // Calculate the fraction of nodes that are still connected to a provider
+  fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes - disconnectedNodes.size());
+
 
 
   /**

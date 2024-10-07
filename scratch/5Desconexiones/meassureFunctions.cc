@@ -8,7 +8,8 @@ uint32_t receivedPacketCount = 0;           // Number of packets received
 uint32_t transmitedPacketCount = 0;         // Number of packets transmitted
 double totalBandwidth = 0.0;                // Total maximum bandwidth of the network
 uint32_t totalBytesReceived = 0;            // Total bytes received
-uint32_t totalNodes = 0;                   // Total number of nodes in the network
+uint32_t totalNodes = 0;                    // Total number of nodes in the network
+double fractionConnectedG_L = 1.0;          // Fraction of nodes connected to a provider
 
 // std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
 // std::vector<double> queueDelays;            // Vector to store queue delays for each packet
@@ -47,6 +48,9 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
   double totalJitter = std::accumulate(jitters.begin(), jitters.end(), 0.0);
   double averageJitter = totalJitter * 1000 / jitters.size();
   output << "Average jitter: " << averageJitter << " ms" << std::endl;
+
+  // Print fraction of nodes connected to a provider G_L
+  output << "G_L: " << fractionConnectedG_L << std::endl;
 
   // Calculate and print average queue delay
   // double totalQueueDelay = std::accumulate(queueDelays.begin(), queueDelays.end(), 0.0);

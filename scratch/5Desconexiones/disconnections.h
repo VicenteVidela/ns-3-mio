@@ -14,4 +14,7 @@ extern std::string nodesDisconnectedString;   // String to store disconnected no
 // Function to disconnect a random node
 void DisconnectRandomNode();
 
+// Function for getting all reachable nodes from startNode
+std::set<uint32_t> GetReachableNodes(Ptr<Node> startNode, const std::vector<std::pair<uint32_t, uint32_t>>& links, std::set<uint32_t> disconnectedNodes);
+
 #endif

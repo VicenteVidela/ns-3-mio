@@ -27,6 +27,7 @@ extern double totalBandwidth;           // Total maximum bandwidth of the networ
 extern uint32_t onoffPacketSize;        // Packet size for OnOff applications
 extern uint32_t totalBytesReceived;     // Total bytes received
 extern uint32_t totalNodes;             // Total number of nodes in the network
+extern double fractionConnectedG_L;     // Fraction of nodes connected to a provider
 
 
 // Function to print throughput and packet statistics at the end of the simulation

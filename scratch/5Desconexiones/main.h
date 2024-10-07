@@ -42,7 +42,7 @@ extern ns3::DoubleValue errorRate;                          // Error rate for pa
 std::string topologyDirectory  = "scratch/topologies/";     // Directory for topology files
 
 // Directory for data files
-std::string dataDirectory = "data/PrimeraTopologia/";        // Directory for data files
+std::string dataDirectory = "data/";                        // Directory for data files
 extern std::string dataFile;                                // Data file name
 std::ofstream outputFile;                                   // Output file stream
 
