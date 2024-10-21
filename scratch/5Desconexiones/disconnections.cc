@@ -26,6 +26,15 @@ void DisconnectRandomNode() {
   // std::cout << "Disconnecting node " << randomIndex << std::endl;
 }
 
+// Function to disconnect a list of nodes
+void DisconnectNodes(std::vector<uint32_t> nodesToDisconnect) {
+  for (uint32_t nodeIndex : nodesToDisconnect) {
+    // Add the node to the set of disconnected nodes
+    disconnectedNodes.insert(nodeIndex);
+    nodesDisconnectedString += std::to_string(nodeIndex) + ' ';
+  }
+}
+
 // Function for getting all reachable nodes from startNode
 std::set<uint32_t> GetReachableNodes(Ptr<Node> startNode, const std::vector<std::pair<uint32_t, uint32_t>>& links, std::set<uint32_t> disconnectedNodes) {
   std::set<uint32_t> reachableNodes;
@@ -65,4 +74,41 @@ std::set<uint32_t> GetReachableNodes(Ptr<Node> startNode, const std::vector<std:
   }
 
   return reachableNodes;
+}
+
+
+
+// Function to load the nodes from the file
+std::vector<std::vector<uint32_t>> loadNodesToDisconnect(const std::string& filename) {
+  std::vector<std::vector<uint32_t>> nodesToDisconnect;
+  std::ifstream file(filename);
+
+  if (!file) {
+    std::cerr << "Error: Could not open file " << filename << std::endl;
+    return nodesToDisconnect;
+  }
+
+  std::string line;
+  std::regex numberRegex(R"(l(\d+))");  // Regex to extract numbers from 'l<num>'
+  std::smatch match;
+
+  // Read the file line-by-line
+  while (std::getline(file, line, ',')) {
+    std::vector<uint32_t> group;
+    std::string token;
+
+    // Use regex to find all 'l<num>' patterns and extract the numbers
+    std::sregex_iterator iter(line.begin(), line.end(), numberRegex);
+    std::sregex_iterator end;
+    while (iter != end) {
+      group.push_back(std::stoi((*iter)[1]));
+      ++iter;
+    }
+
+    if (!group.empty()) {
+      nodesToDisconnect.push_back(group);
+    }
+  }
+
+  return nodesToDisconnect;
 }

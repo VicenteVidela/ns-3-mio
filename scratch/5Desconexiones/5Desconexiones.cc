@@ -10,23 +10,26 @@ DataRate onoffDataRate = DataRate("100Kbps");                     // Data rate f
 uint32_t onoffPacketSize = 1500;                                  // Packet size for OnOff applications
 UintegerValue TCPSegmentSize = UintegerValue(onoffPacketSize);    // Packet size for OnOff applications
 StringValue CCAlgorithm = StringValue("ns3::TcpNewReno");         // Congestion control algorithm
-StringValue packetQueueSize = StringValue("100p");                 // Packet queue size for each link
+StringValue packetQueueSize = StringValue("100p");                // Packet queue size for each link
 std::string queueDiscipline = "ns3::DropTailQueue";               // Queue discipline to handle excess packets
-int nodesToDisconnect = 0;                                        // Number of nodes to disconnect
+int nodesNumberToDisconnect = 0;                                  // Number of nodes to disconnect when random
+
+std::vector<std::vector<uint32_t>> nodesToDisconnect = {{48}, {42}, {123}, {213}, {34}, {8}, {289, 63}, {251}, {157}, {7, 266, 80, 279, 120, 218, 283, 31}, {113, 173}, {2}, {10}, {278}, {91}, {21, 215}};                           // List of nodes to disconnect
+int iteration = 1;                                                // Iteration number for knowing how many nodes to disconnect
 
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();          // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.000);                      // Error rate for package loss
 
 // Default values input paramaters
-// std::string format("Csma");
-std::string input("logic_exp_2.5_v1.csv");        // Input file name
-std::string dataFile = "5Desconexiones.dat";    // Where to store the data
+std::string input("logic_exp_2.5_v1.csv");              // Input file name
+std::string dataFile = "5Desconexiones.dat";            // Where to store the data
+std::string disconnectionsFile = "disconnections1.txt"; // File with disconnections of nodes
 
 // Set random seed
 uint32_t seed = 123;
 
-std::vector<uint32_t> providerNodes = {30, 114, 71, 87, 162, 99};  // Nodes 0, 1, and 2 are provider nodes.
+std::vector<uint32_t> providerNodes = {30, 114, 71, 87, 162, 99}; // Provider nodes
 
 /*
 * Main function
@@ -34,11 +37,13 @@ std::vector<uint32_t> providerNodes = {30, 114, 71, 87, 162, 99};  // Nodes 0, 1
 int main(int argc, char* argv[]) {
   // Command line parser
   CommandLine cmd;
-  cmd.AddValue("nodesToDisconnect", "How many nodes to disconnect", nodesToDisconnect);
+  cmd.AddValue("nodesNumberToDisconnect", "How many nodes to disconnect randomly", nodesNumberToDisconnect);
   cmd.AddValue("input", "Topology input", input);
+  cmd.AddValue("disconnectionsFile", "File with the nodes to disconnect", disconnectionsFile);
   cmd.AddValue("output", "Where to store the data", dataFile);
   cmd.AddValue("seed", "Random seed", seed);
   cmd.AddValue("stopTime", "Simulation time", stopTime);
+  cmd.AddValue("iteration", "Iteration number", iteration);
   cmd.Parse(argc, argv);
 
   // Set the random seed
@@ -108,9 +113,14 @@ int main(int argc, char* argv[]) {
    * Disconnect nodes and check connectivity to provider nodes
    */
   // Disconnect nodes
-  for (int i = 0; i < nodesToDisconnect; i++) {
-    DisconnectRandomNode();
+  // for (int i = 0; i < nodesNumberToDisconnect; i++) {
+  //   DisconnectRandomNode();
+  // }
+  std::vector<std::vector<uint32_t>> nodesToDisconnect = loadNodesToDisconnect(topologyDirectory + disconnectionsFile);
+  for (int i=0; i<iteration; i++) {
+    DisconnectNodes(nodesToDisconnect[i]);
   }
+
   // Check connectivity to provider nodes using BFS
   std::set<uint32_t> allReachableNodes;
   for (auto providerId : providerNodes) {

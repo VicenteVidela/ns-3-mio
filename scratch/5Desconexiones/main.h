@@ -33,7 +33,12 @@ extern uint32_t onoffPacketSize;                            // Packet size for O
 extern ns3::StringValue CCAlgorithm;                        // Congestion control algorithm
 extern ns3::StringValue packetQueueSize;                    // Packet queue size for each link
 extern std::string queueDiscipline;                         // Queue discipline to handle excess packets
-extern int nodesToDisconnect;                               // Number of nodes to disconnect
+extern int nodesNumberToDisconnect;                         // Number of nodes to disconnect, when random
+
+extern std::vector<std::vector<uint32_t>> nodesToDisconnect;     // List of nodes to disconnect
+extern int iteration;                                       // Iteration number for knowing how many nodes to disconnect
+
+
 // Error rate for package loss
 extern ns3::Ptr<ns3::RateErrorModel> em;                    // Error model for point-to-point links
 extern ns3::DoubleValue errorRate;                          // Error rate for package loss
@@ -49,5 +54,6 @@ std::ofstream outputFile;                                   // Output file strea
 // Default values for command line parameters
 extern std::string format;                                  // Format for command line parameters
 extern std::string input;                                   // Input file name
+extern std::string disconnectionsFile;                      // File with disconnections of nodes
 
 #endif
