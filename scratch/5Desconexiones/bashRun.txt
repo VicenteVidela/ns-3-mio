@@ -45,7 +45,7 @@ done
 
 
 
-for i in {0..5}
+for i in {0..51}
 do
   echo "Corriendo iteracion $i"
   ./ns3 run "5Desconexiones
@@ -53,6 +53,42 @@ do
     --disconnectionsFile=Topologia1/disconnections1.txt
     --output=awa.dat
     --seed=1
-    --iteration=$i
-    --stopTime=10"
+    --iteration=$i"
+done
+
+
+for j in {1..10}
+do
+  for i in {0..51}
+  do
+    echo "Corriendo desconexiones $j iteracion $i"
+    ./ns3 run "5Desconexiones
+      --input=Topologia1/logic_exp_2.5_v1.csv
+      --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
+      --output=awa/Desconexiones$j.dat
+      --iteration=$i"
+  done
+done &&
+for j in {1..10}
+do
+  for i in {0..51}
+  do
+    echo "Corriendo desconexiones $j iteracion $i"
+    ./ns3 run "5Desconexiones
+      --input=Topologia1/logic_exp_2.5_v1.csv
+      --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_100x100_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
+      --output=awa/Desconexiones$j.dat
+      --iteration=$i"
+  done
+done
+
+
+for i in {10..51..10}
+do
+  ./ns3 run "5Desconexiones
+    --input=Topologia1/logic_exp_2.5_v1.csv
+    --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n1.txt
+    --output=awa.dat
+    --stopTime=10
+    --iteration=$i"
 done
