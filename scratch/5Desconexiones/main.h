@@ -21,6 +21,7 @@
 #include "meassureFunctions.h"
 #include "disconnections.h"
 #include "otros.h"
+#include "topologyLoader.h"
 
 using namespace ns3;
 
@@ -44,16 +45,17 @@ extern ns3::Ptr<ns3::RateErrorModel> em;                    // Error model for p
 extern ns3::DoubleValue errorRate;                          // Error rate for package loss
 
 // Directory for topology files
-std::string topologyDirectory  = "scratch/topologies/";     // Directory for topology files
+std::string baseTopologyDirectory = "scratch/topologies/";  // Base directory for all topology files
+std::string specificTopologyDirectory  = "Topologia1/";     // Directory for topology files in this simulation
 
 // Directory for data files
-std::string dataDirectory = "data/";                        // Directory for data files
-extern std::string dataFile;                                // Data file name
-std::ofstream outputFile;                                   // Output file stream
+std::string outputDirectory = "data/";                        // Directory for data files
+extern std::string outputFileName;                                // Data file name
+std::ofstream outputStream;                                   // Output file stream
 
 // Default values for command line parameters
-extern std::string format;                                  // Format for command line parameters
-extern std::string input;                                   // Input file name
+extern std::string topologyFileName;                        // Topology file name
+extern std::string providersFileName;                       // Providers file name
 extern std::string disconnectionsFile;                      // File with disconnections of nodes
 
 #endif

@@ -14,6 +14,8 @@ StringValue packetQueueSize = StringValue("100p");                // Packet queu
 std::string queueDiscipline = "ns3::DropTailQueue";               // Queue discipline to handle excess packets
 int nodesNumberToDisconnect = 0;                                  // Number of nodes to disconnect when random
 
+// Nodes parameters
+std::vector<uint32_t> providerNodes = {30}; // Provider nodes
 std::vector<std::vector<uint32_t>> nodesToDisconnect = {{48}, {42, 123}};                           // List of nodes to disconnect
 int iteration = 1;                                                // Iteration number for knowing how many nodes to disconnect
 
@@ -21,15 +23,14 @@ int iteration = 1;                                                // Iteration n
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();          // Error model for point-to-point links
 DoubleValue errorRate = DoubleValue(0.0001);                      // Error rate for package loss
 
-// Default values input paramaters
-std::string input("logic_exp_2.5_v1.csv");              // Input file name
-std::string dataFile = "5Desconexiones.dat";            // Where to store the data
-std::string disconnectionsFile = "disconnections1.txt"; // File with disconnections of nodes
+// Default values input and output paramaters
+std::string topologyFileName("logic_exp_2.5_v1.csv");       // Topology file name
+std::string outputFileName = "5Desconexiones.dat";          // Where to store the data
+std::string providersFileName = "proveedores.txt";          // File with providers
+std::string disconnectionsFile = "disconnections1.txt";     // File with disconnections of nodes
 
 // Set random seed
 uint32_t seed = 123;
-
-std::vector<uint32_t> providerNodes = {30}; // Provider nodes
 
 /*
 * Main function
@@ -37,13 +38,14 @@ std::vector<uint32_t> providerNodes = {30}; // Provider nodes
 int main(int argc, char* argv[]) {
   // Command line parser
   CommandLine cmd;
-  cmd.AddValue("nodesNumberToDisconnect", "How many nodes to disconnect randomly", nodesNumberToDisconnect);
-  cmd.AddValue("input", "Topology input", input);
+  cmd.AddValue("specificTopologyDirectory", "Specific directory for topology files", specificTopologyDirectory);
+  cmd.AddValue("topology", "Topology file name", topologyFileName);
   cmd.AddValue("disconnectionsFile", "File with the nodes to disconnect", disconnectionsFile);
-  cmd.AddValue("output", "Where to store the data", dataFile);
+  cmd.AddValue("output", "Where to store the data", outputFileName);
+  cmd.AddValue("nodesNumberToDisconnect", "How many nodes to disconnect randomly", nodesNumberToDisconnect);
   cmd.AddValue("seed", "Random seed", seed);
   cmd.AddValue("stopTime", "Simulation time", stopTime);
-  cmd.AddValue("iteration", "Iteration number", iteration);
+  cmd.AddValue("iteration", "Iteration number for knowing how many nodes to disconnect", iteration);
   cmd.Parse(argc, argv);
 
   // Set the random seed
@@ -53,26 +55,10 @@ int main(int argc, char* argv[]) {
   // /**
   //  * Read topology data
   //  */
-  // Create container for device interfaces
-  std::vector<std::pair<uint32_t, uint32_t>> links;
-  // Read CSV file
-  std::ifstream file(topologyDirectory + input);
-  std::string line;
-
-  while (std::getline(file, line)) {
-    // Parse the CSV line with format "lX,lY"
-    std::istringstream ss(line);
-    std::string nodeA, nodeB;
-    std::getline(ss, nodeA, ',');
-    std::getline(ss, nodeB, ',');
-
-    // Convert node labels (e.g., "l0", "l50") to integers (0, 50)
-    uint32_t nodeAId = std::stoi(nodeA.substr(1));
-    uint32_t nodeBId = std::stoi(nodeB.substr(1));
-
-    // Add to list of links
-    links.push_back(std::make_pair(nodeAId, nodeBId));
-  }
+  // Load topology from file and create nodes
+  std::string fullTopologyDirectory = baseTopologyDirectory + specificTopologyDirectory;
+  std::vector<std::pair<uint32_t, uint32_t>> links = LoadTopology(fullTopologyDirectory + topologyFileName);
+  providerNodes = LoadProviders(fullTopologyDirectory + providersFileName);
 
   // Determine the maximum node ID to create sufficient nodes
   uint32_t maxNodeId = 0;
@@ -116,7 +102,7 @@ int main(int argc, char* argv[]) {
   // for (int i = 0; i < nodesNumberToDisconnect; i++) {
   //   DisconnectRandomNode();
   // }
-  nodesToDisconnect = loadNodesToDisconnect(topologyDirectory + disconnectionsFile);
+  nodesToDisconnect = loadNodesToDisconnect(fullTopologyDirectory + disconnectionsFile);
   for (int i=0; i<iteration; i++) {
     DisconnectNodes(nodesToDisconnect[i]);
   }
@@ -275,9 +261,9 @@ int main(int argc, char* argv[]) {
 
 
   // Schedule print measures at the end of simulation
-  outputFile.open(dataDirectory + dataFile, std::ios::app);
+  outputStream.open(outputDirectory + outputFileName, std::ios::app);
   Simulator::Schedule(Seconds(stopTime), &PrintMeasures, disconnectedNodes,
-                      std::ref(outputFile.is_open()? outputFile : std::cout), stopTime, nodesDisconnectedString);
+                      std::ref(outputStream.is_open()? outputStream : std::cout), stopTime, nodesDisconnectedString);
 
   // Stop simulation at stop time
   Simulator::Stop(Seconds(stopTime));
@@ -286,7 +272,7 @@ int main(int argc, char* argv[]) {
   Simulator::Destroy();
 
   // Close data file
-  outputFile.close();
+  outputStream.close();
 
   // Clean up dynamically allocated arrays
   delete[] ipv4InterfaceCont;

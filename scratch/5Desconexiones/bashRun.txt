@@ -4,7 +4,7 @@ do
   do
   echo "Desconectando $i nodos en seed $k"
   ./ns3 run "5Desconexiones --nodesNumberToDisconnect=$i
-    --input=logic_exp_2.5_v1.csv
+    --topology=logic_exp_2.5_v1.csv
     --output=$k.dat
     --seed=$k"
   done
@@ -12,7 +12,7 @@ done
 
 ./ns3 run 5Desconexiones
 
-./ns3 run "5Desconexiones --input=3000nodes.txt --output=5Desconexiones3000.dat"
+./ns3 run "5Desconexiones --topology=3000nodes.txt --output=5Desconexiones3000.dat"
 
 for k in {8..10}
 do
@@ -20,7 +20,7 @@ do
   do
   echo "Corriendo por $i segundos en seed $k"
   ./ns3 run "5Desconexiones --nodesNumberToDisconnect=0
-    --input=logic_exp_2.5_v1.csv
+    --topology=logic_exp_2.5_v1.csv
     --output=$k.dat
     --seed=$k
     --stopTime=$i"
@@ -31,30 +31,18 @@ for i in {10..120..10}
 do
 echo "Corriendo por $i segundos"
 ./ns3 run "5Desconexiones --nodesNumberToDisconnect=0
-  --input=logic_exp_2.5_v1.csv
+  --topology=logic_exp_2.5_v1.csv
   --output=awa.dat
   --seed=1
   --stopTime=$i"
 done
 
 ./ns3 run "5Desconexiones --nodesNumberToDisconnect=0
-  --input=logic_exp_2.5_v1.csv
+  --topology=logic_exp_2.5_v1.csv
   --output=awa.dat
   --seed=1
   --stopTime=10"
 
-
-
-for i in {0..51}
-do
-  echo "Corriendo iteracion $i"
-  ./ns3 run "5Desconexiones
-    --input=Topologia1/logic_exp_2.5_v1.csv
-    --disconnectionsFile=Topologia1/disconnections1.txt
-    --output=awa.dat
-    --seed=1
-    --iteration=$i"
-done
 
 
 for j in {1..10}
@@ -63,8 +51,9 @@ do
   do
     echo "Corriendo desconexiones $j iteracion $i"
     ./ns3 run "5Desconexiones
-      --input=Topologia1/logic_exp_2.5_v1.csv
-      --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
+      --specificTopologyDirectory=Topologia1/
+      --topology=logic_exp_2.5_v1.csv
+      --disconnectionsFile=AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
       --output=awa/Desconexiones$j.dat
       --iteration=$i"
   done
@@ -75,8 +64,9 @@ do
   do
     echo "Corriendo desconexiones $j iteracion $i"
     ./ns3 run "5Desconexiones
-      --input=Topologia1/logic_exp_2.5_v1.csv
-      --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_100x100_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
+      --specificTopologyDirectory=Topologia1/
+      --topology=logic_exp_2.5_v1.csv
+      --disconnectionsFile=AV_it10_result_ppv3_lv1_100x100_exp_2.5_ndep_5_att_physical_v10_m_RNG_n$j.txt
       --output=awa/Desconexiones$j.dat
       --iteration=$i"
   done
@@ -86,8 +76,9 @@ done
 for i in {10..51..10}
 do
   ./ns3 run "5Desconexiones
-    --input=Topologia1/logic_exp_2.5_v1.csv
-    --disconnectionsFile=Topologia1/AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n1.txt
+    --specificTopologyDirectory=Topologia1/
+    --topology=logic_exp_2.5_v1.csv
+    --disconnectionsFile=AV_it10_result_ppv3_lv1_20x500_exp_2.5_ndep_5_att_physical_v10_m_RNG_n1.txt
     --output=awa.dat
     --stopTime=10
     --iteration=$i"
