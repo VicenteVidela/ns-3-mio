@@ -14,12 +14,12 @@ StringValue packetQueueSize = StringValue("100p");                // Packet queu
 std::string queueDiscipline = "ns3::DropTailQueue";               // Queue discipline to handle excess packets
 int nodesNumberToDisconnect = 0;                                  // Number of nodes to disconnect when random
 
-std::vector<std::vector<uint32_t>> nodesToDisconnect = {{48}, {42}, {123}, {213}, {34}, {8}, {289, 63}, {251}, {157}, {7, 266, 80, 279, 120, 218, 283, 31}, {113, 173}, {2}, {10}, {278}, {91}, {21, 215}};                           // List of nodes to disconnect
+std::vector<std::vector<uint32_t>> nodesToDisconnect = {{48}, {42, 123}};                           // List of nodes to disconnect
 int iteration = 1;                                                // Iteration number for knowing how many nodes to disconnect
 
 // Error rate for package loss
 Ptr<RateErrorModel> em = CreateObject<RateErrorModel>();          // Error model for point-to-point links
-DoubleValue errorRate = DoubleValue(0.000);                      // Error rate for package loss
+DoubleValue errorRate = DoubleValue(0.0001);                      // Error rate for package loss
 
 // Default values input paramaters
 std::string input("logic_exp_2.5_v1.csv");              // Input file name
@@ -29,7 +29,7 @@ std::string disconnectionsFile = "disconnections1.txt"; // File with disconnecti
 // Set random seed
 uint32_t seed = 123;
 
-std::vector<uint32_t> providerNodes = {30, 114, 71, 87, 162, 99}; // Provider nodes
+std::vector<uint32_t> providerNodes = {30}; // Provider nodes
 
 /*
 * Main function
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
   // for (int i = 0; i < nodesNumberToDisconnect; i++) {
   //   DisconnectRandomNode();
   // }
-  std::vector<std::vector<uint32_t>> nodesToDisconnect = loadNodesToDisconnect(topologyDirectory + disconnectionsFile);
+  nodesToDisconnect = loadNodesToDisconnect(topologyDirectory + disconnectionsFile);
   for (int i=0; i<iteration; i++) {
     DisconnectNodes(nodesToDisconnect[i]);
   }
