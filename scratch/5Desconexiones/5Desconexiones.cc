@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     allReachableNodes.insert(reachableFromProvider.begin(), reachableFromProvider.end());
   }
   // Calculate the fraction of nodes that are still connected to a provider
-  fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes - disconnectedNodes.size());
+  fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes);
 
 
 
