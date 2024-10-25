@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
   /**
    * Schedule simulation run and print function
   */
-  std::cout << "Run Simulation." << std::endl;
+  // std::cout << "Run Simulation." << std::endl;
 
   // Schedule progress update
   for (int i = 0; i < stopTime + 1; i++) {
@@ -279,7 +279,9 @@ int main(int argc, char* argv[]) {
   delete[] netDeviceCont;
   delete[] nodeCont;
 
-  std::cout << "\nDone." << std::endl;
+  // Tonteras pa la consola noma
+  std::cout << "\x1b[2K\033[F\x1b[2K";
+  std::cout.flush();
 
   return 0;
 }
