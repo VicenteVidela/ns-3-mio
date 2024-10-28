@@ -17,6 +17,7 @@
 #include <iostream>
 #include <numeric>
 #include <fstream>
+#include <filesystem>
 
 #include "meassureFunctions.h"
 #include "disconnections.h"
@@ -49,9 +50,9 @@ std::string baseTopologyDirectory = "scratch/topologies/";  // Base directory fo
 std::string specificTopologyDirectory  = "Topologia1/";     // Directory for topology files in this simulation
 
 // Directory for data files
-std::string outputDirectory = "data/";                        // Directory for data files
-extern std::string outputFileName;                                // Data file name
-std::ofstream outputStream;                                   // Output file stream
+std::string outputDirectory = "resultados/";                // Directory for results files
+extern std::string outputFileName;                          // Data file name
+std::ofstream outputStream;                                 // Output file stream
 
 // Default values for command line parameters
 extern std::string topologyFileName;                        // Topology file name

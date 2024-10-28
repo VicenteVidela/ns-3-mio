@@ -8,7 +8,6 @@
 *.pyo
 
 *.cwnd
-*.dat
 *.log
 *.mob
 *.pcap
@@ -53,3 +52,5 @@ vcpkg/
 
 
 animations/
+
+data/

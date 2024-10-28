@@ -102,22 +102,27 @@ int main(int argc, char* argv[]) {
   // for (int i = 0; i < nodesNumberToDisconnect; i++) {
   //   DisconnectRandomNode();
   // }
-  nodesToDisconnect = loadNodesToDisconnect(fullTopologyDirectory + disconnectionsFile);
+  auto nodesToDisconnectAndG_L = loadNodesToDisconnect(disconnectionsFile);
+  nodesToDisconnect = nodesToDisconnectAndG_L.first;
+  if (iteration==0) fractionConnectedG_L = 1.0;
+  else fractionConnectedG_L = nodesToDisconnectAndG_L.second.at(iteration-1);
+  // nodesToDisconnect = loadNodesToDisconnect(fullTopologyDirectory + disconnectionsFile);
   for (int i=0; i<iteration; i++) {
     DisconnectNodes(nodesToDisconnect[i]);
   }
 
-  // Check connectivity to provider nodes using BFS
-  std::set<uint32_t> allReachableNodes;
-  for (auto providerId : providerNodes) {
-    Ptr<Node> providerNode = nodes.Get(providerId);
-    std::set<uint32_t> reachableFromProvider = GetReachableNodes(providerNode, links, disconnectedNodes);
 
-    // Union the reachable nodes from this provider to the overall set
-    allReachableNodes.insert(reachableFromProvider.begin(), reachableFromProvider.end());
-  }
-  // Calculate the fraction of nodes that are still connected to a provider
-  fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes);
+  // // Check connectivity to provider nodes using BFS
+  // std::set<uint32_t> allReachableNodes;
+  // for (auto providerId : providerNodes) {
+  //   Ptr<Node> providerNode = nodes.Get(providerId);
+  //   std::set<uint32_t> reachableFromProvider = GetReachableNodes(providerNode, links, disconnectedNodes);
+
+  //   // Union the reachable nodes from this provider to the overall set
+  //   allReachableNodes.insert(reachableFromProvider.begin(), reachableFromProvider.end());
+  // }
+  // // Calculate the fraction of nodes that are still connected to a provider
+  // fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes);
 
 
 
@@ -261,7 +266,10 @@ int main(int argc, char* argv[]) {
 
 
   // Schedule print measures at the end of simulation
-  outputStream.open(outputDirectory + outputFileName, std::ios::app);
+  std::filesystem::path filePath(outputFileName);
+  std::filesystem::path directoryPath = filePath.parent_path();
+  std::filesystem::create_directories(directoryPath);
+  outputStream.open(outputFileName, std::ios::app);
   Simulator::Schedule(Seconds(stopTime), &PrintMeasures, disconnectedNodes,
                       std::ref(outputStream.is_open()? outputStream : std::cout), stopTime, nodesDisconnectedString);
 

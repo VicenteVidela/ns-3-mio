@@ -15,13 +15,15 @@ void DisconnectNodes(std::vector<uint32_t> nodesToDisconnect) {
 
 
 // Function to load the nodes from the file
-std::vector<std::vector<uint32_t>> loadNodesToDisconnect(const std::string& filename) {
+std::pair<std::vector<std::vector<uint32_t>>, std::vector<double>> loadNodesToDisconnect(const std::string& filename) {
   std::vector<std::vector<uint32_t>> result;
+  std::vector<double> fractionConnectedG_L;
   std::ifstream file(filename);
   std::string line;
 
   if (file.is_open()) {
-    while (std::getline(file, line)) {
+    // Read first line with disconnections
+    if (std::getline(file, line)) {
       // Remove the outer brackets
       line = line.substr(1, line.size() - 2);
 
@@ -52,12 +54,32 @@ std::vector<std::vector<uint32_t>> loadNodesToDisconnect(const std::string& file
         next++;
       }
     }
+
+    // Read second line with G_L
+    if (std::getline(file, line)) {
+      // Remove the outer brackets
+      line = line.substr(1, line.size() - 2);  // Removes the first and last character
+
+      std::stringstream ss(line);
+      std::string item;
+      while (std::getline(ss, item, ',')) {
+        // Remove leading and trailing whitespace
+        item.erase(0, item.find_first_not_of(" \t\n\r\f\v"));
+        item.erase(item.find_last_not_of(" \t\n\r\f\v") + 1);
+
+        // Convert to double and store
+        double value = std::stod(item);
+        fractionConnectedG_L.push_back(value);
+      }
+}
+
+
     file.close();
   } else {
     std::cerr << "Unable to open file: " << filename << std::endl;
   }
 
-  return result;
+  return {result, fractionConnectedG_L};
 }
 
 

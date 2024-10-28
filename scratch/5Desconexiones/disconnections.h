@@ -21,7 +21,7 @@ extern std::string nodesDisconnectedString;   // String to store disconnected no
 void DisconnectNodes(std::vector<uint32_t> nodesToDisconnect);
 
 // Function to load the nodes from the file
-std::vector<std::vector<uint32_t>> loadNodesToDisconnect(const std::string& filename);
+std::pair<std::vector<std::vector<uint32_t>>, std::vector<double>> loadNodesToDisconnect(const std::string& filename);
 
 // Function to disconnect a random node
 // void DisconnectRandomNode();
