@@ -11,8 +11,8 @@ uint32_t totalBytesReceived = 0;            // Total bytes received
 uint32_t totalNodes = 0;                    // Total number of nodes in the network
 double fractionConnectedG_L = 1.0;          // Fraction of nodes connected to a provider
 
-// std::map<uint32_t, Time> enqueueTimes;      // Map to store enqueue times for each packet
-// std::vector<double> queueDelays;            // Vector to store queue delays for each packet
+std::map<Address, std::vector<double>> flowJitters;   // Map to store jitters for each flow
+std::map<Address, Time> flowLastArrivalTimes;         // Map to store last arrival time for each flow
 
 std::map<uint32_t, Time> sendTimes;         // Map to store send times for each packet
 
@@ -44,10 +44,19 @@ void PrintMeasures(std::set<uint32_t> nodesDisconnected, std::ostream& output, f
   double averageDelay = totalDelay * 1000/ latencies.size();
   output << "Average delay: " << averageDelay << " ms" << std::endl;
 
+  double totalJitter = 0.0;
+  int totalPackets = 0;
+  for (const auto &[flowId, jitters] : flowJitters) {
+    totalJitter += std::accumulate(jitters.begin(), jitters.end(), 0.0);
+    totalPackets += jitters.size();
+  }
+  double globalAverageJitter = totalJitter * 1000 / totalPackets;
+  output << "Average jitter: " << globalAverageJitter << " ms" << std::endl;
+
   // Calculate and print average jitter
-  double totalJitter = std::accumulate(jitters.begin(), jitters.end(), 0.0);
-  double averageJitter = totalJitter * 1000 / jitters.size();
-  output << "Average jitter: " << averageJitter << " ms" << std::endl;
+  // double totalJitter = std::accumulate(jitters.begin(), jitters.end(), 0.0);
+  // double averageJitter = totalJitter * 1000 / jitters.size();
+  // output << "Average jitter: " << averageJitter << " ms" << std::endl;
 
   // Print fraction of nodes connected to a provider G_L
   output << "G_L: " << fractionConnectedG_L << std::endl;
@@ -105,16 +114,19 @@ void applicationRxTrace(Ptr<const Packet> packet, const Address &from) {
   Time txTime = sendTimes[packetId];
   // Get the packet reception time
   Time rxTime = Simulator::Now();
+
   // Calculate the latency
   double latency = (rxTime - txTime).GetSeconds();
   // Store the latency
   latencies.push_back(latency);
-  // Calculate the jitter
-  double jitter = (rxTime - lastArrivalTime).GetSeconds();
-  // Store the jitter
-  jitters.push_back(jitter);
-  // Update the last arrival time
-  lastArrivalTime = rxTime;
+
+  // Calculate and store the jitter
+  if (flowLastArrivalTimes.find(from) != flowLastArrivalTimes.end()) {
+    double jitter = (rxTime - flowLastArrivalTimes[from]).GetSeconds();
+    flowJitters[from].push_back(jitter);
+  }
+  // Update last arrival time for the flow
+  flowLastArrivalTimes[from] = rxTime;
 }
 
 

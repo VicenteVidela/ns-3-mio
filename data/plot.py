@@ -35,7 +35,7 @@ physical_fractions = []
 corresponding_G_L = {}
 for G_L_value, fraction_list in data_physical_fraction_and_GL.items():
   if G_L_value == '0.0':
-    continue
+    break
   physical_fractions.extend(fraction_list)
   corresponding_G_L[G_L_value] = len(fraction_list)
 
@@ -44,9 +44,10 @@ noMuerto = True
 for entry in entries:
   lines = entry.split('\n')
   lines.pop(0)
+  this_G_L = float(lines[7].split(": ")[1].split()[0])
+  if (this_G_L == 0): break
   t = float(lines[2].split(": ")[1].split()[0])
   if t > 0:
-    this_G_L = float(lines[7].split(": ")[1].split()[0])
     for i in range(corresponding_G_L[str(this_G_L)]):
       max_bandwidth.append(float(lines[1].split(": ")[1].split()[0]))
       throughput.append(t)
