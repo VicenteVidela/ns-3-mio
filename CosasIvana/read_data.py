@@ -83,7 +83,7 @@ class ResultsReader:
         return fraction_dictionary
 
 # Define directories
-input_directory = Path('ER_50_iteraciones/')
+input_directory = Path('simulaciones_ataques/')
 output_directory = Path('output/')
 output_directory_fraction = Path('output_fraction/')
 # Create output directory if it doesn't exist

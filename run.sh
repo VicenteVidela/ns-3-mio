@@ -2,7 +2,7 @@
 
 # Define variables
 BASE_DIR="scratch/topologies/"
-TOPOLOGY_DIR="ER_50_iteraciones/"
+TOPOLOGY_DIR="Topologia1/"
 TOPOLOGY_FILE="logic_exp_2.5_v1.csv"
 OUTPUT_DIR="resultados"
 
