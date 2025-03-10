@@ -1,68 +1,40 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 
-# Path to the file with aggregated metrics
+# File containing the averaged data
 input_file = 'averaged_metrics.dat'
 
-# Initialize lists to store values
-nodes_disconnected = []
-max_bandwidth = []
-throughput = []
+# Initialize lists to store data
+num_disconnected = []
 throughput_ratio = []
-packet_loss = []
-mean_delay = []
-mean_jitter = []
+std_throughput_ratio = []
 
-max_nodes = 300
-
-# Read and parse the aggregated data
+# Read the file
 with open(input_file, 'r') as f:
-    # Skip the header line
-    header = f.readline()
-    for line in f:
-        parts = line.strip().split(',')
-        nodes_disconnected.append(float(parts[0]) / max_nodes)
-        max_bandwidth.append(float(parts[1]))
-        throughput.append(float(parts[2]))
-        throughput_ratio.append(float(parts[3]))
-        packet_loss.append(float(parts[4]))
-        mean_delay.append(float(parts[5]))
-        mean_jitter.append(float(parts[6]))
+	reader = csv.reader(f)
+	next(reader)  # Skip header
 
-# Plotting
-fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+	for row in reader:
+		num_disconnected.append(int(row[0]))
+		throughput_ratio.append(float(row[5]))
+		std_throughput_ratio.append(float(row[6]))
 
-x_ticks = np.arange(0, 1.1, 0.2)
+# Convert lists to numpy arrays
+num_disconnected = np.array(num_disconnected)
+throughput_ratio = np.array(throughput_ratio)
+std_throughput_ratio = np.array(std_throughput_ratio)
 
-# Plot Throughput Ratio
-axs[0, 0].plot(nodes_disconnected, throughput_ratio, marker='o', linestyle='-', color='b')
-axs[0, 0].set_title('Throughput to Bandwidth Ratio')
-axs[0, 0].set_xlabel('(1 - p)')
-axs[0, 0].set_ylabel('Ratio (%)')
-axs[0, 0].set_xticks(x_ticks)
+# Plot data with error bars
+plt.figure(figsize=(8, 5))
+plt.errorbar(num_disconnected, throughput_ratio, yerr=std_throughput_ratio, fmt='-o', capsize=5, label='Throughput Ratio')
 
-# Plot Packet Loss Percentage
-axs[0, 1].plot(nodes_disconnected, packet_loss, marker='o', linestyle='-', color='g')
-axs[0, 1].set_title('Packet Loss Percentage')
-axs[0, 1].set_xlabel('(1 - p)')
-axs[0, 1].set_ylabel('Packet Loss (%)')
-axs[0, 1].set_xticks(x_ticks)
+# Labels and title
+plt.xlabel("Nodes Disconnected")
+plt.ylabel("Throughput to Bandwidth Ratio (%)")
+plt.title("Throughput Ratio vs Nodes Disconnected")
+plt.legend()
+plt.grid()
 
-# Plot Max Bandwidth
-axs[1, 0].plot(nodes_disconnected, max_bandwidth, marker='o', linestyle='-', color='r')
-axs[1, 0].set_title('Max Bandwidth')
-axs[1, 0].set_xlabel('(1 - p)')
-axs[1, 0].set_ylabel('Bandwidth (Kbps)')
-axs[1, 0].set_xticks(x_ticks)
-
-# Combined Plot for Mean Delay and Mean Jitter
-axs[1, 1].plot(nodes_disconnected, mean_delay, marker='o', linestyle='-', color='y', label='Mean Delay')
-axs[1, 1].plot(nodes_disconnected, mean_jitter, marker='o', linestyle='-', color='m', label='Mean Jitter')
-axs[1, 1].set_title('Mean Delay and Mean Jitter')
-axs[1, 1].set_xlabel('(1 - p)')
-axs[1, 1].set_ylabel('Time (ms)')
-axs[1, 1].set_xticks(x_ticks)
-axs[1, 1].legend()
-
-plt.tight_layout()
+# Show plot
 plt.show()

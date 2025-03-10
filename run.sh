@@ -26,7 +26,7 @@ for DISCONNECTIONS_FILE in $DISCONNECTIONS_FILES; do
   # Extract only the inner arrays and count them
   ARRAY_LENGTH=$(( $(grep -o '\[[^]]*\]' "$DISCONNECTIONS_FILE" | wc -l) - 1))
 
-  echo "Corriendo $FILENAME"
+  echo "Corriendo $SUBDIR/$FILENAME"
 
   # Loop over iterations based on the array length
   for i in $(seq 0 $((ARRAY_LENGTH))); do

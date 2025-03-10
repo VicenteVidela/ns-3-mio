@@ -1,0 +1,470 @@
+Nodes disconnected: 
+Number of disconnected nodes: 0
+Max available bandwidth: 33400 Kbps
+Average throughput: 25289.2 Kbps
+Throughput to bandwidth ratio: 0.757162
+Packet loss percentage: 5.68588%
+Average delay: 2125.04 ms
+Average jitter: 597.51 ms
+G_L: 1
+
+Nodes disconnected: 64 184 
+Number of disconnected nodes: 2
+Max available bandwidth: 33200 Kbps
+Average throughput: 25099.6 Kbps
+Throughput to bandwidth ratio: 0.756013
+Packet loss percentage: 5.91616%
+Average delay: 2119.92 ms
+Average jitter: 593.945 ms
+G_L: 0.9933
+
+Nodes disconnected: 64 184 56 
+Number of disconnected nodes: 3
+Max available bandwidth: 33100 Kbps
+Average throughput: 25075.3 Kbps
+Throughput to bandwidth ratio: 0.757562
+Packet loss percentage: 6.00392%
+Average delay: 2117.64 ms
+Average jitter: 589.395 ms
+G_L: 0.99
+
+Nodes disconnected: 64 184 56 145 
+Number of disconnected nodes: 4
+Max available bandwidth: 33000 Kbps
+Average throughput: 25043.1 Kbps
+Throughput to bandwidth ratio: 0.758883
+Packet loss percentage: 6.06299%
+Average delay: 2110.36 ms
+Average jitter: 587.75 ms
+G_L: 0.9867
+
+Nodes disconnected: 64 184 56 145 211 
+Number of disconnected nodes: 5
+Max available bandwidth: 33000 Kbps
+Average throughput: 24891.4 Kbps
+Throughput to bandwidth ratio: 0.754284
+Packet loss percentage: 6.21042%
+Average delay: 2116.67 ms
+Average jitter: 587.065 ms
+G_L: 0.9833
+
+Nodes disconnected: 64 184 56 145 211 178 154 
+Number of disconnected nodes: 7
+Max available bandwidth: 32900 Kbps
+Average throughput: 24818.2 Kbps
+Throughput to bandwidth ratio: 0.754351
+Packet loss percentage: 6.46505%
+Average delay: 2079.79 ms
+Average jitter: 579.387 ms
+G_L: 0.9767
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 
+Number of disconnected nodes: 9
+Max available bandwidth: 32700 Kbps
+Average throughput: 24588 Kbps
+Throughput to bandwidth ratio: 0.751927
+Packet loss percentage: 6.6959%
+Average delay: 2125.36 ms
+Average jitter: 578.21 ms
+G_L: 0.97
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 
+Number of disconnected nodes: 10
+Max available bandwidth: 32700 Kbps
+Average throughput: 24484.4 Kbps
+Throughput to bandwidth ratio: 0.748757
+Packet loss percentage: 6.79863%
+Average delay: 2072.68 ms
+Average jitter: 583.812 ms
+G_L: 0.9667
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 
+Number of disconnected nodes: 11
+Max available bandwidth: 32700 Kbps
+Average throughput: 24287.2 Kbps
+Throughput to bandwidth ratio: 0.742729
+Packet loss percentage: 6.98737%
+Average delay: 2139.98 ms
+Average jitter: 589.777 ms
+G_L: 0.9633
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 
+Number of disconnected nodes: 13
+Max available bandwidth: 32500 Kbps
+Average throughput: 24170.4 Kbps
+Throughput to bandwidth ratio: 0.743705
+Packet loss percentage: 7.31597%
+Average delay: 2098.98 ms
+Average jitter: 577.203 ms
+G_L: 0.9567
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 
+Number of disconnected nodes: 14
+Max available bandwidth: 32500 Kbps
+Average throughput: 24106.9 Kbps
+Throughput to bandwidth ratio: 0.741752
+Packet loss percentage: 7.37766%
+Average delay: 2153.67 ms
+Average jitter: 574.775 ms
+G_L: 0.9533
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 
+Number of disconnected nodes: 15
+Max available bandwidth: 32500 Kbps
+Average throughput: 24054.5 Kbps
+Throughput to bandwidth ratio: 0.74014
+Packet loss percentage: 7.49469%
+Average delay: 2077.33 ms
+Average jitter: 573.667 ms
+G_L: 0.95
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 
+Number of disconnected nodes: 16
+Max available bandwidth: 32400 Kbps
+Average throughput: 23975.3 Kbps
+Throughput to bandwidth ratio: 0.739977
+Packet loss percentage: 7.56412%
+Average delay: 2073.21 ms
+Average jitter: 578.662 ms
+G_L: 0.9467
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 
+Number of disconnected nodes: 18
+Max available bandwidth: 32200 Kbps
+Average throughput: 23599.1 Kbps
+Throughput to bandwidth ratio: 0.732891
+Packet loss percentage: 7.96778%
+Average delay: 2148.67 ms
+Average jitter: 581.877 ms
+G_L: 0.94
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 
+Number of disconnected nodes: 20
+Max available bandwidth: 32100 Kbps
+Average throughput: 23531.6 Kbps
+Throughput to bandwidth ratio: 0.733072
+Packet loss percentage: 8.16491%
+Average delay: 2140.85 ms
+Average jitter: 572.337 ms
+G_L: 0.9333
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 
+Number of disconnected nodes: 21
+Max available bandwidth: 32100 Kbps
+Average throughput: 23413.6 Kbps
+Throughput to bandwidth ratio: 0.729394
+Packet loss percentage: 8.30801%
+Average delay: 2160.33 ms
+Average jitter: 573.555 ms
+G_L: 0.93
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 
+Number of disconnected nodes: 22
+Max available bandwidth: 32000 Kbps
+Average throughput: 23350.6 Kbps
+Throughput to bandwidth ratio: 0.729708
+Packet loss percentage: 8.26791%
+Average delay: 2200.17 ms
+Average jitter: 574.064 ms
+G_L: 0.9267
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 
+Number of disconnected nodes: 23
+Max available bandwidth: 32000 Kbps
+Average throughput: 23354.8 Kbps
+Throughput to bandwidth ratio: 0.729836
+Packet loss percentage: 8.35943%
+Average delay: 2111.32 ms
+Average jitter: 568.337 ms
+G_L: 0.9233
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 
+Number of disconnected nodes: 24
+Max available bandwidth: 32000 Kbps
+Average throughput: 23247.3 Kbps
+Throughput to bandwidth ratio: 0.726477
+Packet loss percentage: 8.38773%
+Average delay: 2111.01 ms
+Average jitter: 568.304 ms
+G_L: 0.92
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 
+Number of disconnected nodes: 27
+Max available bandwidth: 31700 Kbps
+Average throughput: 22962.3 Kbps
+Throughput to bandwidth ratio: 0.724361
+Packet loss percentage: 8.92561%
+Average delay: 2065.87 ms
+Average jitter: 559.078 ms
+G_L: 0.91
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 
+Number of disconnected nodes: 29
+Max available bandwidth: 31600 Kbps
+Average throughput: 22608.3 Kbps
+Throughput to bandwidth ratio: 0.715453
+Packet loss percentage: 9.41824%
+Average delay: 2122.51 ms
+Average jitter: 568.489 ms
+G_L: 0.9033
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 
+Number of disconnected nodes: 30
+Max available bandwidth: 31600 Kbps
+Average throughput: 22426.3 Kbps
+Throughput to bandwidth ratio: 0.709691
+Packet loss percentage: 9.59705%
+Average delay: 2112.72 ms
+Average jitter: 568.559 ms
+G_L: 0.9
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 
+Number of disconnected nodes: 33
+Max available bandwidth: 31300 Kbps
+Average throughput: 22161.6 Kbps
+Throughput to bandwidth ratio: 0.708037
+Packet loss percentage: 9.83509%
+Average delay: 2017.04 ms
+Average jitter: 561.435 ms
+G_L: 0.89
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 
+Number of disconnected nodes: 34
+Max available bandwidth: 31300 Kbps
+Average throughput: 22005.1 Kbps
+Throughput to bandwidth ratio: 0.703037
+Packet loss percentage: 10.0394%
+Average delay: 2066.61 ms
+Average jitter: 569.119 ms
+G_L: 0.8867
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 
+Number of disconnected nodes: 36
+Max available bandwidth: 31000 Kbps
+Average throughput: 21711 Kbps
+Throughput to bandwidth ratio: 0.700353
+Packet loss percentage: 10.6104%
+Average delay: 2001.06 ms
+Average jitter: 569.256 ms
+G_L: 0.88
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 
+Number of disconnected nodes: 59
+Max available bandwidth: 28700 Kbps
+Average throughput: 19190.5 Kbps
+Throughput to bandwidth ratio: 0.66866
+Packet loss percentage: 15.6136%
+Average delay: 1860.6 ms
+Average jitter: 548.728 ms
+G_L: 0.8033
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 
+Number of disconnected nodes: 60
+Max available bandwidth: 28700 Kbps
+Average throughput: 19148.8 Kbps
+Throughput to bandwidth ratio: 0.667206
+Packet loss percentage: 15.6935%
+Average delay: 1856.51 ms
+Average jitter: 543.556 ms
+G_L: 0.8
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 
+Number of disconnected nodes: 61
+Max available bandwidth: 28600 Kbps
+Average throughput: 19048.2 Kbps
+Throughput to bandwidth ratio: 0.666021
+Packet loss percentage: 15.7366%
+Average delay: 1872.09 ms
+Average jitter: 547.725 ms
+G_L: 0.7967
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 
+Number of disconnected nodes: 62
+Max available bandwidth: 28600 Kbps
+Average throughput: 18903.4 Kbps
+Throughput to bandwidth ratio: 0.66096
+Packet loss percentage: 15.8249%
+Average delay: 1873.35 ms
+Average jitter: 543.39 ms
+G_L: 0.7933
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 
+Number of disconnected nodes: 64
+Max available bandwidth: 28500 Kbps
+Average throughput: 18714.6 Kbps
+Throughput to bandwidth ratio: 0.656653
+Packet loss percentage: 15.8567%
+Average delay: 1862.98 ms
+Average jitter: 550.972 ms
+G_L: 0.7867
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 
+Number of disconnected nodes: 65
+Max available bandwidth: 28400 Kbps
+Average throughput: 18690 Kbps
+Throughput to bandwidth ratio: 0.658097
+Packet loss percentage: 15.9664%
+Average delay: 1875.53 ms
+Average jitter: 548.88 ms
+G_L: 0.7833
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 
+Number of disconnected nodes: 67
+Max available bandwidth: 28200 Kbps
+Average throughput: 18338.3 Kbps
+Throughput to bandwidth ratio: 0.650295
+Packet loss percentage: 16.3897%
+Average delay: 1898.93 ms
+Average jitter: 549.027 ms
+G_L: 0.7767
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 
+Number of disconnected nodes: 68
+Max available bandwidth: 28100 Kbps
+Average throughput: 18204.3 Kbps
+Throughput to bandwidth ratio: 0.647842
+Packet loss percentage: 16.5877%
+Average delay: 1854.13 ms
+Average jitter: 549.055 ms
+G_L: 0.7733
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 
+Number of disconnected nodes: 69
+Max available bandwidth: 28100 Kbps
+Average throughput: 18114.4 Kbps
+Throughput to bandwidth ratio: 0.644642
+Packet loss percentage: 16.6734%
+Average delay: 1892.65 ms
+Average jitter: 550.668 ms
+G_L: 0.77
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 
+Number of disconnected nodes: 72
+Max available bandwidth: 27900 Kbps
+Average throughput: 17806.6 Kbps
+Throughput to bandwidth ratio: 0.638229
+Packet loss percentage: 16.9725%
+Average delay: 1869.68 ms
+Average jitter: 550.011 ms
+G_L: 0.76
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 
+Number of disconnected nodes: 73
+Max available bandwidth: 27900 Kbps
+Average throughput: 17645.2 Kbps
+Throughput to bandwidth ratio: 0.632444
+Packet loss percentage: 17.1937%
+Average delay: 1894.68 ms
+Average jitter: 556.3 ms
+G_L: 0.7567
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 
+Number of disconnected nodes: 75
+Max available bandwidth: 27800 Kbps
+Average throughput: 17577.4 Kbps
+Throughput to bandwidth ratio: 0.63228
+Packet loss percentage: 17.133%
+Average delay: 1883.84 ms
+Average jitter: 545.601 ms
+G_L: 0.75
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 
+Number of disconnected nodes: 76
+Max available bandwidth: 27800 Kbps
+Average throughput: 17454.4 Kbps
+Throughput to bandwidth ratio: 0.627857
+Packet loss percentage: 17.3646%
+Average delay: 1919.74 ms
+Average jitter: 556.765 ms
+G_L: 0.7467
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 
+Number of disconnected nodes: 78
+Max available bandwidth: 27700 Kbps
+Average throughput: 17312.6 Kbps
+Throughput to bandwidth ratio: 0.625004
+Packet loss percentage: 17.4534%
+Average delay: 1905.08 ms
+Average jitter: 547.945 ms
+G_L: 0.74
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 
+Number of disconnected nodes: 86
+Max available bandwidth: 27200 Kbps
+Average throughput: 16526.1 Kbps
+Throughput to bandwidth ratio: 0.607578
+Packet loss percentage: 18.3568%
+Average delay: 1767.94 ms
+Average jitter: 535.241 ms
+G_L: 0.7133
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 
+Number of disconnected nodes: 87
+Max available bandwidth: 27200 Kbps
+Average throughput: 16416.1 Kbps
+Throughput to bandwidth ratio: 0.603534
+Packet loss percentage: 18.4323%
+Average delay: 1807.35 ms
+Average jitter: 541.068 ms
+G_L: 0.71
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 
+Number of disconnected nodes: 88
+Max available bandwidth: 27000 Kbps
+Average throughput: 16280.5 Kbps
+Throughput to bandwidth ratio: 0.602982
+Packet loss percentage: 18.5978%
+Average delay: 1838.15 ms
+Average jitter: 547.496 ms
+G_L: 0.7067
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 27 
+Number of disconnected nodes: 89
+Max available bandwidth: 26900 Kbps
+Average throughput: 16190.7 Kbps
+Throughput to bandwidth ratio: 0.601885
+Packet loss percentage: 18.8343%
+Average delay: 1864.96 ms
+Average jitter: 546.013 ms
+G_L: 0.7033
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 27 194 3 
+Number of disconnected nodes: 91
+Max available bandwidth: 26700 Kbps
+Average throughput: 15970.4 Kbps
+Throughput to bandwidth ratio: 0.598142
+Packet loss percentage: 19.3145%
+Average delay: 1897 ms
+Average jitter: 547.315 ms
+G_L: 0.6967
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 27 194 3 289 63 
+Number of disconnected nodes: 93
+Max available bandwidth: 26500 Kbps
+Average throughput: 15747.8 Kbps
+Throughput to bandwidth ratio: 0.594255
+Packet loss percentage: 19.5055%
+Average delay: 1804.51 ms
+Average jitter: 545.942 ms
+G_L: 0.69
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 27 194 3 289 63 31 
+Number of disconnected nodes: 94
+Max available bandwidth: 26300 Kbps
+Average throughput: 15661.4 Kbps
+Throughput to bandwidth ratio: 0.59549
+Packet loss percentage: 19.6876%
+Average delay: 1697.71 ms
+Average jitter: 537.528 ms
+G_L: 0.6867
+
+Nodes disconnected: 64 184 56 145 211 178 154 180 22 170 264 161 226 108 250 9 51 127 281 110 278 8 84 279 221 37 134 97 34 269 291 284 133 196 81 18 131 260 263 15 155 157 159 299 174 175 54 185 57 70 203 205 82 93 230 231 245 124 254 176 120 52 16 96 242 210 36 189 213 33 44 118 214 208 17 239 24 95 288 225 195 292 116 151 153 94 293 11 27 194 3 289 63 31 0 1 2 4 5 6 7 10 12 13 14 19 20 21 23 25 26 28 29 30 32 35 38 39 40 41 42 43 45 46 47 48 49 50 53 55 58 59 60 61 62 65 66 67 68 69 71 72 73 74 75 76 77 78 79 80 83 85 86 87 88 89 90 91 92 98 99 100 101 102 103 104 105 106 107 109 111 112 113 114 115 117 119 121 122 123 125 126 128 129 130 132 135 136 137 138 139 140 141 142 143 144 146 147 148 149 150 152 156 158 160 162 163 164 165 166 167 168 169 171 172 173 177 179 181 182 183 186 187 188 190 191 192 193 197 198 199 200 201 202 204 206 207 209 212 215 216 217 218 219 220 222 223 224 227 228 229 232 233 234 235 236 237 238 240 241 243 244 246 247 248 249 251 252 253 255 256 257 258 259 261 262 265 266 267 268 270 271 272 273 274 275 276 277 280 282 283 285 286 287 290 294 295 296 297 298 
+Number of disconnected nodes: 300
+Max available bandwidth: 0 Kbps
+Average throughput: 0 Kbps
+Throughput to bandwidth ratio: -nan
+Packet loss percentage: -nan%
+Average delay: -nan ms
+Average jitter: -nan ms
+G_L: 0
+

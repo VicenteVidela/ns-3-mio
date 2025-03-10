@@ -2,19 +2,37 @@ import sys, json, os
 import matplotlib.pyplot as plt
 import numpy as np
 
+# py plot.py 5NN long 5 34
+
+# topologias = ['5NN','ER','GG','GPA','RNG','YAO']
+# formas = ['long', 'square']
+# imaxes = [3, 5, 7, 10]
+# n van del 1 al 50
+
 # Check if the correct number of command-line arguments is provided
-if len(sys.argv) != 2:
-  print("Usage: plot.py <input_file>")
+if len(sys.argv) != 5:
+  print("Usage: plot.py <topologia> <forma> <imax> <n>")
   sys.exit(1)
 
+topologia = sys.argv[1]
+forma = sys.argv[2]
+imax = sys.argv[3]
+n = sys.argv[4]
+
+n_forma = '20x500' if (forma=='long') else '100x100'
+
+
+file_name_string = f"../resultados/Topologia1/ataques/{topologia}/{forma}/imax{imax}/AV_it50_result_ppv3_lv1_{n_forma}_exp_2.5_ndep_{imax}_att_physical_v10_m_{topologia}_n{n}.dat"
+file_name_physical_fraction_and_GL_string = f"../resultados/Topologia1/fraccion_GL/{topologia}/{forma}/imax{imax}/AV_it50_result_ppv3_lv1_{n_forma}_exp_2.5_ndep_{imax}_att_physical_v10_m_{topologia}_n{n}.fraction"
+
 # Get the input file name from the command-line argument
-file_name = sys.argv[1]
-file_name_physical_fraction_and_GL = os.path.splitext(file_name.replace('Disconnections', 'PhysicalFractionAndGL'))[0] + '.fraction'
+# file_name = sys.argv[1]
+# file_name_physical_fraction_and_GL = os.path.splitext(file_name.replace('ataques', 'fraccion_GL'))[0] + '.fraction'
 
 # Open files for reading
-with open(file_name, 'r') as f:
+with open(file_name_string, 'r') as f:
   data = f.read()
-with open(file_name_physical_fraction_and_GL, 'r') as f:
+with open(file_name_physical_fraction_and_GL_string, 'r') as f:
   data_physical_fraction_and_GL = json.loads(f.read())
 
 # Split the data into individual entries
@@ -70,6 +88,8 @@ def combine_legends(ax_left, ax_right, loc):
 
 # Plotting
 fig, axs = plt.subplots(2, 2, figsize=(16, 12))
+
+fig.figure.suptitle(f"{topologia} {n_forma} imax{imax}, n: {n}")
 
 x_ticks = np.arange(0, 1.1, 0.2)
 
@@ -148,10 +168,6 @@ ax_right.set_ylabel('G_L')
 ax_right.tick_params(axis='y')
 
 combine_legends(ax_left, ax_right, loc='upper right')
-
-
-
-
 
 
 plt.tight_layout()
