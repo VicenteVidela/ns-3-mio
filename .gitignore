@@ -50,11 +50,8 @@ vcpkg/
 # Ignore local cache used by e.g. clangd
 .cache/
 
+data/AggregatedData/
 
 animations/
-
-data/
-
-!data/*.py
 
 CosasIvana/
