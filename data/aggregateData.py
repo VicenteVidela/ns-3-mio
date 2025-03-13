@@ -53,7 +53,7 @@ for file_name in glob.glob(os.path.join(data_directory, '*.dat')):
 		aggregated_data[num_disconnected]['mean_jitter'].append(mean_jitter)
 
 # Calculate averages, standard deviations, and store in a new file
-output_file = 'averaged_metrics.dat'
+output_file = f'AggregatedData/{topologia}_{forma}_imax{imax}.dat'
 
 def calculate_std(values, mean):
 	if len(values) < 2:
