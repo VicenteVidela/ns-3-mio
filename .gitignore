@@ -50,7 +50,7 @@ vcpkg/
 # Ignore local cache used by e.g. clangd
 .cache/
 
-data/AggregatedData/
+data/*/
 
 animations/
 
