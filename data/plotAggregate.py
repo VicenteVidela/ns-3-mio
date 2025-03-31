@@ -5,7 +5,7 @@ import json
 import numpy as np
 from decimal import *
 
-mode = 0 # 0=save 1=show
+mode = 1 # 0=save 1=show
 
 def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topologia, forma, imax, filename_suffix, color):
 	fig, ax_left = plt.subplots(figsize=(16, 9))
@@ -89,15 +89,15 @@ def plot_data(topologia, forma, imax):
 
 	# Plot each metric
 	plot_metric(df_expanded, GL_values, "Max Available Bandwidth (Kbps)", "Std Max Bandwidth",
-							"Max Available Bandwidth (Kbps)", "Max Available Bandwidth", topologia, forma, imax, "bandwidth", 'blue')
+							"Máximo Ancho de Banda (Kbps)", "Máximo Ancho de Banda", topologia, forma, imax, "bandwidth", 'blue')
 	plot_metric(df_expanded, GL_values, "Throughput to Bandwidth Ratio (%)", "Std Throughput Ratio",
-							"Ratio (%)", "Throughput to Bandwidth Ratio", topologia, forma, imax, "throughput_ratio", 'purple')
+							"Porcentaje (%)", "Relación Throughput a Ancho de Banda", topologia, forma, imax, "throughput_ratio", 'purple')
 	plot_metric(df_expanded, GL_values, "Packet Loss Percentage (%)", "Std Packet Loss",
-							"Packet Loss Percentage (%)", "Packet Loss Percentage", topologia, forma, imax, "packet_loss", 'orange')
+							"Porcentaje (%)", "Porcentaje de Pérdida de Paquetes", topologia, forma, imax, "packet_loss", 'orange')
 	plot_metric(df_expanded, GL_values, "Average Delay (ms)", "Std Delay",
-							"Delay (ms)", "Average Delay", topologia, forma, imax, "delay", 'navy')
+							"Latencia (ms)", "Latencia Promedio", topologia, forma, imax, "delay", 'navy')
 	plot_metric(df_expanded, GL_values, "Average Jitter (ms)", "Std Jitter",
-							"Jitter (ms)", "Average Jitter", topologia, forma, imax, "jitter", 'magenta')
+							"Jitter (ms)", "Jitter Promedio", topologia, forma, imax, "jitter", 'magenta')
 
 	print(f"{topologia}_{forma}_imax{imax} listoo")
 

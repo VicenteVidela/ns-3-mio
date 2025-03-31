@@ -57,7 +57,7 @@ def calculate_correlation(topologia, forma, imax):
   # Calculate correlations
   metrics = [
     "Max Available Bandwidth (Kbps)", "Average Throughput (Kbps)", "Throughput to Bandwidth Ratio (%)",
-    "Packet Loss Percentage (%)", "Average Delay (ms)", "Average Jitter (ms)"
+    "Packet Loss Percentage (%)", "Average Delay (ms)", "Average Jitter (ms)", "Std Delay", "Std Jitter"
   ]
 
   correlations_pearson = {}
