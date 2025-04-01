@@ -103,8 +103,8 @@ ax_left.set_xticks(x_ticks)
 ax_left.tick_params(axis='y')
 
 ax_right = ax_left.twinx()
-ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='G_L')
-ax_right.set_ylabel('G_L')
+ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='${G_L}$')
+ax_right.set_ylabel('${G_L}$')
 ax_right.tick_params(axis='y')
 
 combine_legends(ax_left, ax_right, loc='upper right')
@@ -122,8 +122,8 @@ ax_left.set_xticks(x_ticks)
 ax_left.tick_params(axis='y')
 
 ax_right = ax_left.twinx()
-ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='G_L')
-ax_right.set_ylabel('G_L')
+ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='${G_L}$')
+ax_right.set_ylabel('${G_L}$')
 ax_right.tick_params(axis='y')
 
 combine_legends(ax_left, ax_right, loc='upper right')
@@ -142,8 +142,8 @@ ax_left.set_xticks(x_ticks)
 ax_left.tick_params(axis='y')
 
 ax_right = ax_left.twinx()
-ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='G_L')
-ax_right.set_ylabel('G_L')
+ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='${G_L}$')
+ax_right.set_ylabel('${G_L}$')
 ax_right.tick_params(axis='y')
 
 combine_legends(ax_left, ax_right, loc='upper right')
@@ -163,8 +163,8 @@ ax_left.set_xticks(x_ticks)
 ax_left.tick_params(axis='y')
 
 ax_right = ax_left.twinx()
-ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='G_L')
-ax_right.set_ylabel('G_L')
+ax_right.plot(physical_fractions, G_L, linestyle='-', color='r', label='${G_L}$')
+ax_right.set_ylabel('${G_L}$')
 ax_right.tick_params(axis='y')
 
 combine_legends(ax_left, ax_right, loc='upper right')

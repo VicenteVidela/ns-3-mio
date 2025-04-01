@@ -5,32 +5,32 @@ import json
 import numpy as np
 from decimal import *
 
-mode = 1 # 0=save 1=show
+mode = 0 # 0=save 1=show
 
 def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topologia, forma, imax, filename_suffix, color):
-	fig, ax_left = plt.subplots(figsize=(16, 9))
-	fig.suptitle(f"{topologia} {forma} imax{imax}")
+	fig, ax_left = plt.subplots(figsize=(12, 7))
+	# fig.suptitle(f"{topologia} {forma} imax{imax}")
 
 	ax_left.plot(df_expanded["Fraction Physical Disconnected"], df_expanded[metric], linestyle='-', label=metric, color=color)
 	ax_left.fill_between(df_expanded["Fraction Physical Disconnected"],
 												df_expanded[metric] - df_expanded[std_metric],
 												df_expanded[metric] + df_expanded[std_metric],
 												alpha=0.2, color=color)
-	ax_left.set_title(title)
-	ax_left.set_xlabel('(1-p)')
-	ax_left.set_ylabel(ylabel)
+	# ax_left.set_title(title)
+	ax_left.set_xlabel('(1-p)', fontsize=12)
+	ax_left.set_ylabel(ylabel, fontsize=12)
 	ax_left.set_xticks(np.arange(0, 1.1, 0.1))
 	ax_left.tick_params(axis='y')
 	ax_left.grid(True)
 
 	ax_right = ax_left.twinx()
-	ax_right.plot(df_expanded["Fraction Physical Disconnected"], GL_values, linestyle='-', color='r', label='G_L')
-	ax_right.set_ylabel('G_L')
+	ax_right.plot(df_expanded["Fraction Physical Disconnected"], GL_values, linestyle='-', color='r', label='${G_L}$')
+	ax_right.set_ylabel('${G_L}$', fontsize=12)
 	ax_right.tick_params(axis='y')
 
 	handles_left, labels_left = ax_left.get_legend_handles_labels()
 	handles_right, labels_right = ax_right.get_legend_handles_labels()
-	ax_left.legend(handles_left + handles_right, labels_left + labels_right, loc='upper right')
+	ax_left.legend(handles_left + handles_right, labels_left + labels_right, loc='upper right', fontsize=12)
 
 	plt.tight_layout()
 	if mode:
