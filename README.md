@@ -1,215 +1,51 @@
-# The Network Simulator, Version 3
+# Internet QoS Resilience
+Este repositorio es un fork del simulador ns-3, donde se implementaron métodos de medición de métricas QoS como ancho de banda, latencia, pérdida de paquetes, etc., y métodos para simular desconexiones abruptas de nodos físicos.
+## 1. Prerrequisitos
+Este proyecto tiene los mismos requisitos que ns-3 para ser utilizado, los cuales son:
+- Sistema Unix (Linux, macOS)
+- Compilador C++: `clang++` o `g++` versión 9 o superior
+- `Python3.6` o superior
+- `CMake` versión 3.10 o superior
+- Sistema de compilación: `make, ninja, xcodebuild`
 
-[![codecov](https://codecov.io/gh/nsnam/ns-3-dev-git/branch/master/graph/badge.svg)](https://codecov.io/gh/nsnam/ns-3-dev-git/branch/master/)
-[![Gitlab CI](https://gitlab.com/nsnam/ns-3-dev/badges/master/pipeline.svg)](https://gitlab.com/nsnam/ns-3-dev/-/pipelines)
-[![Github CI](https://github.com/nsnam/ns-3-dev-git/actions/workflows/per_commit.yml/badge.svg)](https://github.com/nsnam/ns-3-dev-git/actions)
+## 2. Compilación
+Dado que este fork utiliza ns-3 como base, necesita los mismos pasos para compilar el código. Existen varias opciones, pero aquí se detallará la más directa, adecuada para este repositorio, que tampoco requiere configuraciones adicionales. Los pasos son los siguientes:
 
-[![Latest Release](https://gitlab.com/nsnam/ns-3-dev/-/badges/release.svg)](https://gitlab.com/nsnam/ns-3-dev/-/releases)
+1. Para configurar ns-3 con todas sus dependencias, en la carpeta base del proyecto se debe correr el comando `./ns3 configure`
+2. Una vez configurado, se debe compilar el código utilizando el comando `./ns3 build`
 
-## Table of Contents
+Una vez listo, el sistema estará compilado con la configuración básica de ns-3, suficiente para este proyecto.
 
-* [Overview](#overview-an-open-source-project)
-* [Building ns-3](#building-ns-3)
-* [Testing ns-3](#testing-ns-3)
-* [Running ns-3](#running-ns-3)
-* [ns-3 Documentation](#ns-3-documentation)
-* [Working with the Development Version of ns-3](#working-with-the-development-version-of-ns-3)
-* [Contributing to ns-3](#contributing-to-ns-3)
-* [Reporting Issues](#reporting-issues)
-* [ns-3 App Store](#ns-3-app-store)
+## 3. Uso
+### Correr simulaciones
+Una vez compilado el proyecto, se puede usar el comando `./ns3 run 'target'` para ejecutar la simulación 'target'. En el caso específico de este proyecto,
+existe el programa `5Desconexiones` dentro de la carpeta `scratch`, el cual contiene toda la lógica principal de la versión final de las simulaciones.
+El programa por si solo corre una simulación por defecto, pero se le pueden entregar los siguientes parámetros que alteran su funcionamiento, de donde se extraen los datos y donde se guardan:
+- `specificTopologyDirectory`: Cuál es el directorio dentro de la carpeta `scratch/topologies` donde se encuentran los archivos de topología, de nodos proveedores y los archivos de los ataques a hacer a la red.
+  - El archivo de nodos proveedores es un archivo llamado `proveedores.txt`, el cual especifica los nodos lógicos proveedores de la red
+  - Los archivos de ataques son archivos de texto con las extensión `.disc`, que es un arreglo de arreglos, donde cada subarreglo corresponde a una cantidad igual o mayor a 1 de nodos lógicos a desconectar en ese paso.
+- `topology`: Archivo csv dentro de `specificTopologyDirectory` que contiene la topología de la red lógica a utilizar en las simulaciones
+- `disconnectionsFile`: Archivo `.disc` de donde se extrae el orden de desconexiones de nodos de la simulación a correr.
+- `output`: Archivo donde guardar los resultados de la simulación.
+- `seed`: Semilla aleatoria, por si se quiere tener control sobre la aleatoriedad de los experimentos.
+- `stopTime`: Por cuántos segundos correr la simulación
+- `iteration`: Número de iteración de la simulación, para saber cuántos nodos desconectar tomando como referencia el archivo de desconexiones (e.g. en la iteración 5 se desconectarán los nodos especificados desde el primer subarreglo hasta el quinto)
 
-> **NOTE**: Much more substantial information about ns-3 can be found at
-<https://www.nsnam.org>
+Además, si se quiere correr todos los experimentos, se puede ejecutar el archivo `run.sh`, el cual toma cada uno de los archivos `.disc` de la carpeta (y subcarpetas de) `scratch/topologies/Topologia1` y corre cada iteración durante 50 segundos, luego guardando los resultados en la carpeta `resultados`.
 
-## Overview: An Open Source Project
+### Visualización resultados
+Una vez obtenidos los resultados, estos pueden ser visualizados utilizando los archivos Python de la carpeta `data`:
+- `plot.py`: Permite graficar los resultados dado parámetros específicos de las simulaciones. Su uso es `plot.py <topologia> <forma> <imax> <n>`, donde:
+  - `topologia`: modelo físico utilizado para generar la topología. Uno de 5NN, ER , GG, GPA, RNG, YAO.
+  - `forma`: forma del espacio donde se disponen los nodos, puede ser long o square
+  - `imax`: cantidad máxima de interenlaces entre nodos físicos y lógicos de la red interdependiente. Acepta valores igual a 3, 5, 7 y 10.
+  - `n`: corresponde al experimento número `n`, el cual puede ser desde 1 a 50. Varía la aleatoriedad y orden en que se eliminan los nodos.
+- `aggregateData.py`: Permiter agregar los 50 experimentos asociados un solo set de parámetros, calculando promedio y desviación estándar para cada métrica medida. Su uso es `aggregateData.py <topologia> <forma> <imax>`, donde los parámetros pueden tomar los mismos valores que el anterior. En caso de no entregar parámetros, se calculará la agregación de métricas para cada una de las combinaciones posibles. Los resultados se guardan dentro de la carpeta `AggregatedData/` en un csv con extensión `.dat`
+- `aggregateGL.py`: Agrupa los valores de G_L según los mismos parámetros de `aggregateData.py`. En caso de no entregar parámetros, se calculará la agregación de GL para cada una de las combinaciones posibles. Los resultados se guardan dentro de la carpeta `AggregatedData/` en un csv con extensión `.fraction`
+- `plotAggregate.py`: Permite graficar los datos ya agrupados según los archivos `aggregateData.py` y `aggregateGL.py`. Al igual que estos, toma los mismos parámetros si se quiere graficar alguna combinación de parámetros en específico, o grafica todos en caso de ejecutarlo sin parámetros. Además, dentro del archivo tiene dos modos, uno para mostrar y otro para guardar los gráficos en archivos `.png`. Hace 5 gráficos, separados según las métricas medidas.
+- `correlations.py`: Tomando los datos agregados según los archivos `aggregateData.py` y `aggregateGL.py`, calcula las correlaciones de Pearson, Spearman y Kendall entre cada métrica y G_L. Luego, las guarda en un archivo _json_ dentro de la carpeta `Correlations`. Se puede ejecutar con los mismos parámetros anteriores para el cálculo de un caso, o no entregar parámetros y calcular para todas las combinaciones posibles.
+- `plotCorrelations.py`: Genera heatmaps de los valores de correlación de Pearson y Spearman, calculados con el archivo anterior. Para estos calculos, se pueden agrupar los datos según los datos que se desee, entregando como parámetro un número entre 0 y 2:
+  - `0`: Agrupar según topología.
+  - `1`: Agrupar según forma espacial.
+  - `2`: Agrupar según cantidad máxima de interenlaces.
 
-ns-3 is a free open source project aiming to build a discrete-event
-network simulator targeted for simulation research and education.
-This is a collaborative project; we hope that
-the missing pieces of the models we have not yet implemented
-will be contributed by the community in an open collaboration
-process. If you would like to contribute to ns-3, please check
-the [Contributing to ns-3](#contributing-to-ns-3) section below.
-
-This README excerpts some details from a more extensive
-tutorial that is maintained at:
-<https://www.nsnam.org/documentation/latest/>
-
-## Building ns-3
-
-The code for the framework and the default models provided
-by ns-3 is built as a set of libraries. User simulations
-are expected to be written as simple programs that make
-use of these ns-3 libraries.
-
-To build the set of default libraries and the example
-programs included in this package, you need to use the
-`ns3` tool. This tool provides a Waf-like API to the
-underlying CMake build manager.
-Detailed information on how to use `ns3` is included in the
-[quick start guide](doc/installation/source/quick-start.rst).
-
-Before building ns-3, you must configure it.
-This step allows the configuration of the build options,
-such as whether to enable the examples, tests and more.
-
-To configure ns-3 with examples and tests enabled,
-run the following command on the ns-3 main directory:
-
-```shell
-./ns3 configure --enable-examples --enable-tests
-```
-
-Then, build ns-3 by running the following command:
-
-```shell
-./ns3 build
-```
-
-By default, the build artifacts will be stored in the `build/` directory.
-
-### Supported Platforms
-
-The current codebase is expected to build and run on the
-set of platforms listed in the [release notes](RELEASE_NOTES.md)
-file.
-
-Other platforms may or may not work: we welcome patches to
-improve the portability of the code to these other platforms.
-
-## Testing ns-3
-
-ns-3 contains test suites to validate the models and detect regressions.
-To run the test suite, run the following command on the ns-3 main directory:
-
-```shell
-./test.py
-```
-
-More information about ns-3 tests is available in the
-[test framework](doc/manual/source/test-framework.rst) section of the manual.
-
-## Running ns-3
-
-On recent Linux systems, once you have built ns-3 (with examples
-enabled), it should be easy to run the sample programs with the
-following command, such as:
-
-```shell
-./ns3 run simple-global-routing
-```
-
-That program should generate a `simple-global-routing.tr` text
-trace file and a set of `simple-global-routing-xx-xx.pcap` binary
-PCAP trace files, which can be read by `tcpdump -n -tt -r filename.pcap`.
-The program source can be found in the `examples/routing` directory.
-
-## Running ns-3 from Python
-
-If you do not plan to modify ns-3 upstream modules, you can get
-a pre-built version of the ns-3 python bindings.
-
-```shell
-pip install --user ns3
-```
-
-If you do not have `pip`, check their documents
-on [how to install it](https://pip.pypa.io/en/stable/installation/).
-
-After installing the `ns3` package, you can then create your simulation python script.
-Below is a trivial demo script to get you started.
-
-```python
-from ns import ns
-
-ns.LogComponentEnable("Simulator", ns.LOG_LEVEL_ALL)
-
-ns.Simulator.Stop(ns.Seconds(10))
-ns.Simulator.Run()
-ns.Simulator.Destroy()
-```
-
-The simulation will take a while to start, while the bindings are loaded.
-The script above will print the logging messages for the called commands.
-
-Use `help(ns)` to check the prototypes for all functions defined in the
-ns3 namespace. To get more useful results, query specific classes of
-interest and their functions e.g., `help(ns.Simulator)`.
-
-Smart pointers `Ptr<>` can be differentiated from objects by checking if
-`__deref__` is listed in `dir(variable)`. To dereference the pointer,
-use `variable.__deref__()`.
-
-Most ns-3 simulations are written in C++ and the documentation is
-oriented towards C++ users. The ns-3 tutorial programs (`first.cc`,
-`second.cc`, etc.) have Python equivalents, if you are looking for
-some initial guidance on how to use the Python API. The Python
-API may not be as full-featured as the C++ API, and an API guide
-for what C++ APIs are supported or not from Python do not currently exist.
-The project is looking for additional Python maintainers to improve
-the support for future Python users.
-
-## ns-3 Documentation
-
-Once you have verified that your build of ns-3 works by running
-the `simple-global-routing` example as outlined in the [running ns-3](#running-ns-3)
-section, it is quite likely that you will want to get started on reading
-some ns-3 documentation.
-
-All of that documentation should always be available from
-the ns-3 website: <https://www.nsnam.org/documentation/>.
-
-This documentation includes:
-
-* a tutorial
-* a reference manual
-* models in the ns-3 model library
-* a wiki for user-contributed tips: <https://www.nsnam.org/wiki/>
-* API documentation generated using doxygen: this is
-  a reference manual, most likely not very well suited
-  as introductory text:
-  <https://www.nsnam.org/doxygen/index.html>
-
-## Working with the Development Version of ns-3
-
-If you want to download and use the development version of ns-3, you
-need to use the tool `git`. A quick and dirty cheat sheet is included
-in the manual, but reading through the Git
-tutorials found in the Internet is usually a good idea if you are not
-familiar with it.
-
-If you have successfully installed Git, you can get
-a copy of the development version with the following command:
-
-```shell
-git clone https://gitlab.com/nsnam/ns-3-dev.git
-```
-
-However, we recommend to follow the GitLab guidelines for starters,
-that includes creating a GitLab account, forking the ns-3-dev project
-under the new account's name, and then cloning the forked repository.
-You can find more information in the [manual](https://www.nsnam.org/docs/manual/html/working-with-git.html).
-
-## Contributing to ns-3
-
-The process of contributing to the ns-3 project varies with
-the people involved, the amount of time they can invest
-and the type of model they want to work on, but the current
-process that the project tries to follow is described in the
-[contributing code](https://www.nsnam.org/developers/contributing-code/)
-website and in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-## Reporting Issues
-
-If you would like to report an issue, you can open a new issue in the
-[GitLab issue tracker](https://gitlab.com/nsnam/ns-3-dev/-/issues).
-Before creating a new issue, please check if the problem that you are facing
-was already reported and contribute to the discussion, if necessary.
-
-## ns-3 App Store
-
-The official [ns-3 App Store](https://apps.nsnam.org/) is a centralized directory
-listing third-party modules for ns-3 available on the Internet.
-
-More information on how to submit an ns-3 module to the ns-3 App Store is available
-in the [ns-3 App Store documentation](https://www.nsnam.org/docs/contributing/html/external.html).

@@ -1,80 +1,67 @@
-import os
-import json
+import json, os, sys
 import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
-from glob import glob
+import matplotlib.pyplot as plt
+import pandas as pd
 
-def load_json_files(directory):
-	"""Load all JSON files from a directory and return a list of dictionaries."""
-	files = glob(os.path.join(directory, "*.json"))
-	data = []
-	for file in files:
-		with open(file, "r") as f:
-			data.append(json.load(f))
-	return data
+# Bajo cual agrupar
+agrupar_por = 0
 
-def aggregate_correlations(data):
-	"""Aggregate correlation values and compute standard deviations across all files."""
-	metrics = data[0]['pearson'].keys()  # Assume all files have the same metrics
-	correlations = {metric: {"pearson": [], "spearman": [], "kendall": []} for metric in metrics}
+# Si le dan argumentos, agrupar bajo esos parámetros
+if len(sys.argv) == 2:
+	agrupar_por = int(sys.argv[1])
 
-	for entry in data:
-		for metric in metrics:
-			correlations[metric]["pearson"].append(entry["pearson"][metric])
-			correlations[metric]["spearman"].append(entry["spearman"][metric])
-			correlations[metric]["kendall"].append(entry["kendall"][metric])
+# Define parameters
+first_params = ["5NN", "ER", "GG", "GPA", "RNG", "YAO"]
+second_params = ["long", "square"]
+third_params = ["imax3", "imax5", "imax7", "imax10"]
 
-	# Compute the average correlation and standard deviation per metric
-	stats = {metric: {corr: {"mean": np.mean(correlations[metric][corr]), "std": np.std(correlations[metric][corr])} for corr in correlations[metric]} for metric in metrics}
+param_group = [first_params, second_params, third_params][agrupar_por]
+xlabel = ["Topology Type", "Topology Shape", "Max Interlinks"][agrupar_por]
 
-	return stats
+# Load JSON files
+folder = "Correlations"  # Change this to your folder containing JSON files
+all_data = []
 
-def plot_heatmap(correlations):
-	"""Plot a heatmap of the correlation values with standard deviation annotations."""
-	metrics = list(correlations.keys())
-	corr_types = ["pearson", "spearman", "kendall"]
+for filename in os.listdir(folder):
+    if filename.endswith(".json"):
+        with open(os.path.join(folder, filename), "r") as f:
+            data = json.load(f)
+            # Extract parameters from filename (modify if needed)
+            params = filename.replace(".json", "").split("_")  # Assuming filenames follow a structured pattern
+            all_data.append((params, data))
 
-	corr_matrix = np.array([[correlations[metric][corr]["mean"] for corr in corr_types] for metric in metrics])
-	std_matrix = np.array([[correlations[metric][corr]["std"] for corr in corr_types] for metric in metrics])
+# Organize data into DataFrames
+def extract_correlations(correlation_type):
+    # Elegir segun first, second o third, para agrupar segun eso. Tambien cambiar el valor de first_param=params[n]
+    heatmap_data = {param: {} for param in param_group}
 
-	plt.figure(figsize=(16, 9))
-	sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", xticklabels=[corr.capitalize() for corr in corr_types], yticklabels=metrics, fmt=".3f", cbar=True, linewidths=.5, linecolor='black')
+    for params, data in all_data:
+        first_param = params[agrupar_por]   # Para elegir segun quien agrupar
+        correlations = data[correlation_type]
 
-	# Annotate with standard deviations
-	for i in range(len(metrics)):
-		for j in range(len(corr_types)):
-			plt.text(j + 0.5, i + .75, f"±{std_matrix[i, j]:.3f}", ha='center', va='bottom', fontsize=10, color='white')
+        for metric, value in correlations.items():
+            if metric not in heatmap_data[first_param]:
+                heatmap_data[first_param][metric] = []
+            heatmap_data[first_param][metric].append(value)
 
-	plt.title("Correlation Heatmap with Standard Deviations")
-	plt.xlabel("Correlation Type")
-	plt.ylabel("Metric")
-	plt.tight_layout()
-	plt.show()
+    # Convert to DataFrame (averaging values if needed)
+    df = pd.DataFrame({k: {m: np.mean(v) for m, v in v.items()} for k, v in heatmap_data.items()})
+    return df
 
-def plot_radar_chart(correlations):
-	"""Plot a radar chart comparing correlation types."""
-	metrics = list(correlations.keys())
-	corr_types = ["pearson", "spearman", "kendall"]
-	angles = np.linspace(0, 2 * np.pi, len(metrics), endpoint=False).tolist()
-	angles += angles[:1]  # Close the circle
+# Plot heatmaps
+def plot_heatmap(df, title):
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(df, annot=True, cmap="coolwarm", center=0, linewidths=0.5)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel("Metric")
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    plt.show()
 
-	fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={"polar": True})
-	for corr_type, color in zip(corr_types, ["b", "g", "r"]):
-		values = [correlations[metric][corr_type]["mean"] for metric in metrics]
-		values += values[:1]  # Close the circle
-		ax.plot(angles, values, label=corr_type.capitalize(), color=color)
-		ax.fill(angles, values, alpha=0.25, color=color)
-
-	ax.set_xticks(angles[:-1])
-	ax.set_xticklabels(metrics, rotation=45, ha="right")
-	ax.set_title("Radar Chart of Correlations")
-	ax.legend()
-	plt.show()
-
-if __name__ == "__main__":
-	directory = "./Correlations"  # Change this to your actual directory containing JSON files
-	data = load_json_files(directory)
-	correlations = aggregate_correlations(data)
-	plot_heatmap(correlations)
-	# plot_radar_chart(correlations)
+# Generate and plot heatmaps
+for correlation_type in ["pearson", "spearman"]:
+    df = extract_correlations(correlation_type)
+    plot_heatmap(df, f"{correlation_type.capitalize()} Correlation Heatmap")
