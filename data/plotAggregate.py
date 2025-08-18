@@ -7,7 +7,7 @@ from decimal import *
 
 mode = 0 # 0=save 1=show
 
-def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topologia, forma, imax, filename_suffix, color):
+def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topologia, forma, imax, metric_name, color, location='center left'):
 	fig, ax_left = plt.subplots(figsize=(12, 7))
 	# fig.suptitle(f"{topologia} {forma} imax{imax}")
 
@@ -30,13 +30,13 @@ def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topol
 
 	handles_left, labels_left = ax_left.get_legend_handles_labels()
 	handles_right, labels_right = ax_right.get_legend_handles_labels()
-	ax_left.legend(handles_left + handles_right, labels_left + labels_right, loc='upper right', fontsize=12)
+	ax_left.legend(handles_left + handles_right, labels_left + labels_right, loc=location, fontsize=16)
 
 	plt.tight_layout()
 	if mode:
 		plt.show()
 	else:
-		plt.savefig(f"Plots/{topologia}_{forma}_imax{imax}_{filename_suffix}.png")
+		plt.savefig(f"Plots/{metric_name}_{topologia}_{forma}_imax{imax}.png")
 	plt.close()
 
 def plot_data(topologia, forma, imax):
@@ -85,6 +85,7 @@ def plot_data(topologia, forma, imax):
 			GL_values.extend([frac_logical] * repeat_count)
 			df_expanded = pd.concat([df_expanded, expanded_rows], ignore_index=True)
 
+
 	df_expanded.sort_values("Fraction Physical Disconnected", inplace=True)
 
 	# Plot each metric
@@ -95,9 +96,9 @@ def plot_data(topologia, forma, imax):
 	plot_metric(df_expanded, GL_values, "Packet Loss Percentage (%)", "Std Packet Loss",
 							"Porcentaje (%)", "Porcentaje de Pérdida de Paquetes", topologia, forma, imax, "packet_loss", 'orange')
 	plot_metric(df_expanded, GL_values, "Average Delay (ms)", "Std Delay",
-							"Latencia (ms)", "Latencia Promedio", topologia, forma, imax, "delay", 'navy')
+							"Latencia (ms)", "Latencia Promedio", topologia, forma, imax, "delay", 'navy', 'best')
 	plot_metric(df_expanded, GL_values, "Average Jitter (ms)", "Std Jitter",
-							"Jitter (ms)", "Jitter Promedio", topologia, forma, imax, "jitter", 'magenta')
+							"Jitter (ms)", "Jitter Promedio", topologia, forma, imax, "jitter", 'dodgerblue',  'best')
 
 	print(f"{topologia}_{forma}_imax{imax} listoo")
 

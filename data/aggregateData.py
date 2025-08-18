@@ -78,7 +78,6 @@ def aggregateData(topologia, forma, imax):
 
 # Check if arguments are provided
 if len(sys.argv) == 4:
-	print("Usage: aggregateData.py <topologia> <forma> <imax>")
 	topologia = sys.argv[1]
 	forma = sys.argv[2]
 	imax = sys.argv[3]

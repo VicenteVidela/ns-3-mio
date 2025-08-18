@@ -4,7 +4,7 @@
 BASE_DIR="scratch/topologies/"
 TOPOLOGY_DIR="Topologia1/"
 TOPOLOGY_FILE="logic_exp_2.5_v1.csv"
-OUTPUT_DIR="resultados"
+OUTPUT_DIR="resultados/GL"
 
 # Get a list of all .disc files in the specific directory and its subdirectories
 DISCONNECTIONS_FILES=$(find "${BASE_DIR}${TOPOLOGY_DIR}" -type f -name "*.disc")
@@ -26,6 +26,11 @@ for DISCONNECTIONS_FILE in $DISCONNECTIONS_FILES; do
   # Extract only the inner arrays and count them
   ARRAY_LENGTH=$(( $(grep -o '\[[^]]*\]' "$DISCONNECTIONS_FILE" | wc -l) - 1))
 
+  # Get the correct ndep
+  ndep=$(printf '%s\n' "$FILENAME" | sed -n 's/.*ndep_\([0-9]\+\).*/\1/p')
+  # for getting the correct providers file
+  PROVIDERS_FILE_NAME="providers_ndep_${ndep}_lprovnum_6_v3.txt"
+
   echo "Corriendo $SUBDIR/$FILENAME"
 
   # Loop over iterations based on the array length
@@ -41,7 +46,8 @@ for DISCONNECTIONS_FILE in $DISCONNECTIONS_FILES; do
       --topology=${TOPOLOGY_FILE} \
       --disconnectionsFile=${DISCONNECTIONS_FILE} \
       --output=${OUTPUT_FILE} \
-      --iteration=${i}"
+      --iteration=${i} \
+      --providersFileName=${PROVIDERS_FILE_NAME}"
 
     # Check if the command failed
     if [ $? -ne 0 ]; then

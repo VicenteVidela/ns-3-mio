@@ -27,8 +27,8 @@ for filename in os.listdir(folder):
     if filename.endswith(".json"):
         with open(os.path.join(folder, filename), "r") as f:
             data = json.load(f)
-            # Extract parameters from filename (modify if needed)
-            params = filename.replace(".json", "").split("_")  # Assuming filenames follow a structured pattern
+            # Extract parameters from filename
+            params = filename.replace(".json", "").split("_")
             all_data.append((params, data))
 
 # Organize data into DataFrames
@@ -51,11 +51,11 @@ def extract_correlations(correlation_type):
 
 # Plot heatmaps
 def plot_heatmap(df, title):
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 8))
     sns.heatmap(df, annot=True, cmap="coolwarm", center=0, linewidths=0.5)
     plt.title(title)
     plt.xlabel(xlabel)
-    plt.ylabel("Metric")
+    # plt.ylabel("Metric")
     plt.xticks(rotation=45)
     plt.yticks(rotation=0)
     plt.tight_layout()

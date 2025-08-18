@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
   cmd.AddValue("seed", "Random seed", seed);
   cmd.AddValue("stopTime", "Simulation time", stopTime);
   cmd.AddValue("iteration", "Iteration number for knowing how many nodes to disconnect", iteration);
+  cmd.AddValue("providersFileName", "File with providers", providersFileName);
   cmd.Parse(argc, argv);
 
   // Set the random seed
@@ -112,7 +113,7 @@ int main(int argc, char* argv[]) {
   }
 
 
-  // // Check connectivity to provider nodes using BFS
+  // Check connectivity to provider nodes using BFS
   // std::set<uint32_t> allReachableNodes;
   // for (auto providerId : providerNodes) {
   //   Ptr<Node> providerNode = nodes.Get(providerId);
@@ -123,6 +124,22 @@ int main(int argc, char* argv[]) {
   // }
   // // Calculate the fraction of nodes that are still connected to a provider
   // fractionConnectedG_L = static_cast<double>(allReachableNodes.size()) / static_cast<double>(totalNodes);
+
+  // // Print GL to file
+  // std::filesystem::path filePath(outputFileName);
+  // std::filesystem::path directoryPath = filePath.parent_path();
+  // std::filesystem::create_directories(directoryPath);
+  // outputStream.open(outputFileName, std::ios::app);
+
+  // outputStream << "Iteration: " << iteration << ", G_L: " << fractionConnectedG_L << std::endl;
+
+  // // Close data file
+  // outputStream.close();
+
+  // std::cout << "\x1b[2K\033[F\x1b[2K";
+  // std::cout.flush();
+
+  // return 0;
 
 
 
@@ -202,8 +219,23 @@ int main(int argc, char* argv[]) {
       onOffApp->SetAttribute("DataRate", DataRateValue(onoffDataRate));
       onOffApp->SetAttribute("PacketSize", UintegerValue(onoffPacketSize));
 
-      // Choose the next node as destination
-      uint32_t destNodeIndex = (i + 1) % totalNodes;
+      // Set the destination node for each node
+      // Setup for random number generation
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::uniform_int_distribution<> dist(0, providerNodes.size() - 1);
+      uint32_t destNodeIndex;
+      if (std::find(providerNodes.begin(), providerNodes.end(), i) == providerNodes.end()) {
+        // If the node is not a provider, choose a random provider node as destination
+        destNodeIndex = providerNodes[dist(gen)];
+      } else {
+        // If the node is a provider, set just next node as destination
+        destNodeIndex = (i + 1) % totalNodes;
+        // Ensure the destination node is not disconnected
+        while (disconnectedNodes.find(destNodeIndex) != disconnectedNodes.end()) {
+          destNodeIndex = (destNodeIndex + 1) % totalNodes;
+        }
+      }
       onOffApp->SetAttribute("Remote", AddressValue(InetSocketAddress(nodes.Get(destNodeIndex)->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal(), 9)));
       // Connect trace to transmitted packets at the application layer
       onOffApp->TraceConnectWithoutContext("Tx", MakeCallback(&applicationTxTrace));

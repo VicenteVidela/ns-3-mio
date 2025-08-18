@@ -21,7 +21,7 @@ Una vez listo, el sistema estará compilado con la configuración básica de ns-
 Una vez compilado el proyecto, se puede usar el comando `./ns3 run 'target'` para ejecutar la simulación 'target'. En el caso específico de este proyecto,
 existe el programa `5Desconexiones` dentro de la carpeta `scratch`, el cual contiene toda la lógica principal de la versión final de las simulaciones.
 El programa por si solo corre una simulación por defecto, pero se le pueden entregar los siguientes parámetros que alteran su funcionamiento, de donde se extraen los datos y donde se guardan:
-- `specificTopologyDirectory`: Cuál es el directorio dentro de la carpeta `scratch/topologies` donde se encuentran los archivos de topología, de nodos proveedores y los archivos de los ataques a hacer a la red.
+- `specificTopologyDirectory`: Es el directorio dentro de la carpeta `scratch/topologies` donde se encuentran los archivos de topología, de nodos proveedores y los archivos de los ataques a hacer a la red.
   - El archivo de nodos proveedores es un archivo llamado `proveedores.txt`, el cual especifica los nodos lógicos proveedores de la red
   - Los archivos de ataques son archivos de texto con las extensión `.disc`, que es un arreglo de arreglos, donde cada subarreglo corresponde a una cantidad igual o mayor a 1 de nodos lógicos a desconectar en ese paso.
 - `topology`: Archivo csv dentro de `specificTopologyDirectory` que contiene la topología de la red lógica a utilizar en las simulaciones

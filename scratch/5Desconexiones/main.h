@@ -23,6 +23,8 @@
 #include "disconnections.h"
 #include "otros.h"
 #include "topologyLoader.h"
+#include <random>
+#include<bits/stdc++.h>
 
 using namespace ns3;
 
