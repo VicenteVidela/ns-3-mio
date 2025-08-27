@@ -51,7 +51,7 @@ def extract_correlations(correlation_type):
 
 # Plot heatmaps
 def plot_heatmap(df, title):
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 6))
     sns.heatmap(df, annot=True, cmap="coolwarm", center=0, linewidths=0.5)
     plt.title(title)
     plt.xlabel(xlabel)

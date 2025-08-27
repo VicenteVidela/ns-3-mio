@@ -2,6 +2,9 @@ import pandas as pd
 import sys
 import json
 
+# Pa cachar que cuando la cantidad de nodos es chiquita, algunas métricas dejan de seguir a GL de cerca
+# Pero al poner como 0.02 en vez de 0, se ve que siguen super de cerca casi todo el rato.
+gl_colapse_threshold = 0.0
 
 def calculate_correlation(topologia, forma, imax):
   file = f"AggregatedData/{topologia}_{forma}_imax{imax}.dat"
@@ -39,7 +42,7 @@ def calculate_correlation(topologia, forma, imax):
   df_expanded = pd.DataFrame()
   for _, row in df.iterrows():
     frac_logical = round(row["Fraction Logical Connected"], 4)
-    if frac_logical == 0:
+    if frac_logical <= gl_colapse_threshold:
       break
     matching_keys = [float(k) for k, v in fraction_data.items() if v == frac_logical]
     if matching_keys:
@@ -57,7 +60,7 @@ def calculate_correlation(topologia, forma, imax):
   # Calculate correlations
   metrics = [
     "Throughput to Bandwidth Ratio (%)", "Packet Loss Percentage (%)", "Average Delay (ms)", "Average Jitter (ms)",
-    "Std Throughput Ratio", "Std Packet Loss", "Std Delay", "Std Jitter"
+    # "Std Throughput Ratio", "Std Packet Loss", "Std Delay", "Std Jitter"
   ]
 
   correlations_pearson = {}
@@ -90,16 +93,11 @@ def calculate_correlation(topologia, forma, imax):
   print(f"{topologia} {forma} imax{imax} listoo")
 
 
-# Si le dan argumentos, calcular ese caso
-if len(sys.argv) == 4:
-  topologia = sys.argv[1]
-  forma = sys.argv[2]
-  imax = sys.argv[3]
+# Si le dan argumento, es para el threshold del GL
+if len(sys.argv) == 2:
+  gl_colapse_threshold = float(sys.argv[1])
 
-  calculate_correlation(topologia, forma, imax)
-# Si no, calcular todos los casos
-else:
-  for topologia in ['5NN', 'ER', 'GG', 'GPA', 'RNG', 'YAO']:
-    for forma in ['long', 'square']:
-      for imax in [3,5,7,10]:
-        calculate_correlation(topologia, forma, imax)
+for topologia in ['5NN', 'ER', 'GG', 'GPA', 'RNG', 'YAO']:
+  for forma in ['long', 'square']:
+    for imax in [3,5,7,10]:
+      calculate_correlation(topologia, forma, imax)
