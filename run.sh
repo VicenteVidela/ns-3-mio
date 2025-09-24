@@ -4,7 +4,7 @@
 BASE_DIR="scratch/topologies/"
 TOPOLOGY_DIR="Topologia1/"
 TOPOLOGY_FILE="logic_exp_2.5_v1.csv"
-OUTPUT_DIR="resultados/GL"
+OUTPUT_DIR="resultados"
 
 # Get a list of all .disc files in the specific directory and its subdirectories
 DISCONNECTIONS_FILES=$(find "${BASE_DIR}${TOPOLOGY_DIR}" -type f -name "*.disc")

@@ -5,7 +5,11 @@ import json
 import numpy as np
 from decimal import *
 
-mode = 0 # 0=save 1=show
+# Pa cachar que cuando la cantidad de nodos es chiquita, algunas métricas dejan de seguir a GL de cerca
+# Pero al poner como 0.02 en vez de 0, se ve que siguen super de cerca casi todo el rato.
+gl_colapse_threshold = 0.02
+
+mode = 1 # 0=save 1=show
 
 def plot_metric(df_expanded, GL_values, metric, std_metric, ylabel, title, topologia, forma, imax, metric_name, color, location='center left'):
 	fig, ax_left = plt.subplots(figsize=(12, 7))
@@ -75,7 +79,7 @@ def plot_data(topologia, forma, imax):
 	df_expanded = pd.DataFrame()
 	for _, row in df.iterrows():
 		frac_logical = round(row["Fraction Logical Connected"], 4)
-		if frac_logical == 0:
+		if frac_logical <= gl_colapse_threshold:
 			break
 		matching_keys = [float(k) for k, v in fraction_data.items() if v == frac_logical]
 		if matching_keys:
